@@ -12,5 +12,12 @@ public class ClientListener {
 	 */
 	public ClientListener(int Port) {
 		
+		
+		try {
+			Class.forName("com.mysql.jdbc.Driver").newInstance();
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }
