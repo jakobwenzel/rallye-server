@@ -1,5 +1,7 @@
 package de.stadtrallye;
 
+import java.io.IOException;
+
 import de.stadtrallye.control.GameHandler;
 
 /**
@@ -18,6 +20,16 @@ public class StadtRallye {
 		GameHandler game = new GameHandler();
 		
 		
+		//temporary to hold the server open
+		try {
+			System.in.read();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		game.stopServer();
 		//game.start();
 		
 	}
