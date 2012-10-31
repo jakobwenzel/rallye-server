@@ -10,8 +10,35 @@ import java.sql.SQLException;
  */
 public class DataHandler {
 
-	Connection con = null;
+	private Connection con = null;
 	
+	private String uri = "localhost";
+	private int Port = 10101;
+	
+	/**
+	 * @return the con
+	 */
+	public Connection getCon() {
+		return con;
+	}
+
+	
+	/**
+	 * @return the uri
+	 */
+	public String getUri() {
+		return uri;
+	}
+
+
+	/**
+	 * @return the port
+	 */
+	public int getPort() {
+		return Port;
+	}
+
+
 	public DataHandler() {
 		try {
 			Class.forName("com.mysql.jdbc.Driver").newInstance();

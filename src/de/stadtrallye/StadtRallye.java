@@ -20,13 +20,17 @@ public class StadtRallye {
 		GameHandler game = new GameHandler();
 		
 		
+		
+		
 		//temporary to hold the server open
+		System.out.println("Hit enter to stop server...");
 		try {
 			System.in.read();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
 		
 		
 		game.stopServer();

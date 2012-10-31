@@ -12,5 +12,6 @@
 	<classpathentry kind="lib" path="/Users/felix/Documents/Ecipse/StadtRallye/lib/jersey-grizzly2-1.14.jar"/>
 	<classpathentry kind="lib" path="/Users/felix/Documents/Ecipse/StadtRallye/lib/jersey-server-1.14.jar"/>
 	<classpathentry kind="lib" path="/Users/felix/Documents/Ecipse/StadtRallye/lib/jsr311-api-1.1.1.jar"/>
+	<classpathentry kind="lib" path="/Users/felix/Documents/Ecipse/StadtRallye/lib/mysql-connector-java-5.1.22-bin.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

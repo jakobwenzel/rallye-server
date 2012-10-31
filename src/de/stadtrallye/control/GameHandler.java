@@ -2,6 +2,8 @@ package de.stadtrallye.control;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.ws.rs.core.UriBuilder;
 
@@ -23,19 +25,23 @@ public class GameHandler {
 	ClientListener listener;
 	private static URI BASE_URI = null;
 	private HttpServer httpServer = null;
+	
+	
+	//this is needed to minimise the logging from Jersey in console
+	private final static Logger COM_SUN_JERSEY_LOGGER = Logger.getLogger( "com.sun.jersey" ); 
+	static { COM_SUN_JERSEY_LOGGER.setLevel( Level.SEVERE ); }
 
 	public GameHandler() {
 		// create and init new DataHander
 		data = new DataHandler();
-
-		// create URI
-		BASE_URI = UriBuilder.fromUri("http://localhost/").port(10101).build();
+		
+		// create URI 
+		//TODO get uri and port from DataHandler
+		BASE_URI = UriBuilder.fromUri("http://"+this.data.getUri()+"/").port(this.data.getPort()).build();
 
 		// start server
 		try {
 			httpServer = startServer();
-			System.out.println(String.format("Jersey app started with WADL available at "
-				+ "%sapplication.wadl\nTry out %shelloworld\nHit enter to stop it...", BASE_URI, BASE_URI));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -80,7 +86,9 @@ public class GameHandler {
 	protected static HttpServer startServer() throws IOException {
 		System.out.println("Starting grizzly...");
 		ResourceConfig rc = new PackagesResourceConfig("de.stadtrallye.control");
-		return GrizzlyServerFactory.createHttpServer(BASE_URI, rc);
+		
+		HttpServer serv = GrizzlyServerFactory.createHttpServer(BASE_URI, rc);
+		return serv;
 	}
 
 	/**
@@ -91,7 +99,6 @@ public class GameHandler {
 	public void stopServer() {
 		if (this.httpServer != null) {
 			this.httpServer.stop();
-			System.out.println("Server on url:" + BASE_URI + " Stopped!");
 		}
 	}
 }
