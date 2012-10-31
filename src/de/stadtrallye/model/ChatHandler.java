@@ -6,5 +6,15 @@ package de.stadtrallye.model;
  *
  */
 public class ChatHandler {
+	DataHandler dh = null;
 
+	/**
+	 * constructor
+	 * @param dataHandler
+	 */
+	public ChatHandler(DataHandler dataHandler) {
+		this.dh = dataHandler;
+	}
+
+	
 }

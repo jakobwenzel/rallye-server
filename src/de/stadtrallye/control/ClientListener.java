@@ -2,13 +2,15 @@ package de.stadtrallye.control;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
-import com.sun.jersey.server.impl.application.WebApplicationImpl;
+import org.json.JSONObject;
 
 import de.stadtrallye.model.DataHandler;
+import de.stadtrallye.model.MapHandler;
 
 /**
  * @author Felix HŸbner
@@ -18,11 +20,7 @@ import de.stadtrallye.model.DataHandler;
 @Path("/StadtRallye")
 public class ClientListener {
 
-	static DataHandler data;
-	public ClientListener() {
-		//create a new static instance of the DataHandler
-		data = new DataHandler();
-	}
+	DataHandler data = new DataHandler();
 	
 	
 	
@@ -32,13 +30,20 @@ public class ClientListener {
 	 * @return
 	 * @author Felix HŸbner
 	 */
-	@Path("chat")
+	@Path("chat/{command}")
 	@GET
 	@Produces({"text/plain", "application/json"})
-	public String getChatEvent() {
+	public Response getChatEvent(@PathParam("command") String command) {
+		command = command.toLowerCase();
+		
+		//if (false) {
+			//return this.data.map.getAllNodes();
+		//} else {
+		
 		StringBuilder str = new StringBuilder();
 		str.append("Respond to CHAT-Event");
-		return str.toString();
+		return Response.status(201).entity(str.toString()).build();
+		//}
 	}
 	
 	/**
@@ -47,13 +52,28 @@ public class ClientListener {
 	 * @return
 	 * @author Felix HŸbner
 	 */
-	@Path("map")
+	@Path("map/{command}")
 	@GET
-	@Produces({"text/plain", "application/json"})
-	public String getMapEvent() {
-		StringBuilder str = new StringBuilder();
-		str.append("Respond to MAP-Event on host: http://"+data.getUri()+":"+data.getPort());
-		return str.toString();
+	@Produces("application/json")
+	//@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject getMapEvent(@PathParam("command") String command) {
+		//error handling (the boolean must be an AND to be sure to stop checking if data does not exist)
+		if (this.data == null) {
+			throw new WebApplicationException(500);
+			//return Response.status(500).entity("data does not exist!!!").build();
+		}
+		
+		command = command.toLowerCase();
+		
+		
+		if (command.equals("getallnodes")) {
+			return MapHandler.getAllNodes(this.data);
+		} else {
+			//StringBuilder str = new StringBuilder();
+			//str.append("Respond to MAP-Event on host: http://"+this.data.getUri()+":"+this.data.getPort());
+			throw new WebApplicationException(400);
+			//return Response.status(201).entity(str.toString()).build();
+		}
 	}
 	
 	

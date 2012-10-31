@@ -21,7 +21,7 @@ import com.sun.jersey.api.core.ResourceConfig;
  * 
  */
 public class GameHandler {
-	static DataHandler data;
+	DataHandler data;
 	ClientListener listener;
 	private static URI BASE_URI = null;
 	private HttpServer httpServer = null;

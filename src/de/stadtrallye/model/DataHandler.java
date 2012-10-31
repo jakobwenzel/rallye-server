@@ -10,13 +10,16 @@ import java.sql.SQLException;
  */
 public class DataHandler {
 
-	private Connection sqlCon = null;
-
+	private static Connection sqlCon;
 	private String uri = "localhost";
 	private int Port = 10101;
 
+	/**
+	 * constructor
+	 */
 	public DataHandler() {
-		if (sqlCon == null) {
+		// create a new connection if no connection exists
+		if (DataHandler.sqlCon == null) {
 			try {
 				Class.forName("com.mysql.jdbc.Driver").newInstance();
 			} catch (Exception e) {
@@ -34,6 +37,15 @@ public class DataHandler {
 				System.out.println("VendorError: " + e.getErrorCode());
 			}
 		}
+	}
+	
+	
+
+	/**
+	 * @return the sqlCon
+	 */
+	protected Connection getSqlCon() {
+		return DataHandler.sqlCon;
 	}
 
 	/**
