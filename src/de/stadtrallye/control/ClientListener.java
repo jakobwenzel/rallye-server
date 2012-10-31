@@ -5,12 +5,16 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.json.JSONObject;
+import org.json.JSONArray;
+//import org.codehaus.jettison.json.JSONArray;
+//import org.json.JSONObject;
 
 import de.stadtrallye.model.DataHandler;
 import de.stadtrallye.model.MapHandler;
+import de.stadtrallye.model.OtherHandler;
 
 /**
  * @author Felix HŸbner
@@ -21,6 +25,35 @@ import de.stadtrallye.model.MapHandler;
 public class ClientListener {
 
 	DataHandler data = new DataHandler();
+	
+	@Path("map/getNodes")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON) 
+	public JSONArray getNodes() {
+		return MapHandler.getAllNodes(this.data);
+	}
+	
+	@Path("map/getAllNodes")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON) 
+	public Response getAllNodes() {
+		return Response.status(201).entity(MapHandler.getAllNodes(this.data).toString()).build();
+	}
+	
+	@Path("getStatus")
+	@GET
+	@Produces(MediaType.APPLICATION_JSON) 
+	public Response getStatus() {
+		return Response.status(201).entity(OtherHandler.getStatus(this.data).toString()).build();
+	}
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	
 	
@@ -54,20 +87,19 @@ public class ClientListener {
 	 */
 	@Path("map/{command}")
 	@GET
-	@Produces("application/json")
-	//@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject getMapEvent(@PathParam("command") String command) {
+	//@Produces("application/json")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getMapEvent(@PathParam("command") String command) {
 		//error handling (the boolean must be an AND to be sure to stop checking if data does not exist)
 		if (this.data == null) {
 			throw new WebApplicationException(500);
 			//return Response.status(500).entity("data does not exist!!!").build();
 		}
-		
 		command = command.toLowerCase();
 		
 		
 		if (command.equals("getallnodes")) {
-			return MapHandler.getAllNodes(this.data);
+			return Response.status(201).entity(MapHandler.getAllNodes(this.data).toString()).build();
 		} else {
 			//StringBuilder str = new StringBuilder();
 			//str.append("Respond to MAP-Event on host: http://"+this.data.getUri()+":"+this.data.getPort());
@@ -85,4 +117,7 @@ public class ClientListener {
 		return Response.status(404).entity("Unknown Event!!").build();
 		//throw new WebApplicationException(404);
 	}
+	
+	// @Consumes(MediaType.APPLICATION_JSON)
+	// @Produces(MediaType.APPLICATION_JSON)
 }

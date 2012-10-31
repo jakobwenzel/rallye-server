@@ -28,7 +28,7 @@ public class DataHandler {
 			}
 
 			try {
-				sqlCon = java.sql.DriverManager.getConnection("jdbc:mysql://hajoschja.de?user=felix&password=andro-rallye");
+				sqlCon = java.sql.DriverManager.getConnection("jdbc:mysql://hajoschja.de/rallye?user=felix&password=andro-rallye");
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
