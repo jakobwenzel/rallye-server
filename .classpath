@@ -8,11 +8,12 @@
 	<classpathentry kind="lib" path="/Users/felix/Documents/Ecipse/StadtRallye/lib/grizzly-framework-2.2.16.jar"/>
 	<classpathentry kind="lib" path="/Users/felix/Documents/Ecipse/StadtRallye/lib/grizzly-http-2.2.16.jar"/>
 	<classpathentry kind="lib" path="/Users/felix/Documents/Ecipse/StadtRallye/lib/grizzly-http-server-2.2.16.jar"/>
-	<classpathentry kind="lib" path="/Users/felix/Documents/Ecipse/StadtRallye/lib/jersey-core-1.14.jar"/>
-	<classpathentry kind="lib" path="/Users/felix/Documents/Ecipse/StadtRallye/lib/jersey-grizzly2-1.14.jar"/>
-	<classpathentry kind="lib" path="/Users/felix/Documents/Ecipse/StadtRallye/lib/jersey-server-1.14.jar"/>
+	<classpathentry kind="lib" path="/Users/felix/Documents/Ecipse/StadtRallye/lib/jersey-core-1.15.jar"/>
+	<classpathentry kind="lib" path="/Users/felix/Documents/Ecipse/StadtRallye/lib/jersey-grizzly2-1.15.jar"/>
+	<classpathentry kind="lib" path="/Users/felix/Documents/Ecipse/StadtRallye/lib/jersey-server-1.15.jar"/>
 	<classpathentry kind="lib" path="/Users/felix/Documents/Ecipse/StadtRallye/lib/jsr311-api-1.1.1.jar"/>
 	<classpathentry kind="lib" path="/Users/felix/Documents/Ecipse/StadtRallye/lib/mysql-connector-java-5.1.22-bin.jar"/>
-	<classpathentry kind="lib" path="/Users/felix/Documents/Ecipse/StadtRallye/lib/jersey-json-1.8.jar.zip"/>
+	<classpathentry kind="lib" path="/Users/felix/Documents/Ecipse/StadtRallye/lib/jersey-json-1.15.jar"/>
+	<classpathentry kind="lib" path="/Users/felix/Documents/Ecipse/StadtRallye/lib/jettison-1.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
