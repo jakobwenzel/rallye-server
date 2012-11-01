@@ -11,7 +11,7 @@ import java.sql.SQLException;
 public class DataHandler {
 
 	private static Connection sqlCon;
-	private String uri = "localhost";
+	private String uri = "hajoschja.de";
 	private int Port = 10101;
 
 	/**
