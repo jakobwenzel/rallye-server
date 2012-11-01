@@ -8,6 +8,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.mysql.jdbc.Statement;
+
 /**
  * @author Felix HŸbner
  * @version 1.0
