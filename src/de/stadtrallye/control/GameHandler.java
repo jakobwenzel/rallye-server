@@ -8,12 +8,12 @@ import java.util.logging.Logger;
 import javax.ws.rs.core.UriBuilder;
 
 import org.glassfish.grizzly.http.server.HttpServer;
-
 import de.stadtrallye.model.DataHandler;
 import com.google.android.gcm.server.*;
 import com.sun.jersey.api.container.grizzly2.GrizzlyServerFactory;
 import com.sun.jersey.api.core.PackagesResourceConfig;
 import com.sun.jersey.api.core.ResourceConfig;
+import com.sun.jersey.api.json.JSONConfiguration;
 
 /**
  * @author Felix HŸbner
@@ -47,7 +47,37 @@ public class GameHandler {
 			e.printStackTrace();
 		}
 	}
+	
+	
+	
+	/**
+	 * 
+	 * @return
+	 * @throws IOException
+	 * @author Felix HŸbner
+	 */
+	protected static HttpServer startServer() throws IOException {
+		System.out.println("Starting grizzly...");
+		
+		ResourceConfig rc = new PackagesResourceConfig("de.stadtrallye.control");
+		rc.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, true);
+		HttpServer serv = GrizzlyServerFactory.createHttpServer(BASE_URI, rc);
+		return serv;
+	}
+	
 
+	/**
+	 * 
+	 * 
+	 * @author Felix HŸbner
+	 */
+	public void stopServer() {
+		if (this.httpServer != null) {
+			this.httpServer.stop();
+		}
+	}
+	
+	
 	/**
 	 * Google GCM, snippet
 	 */
@@ -77,28 +107,5 @@ public class GameHandler {
 
 	}
 
-	/**
-	 * 
-	 * @return
-	 * @throws IOException
-	 * @author Felix HŸbner
-	 */
-	protected static HttpServer startServer() throws IOException {
-		System.out.println("Starting grizzly...");
-		ResourceConfig rc = new PackagesResourceConfig("de.stadtrallye.control");
-		
-		HttpServer serv = GrizzlyServerFactory.createHttpServer(BASE_URI, rc);
-		return serv;
-	}
-
-	/**
-	 * 
-	 * 
-	 * @author Felix HŸbner
-	 */
-	public void stopServer() {
-		if (this.httpServer != null) {
-			this.httpServer.stop();
-		}
-	}
+	
 }
