@@ -4,10 +4,19 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
+
+import com.sun.xml.internal.txw2.output.ResultFactory;
+
+import de.stadtrallye.model.ChatHandler;
 import de.stadtrallye.model.DataHandler;
 import de.stadtrallye.model.MapHandler;
 import de.stadtrallye.model.OtherHandler;
@@ -46,20 +55,20 @@ public class ClientListener {
 	//    Chat Commands
 	//==================================================================//
 	
-	@Path("chat/setNewChatEntry")
+	@Path("chat/setNewChatEntry/{userID}/{message}")
 	@POST
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public JSONArray setNewChatEntry(JSONArray chatEntry) {
-		for(int i = 0; i < chatEntry.length(); i++) {
-			try {
-				System.out.println(chatEntry.get(i));
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
+	@Produces(MediaType.TEXT_PLAIN)
+	public Response setNewChatEntry(byte[] payload,@PathParam("userID") int user, @PathParam("message") String message ) {
+		// some debug print
+		System.out.println("User: "+user+" Message: '"+message+"' Payload: "+(payload.length!=0? "available":"empty"));
+		
+		// process ChatEntry
+		if (ChatHandler.setNewChatEntry(this.data,payload, user, message)) {
+			return Response.status(201).build();
+		} else {
+			return Response.status(400).build();
 		}
-		return chatEntry;
 	}
 	
 	//==================================================================//
