@@ -1,7 +1,15 @@
 package de.stadtrallye.model;
 
+import java.io.IOException;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashSet;
+
+import com.google.android.gcm.server.Constants;
+import com.google.android.gcm.server.Message;
+import com.google.android.gcm.server.Result;
+import com.google.android.gcm.server.Sender;
 
 /**
  * @author Felix HŸbner
@@ -11,9 +19,11 @@ import java.sql.SQLException;
 public class DataHandler {
 
 	private static Connection sqlCon;
+	
 	//private String uri = "hajoschja.de";
 	private String uri = "localhost";
 	private int Port = 10101;
+	private final String GCM_API_KEY = "AIzaSyBvku0REe1MwJStdJ7Aye6NC7bwcSO-TG0";
 
 	/**
 	 * constructor
@@ -40,6 +50,48 @@ public class DataHandler {
 		}
 	}
 	
+	/**
+	 * this method update all Clients in all Chatrooms given in the HashSet
+	 * @param chatrooms
+	 * @author Felix HŸbner
+	 */
+	public void updateDevices(HashSet<Integer> chatrooms) {
+		StringBuilder str = new StringBuilder();
+		str.append("SELECT distinct c.clientID FROM ry_chatrooms_groups as cg, ry_clients as c WHERE c.groupID = cg.groupID AND (");
+		for (Integer i : chatrooms) {
+			str.append("cg.chatroomID = "+i.intValue()+" OR ");
+		}
+		// cut the last OR
+		str.delete(str.length()-3, str.length());
+		str.append(")");
+		
+		//DEBUG
+		System.out.println(str.toString());
+		
+		
+		try {
+			ResultSet rs = DataHandler.sqlCon.createStatement().executeQuery(str.toString());
+			Boolean empty = rs.first();
+			
+			while(empty) {
+				// update client
+				//DEBUG
+				System.out.println("Update Client with id: "+rs.getInt(1));
+				
+				// jump to next client
+				empty = rs.next();
+			}
+			
+			
+			
+			
+			
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	
 
 	/**
@@ -61,5 +113,38 @@ public class DataHandler {
 	 */
 	public int getPort() {
 		return Port;
+	}
+	
+	/**
+	 * Google GCM, snippet
+	 */
+	public void push(String client,String type, String value) {
+		Sender sender = new Sender(GCM_API_KEY);
+		Message msg = new Message.Builder()
+	    .collapseKey("update")
+	    .timeToLive(3)
+	    .addData(type, value)
+	    .build();
+		try {
+			Result res = sender.send(msg, client, 3);// RegIds
+			
+			if (res.getMessageId() != null) {
+				String canonicalRegId = res.getCanonicalRegistrationId();
+				if (canonicalRegId != null) {
+					// same device has more than on registration ID: update
+					// database
+				}
+			} else {
+				String error = res.getErrorCodeName();
+				if (error.equals(Constants.ERROR_NOT_REGISTERED)) {
+					// application has been removed from device - unregister
+					// database
+				}
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		//TODO make throw exceptions if user has changed regID, or if user not available anymore
 	}
 }

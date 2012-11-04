@@ -1,25 +1,22 @@
 package de.stadtrallye.control;
 
+import java.util.HashSet;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
-
-import com.sun.xml.internal.txw2.output.ResultFactory;
-
 import de.stadtrallye.model.ChatHandler;
 import de.stadtrallye.model.DataHandler;
 import de.stadtrallye.model.MapHandler;
 import de.stadtrallye.model.OtherHandler;
+import de.stadtrallye.resource.exceptions.SQLHandlerException;
 
 /**
  * @author Felix HŸbner
@@ -59,16 +56,27 @@ public class ClientListener {
 	@POST
 	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
 	@Produces(MediaType.TEXT_PLAIN)
-	public Response setNewChatEntry(byte[] payload,@PathParam("userID") int user, @PathParam("message") String message ) {
+	public Response setNewChatEntry(byte[] payload,@PathParam("userID") String user, @PathParam("message") String message ) {
 		// some debug print
 		System.out.println("User: "+user+" Message: '"+message+"' Payload: "+(payload.length!=0? "available":"empty"));
 		
-		// process ChatEntry
-		if (ChatHandler.setNewChatEntry(this.data,payload, user, message)) {
+		
+		HashSet<Integer> c;
+		try {
+			// process ChatEntry
+			c = ChatHandler.setNewChatEntry(this.data,payload, user, message);
+			// update devices in chatrooms
+			if (!c.isEmpty()) {
+				this.data.updateDevices(c);
+			}
 			return Response.status(201).build();
-		} else {
-			return Response.status(400).build();
+			
+		} catch (SQLHandlerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return Response.status(400).entity(e.getErrorCode()+" : "+e.getMessage()).build();
 		}
+		
 	}
 	
 	//==================================================================//

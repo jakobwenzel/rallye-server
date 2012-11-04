@@ -5,10 +5,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Savepoint;
-import java.sql.Statement;
-
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
+import java.util.HashSet;
+import de.stadtrallye.resource.exceptions.SQLHandlerException;
 
 /**
  * @author Felix HŸbner
@@ -16,27 +14,24 @@ import org.codehaus.jettison.json.JSONObject;
  * 
  */
 public class ChatHandler {
-	DataHandler dh = null;
-	static String setChatEntry = "addChatEntry";
-
 	/**
 	 * constructor
 	 * 
 	 * @param dataHandler
 	 */
-	public ChatHandler(DataHandler dataHandler) {
-		this.dh = dataHandler;
+	public ChatHandler() {
 	}
 
-	public static boolean setNewChatEntry(DataHandler dh, byte[] pic, int userID, String message) {
+	public static HashSet<Integer> setNewChatEntry(DataHandler dh, byte[] pic, String userID, String message) throws SQLHandlerException {
+		HashSet<Integer> chatrooms = new HashSet<Integer>();
 		Connection con = dh.getSqlCon();
 		PreparedStatement stmt = null;
 		Savepoint sPoint = null;
-		
+
 		try {
-			//disable auto commit
+			// disable auto commit
 			con.setAutoCommit(false);
-			
+
 			// create savePoint for a rollback if an error occurs
 			sPoint = con.setSavepoint();
 			if (!message.isEmpty()) {
@@ -59,19 +54,34 @@ public class ChatHandler {
 				stmt.close();
 			}
 
-			if (!message.isEmpty() || pic.length != 0)
-			// create new chat entry into ry_chats
-			stmt = con.prepareStatement("INSERT INTO ry_chats (timestamp,groupID,messageID,pictureID,chatroomID) VALUES (" + "now(),"
-					+ "(SELECT groupID FROM ry_clients WHERE clientID = 1)," 
-					+ (!message.isEmpty() ? "(SELECT MAX(messageID) FROM ry_messages)," : "NULL,")
-					+ (pic.length != 0 ? "(SELECT MAX(pictureID) FROM ry_pictures)," : "NULL,")
-					+ "1)");
-			stmt.execute();
-			// debug
-			System.out.println("Warnings insert ChatEntry: " + stmt.getWarnings());
-			stmt.close();
-			
-			//apply changes in database
+			if (!message.isEmpty() || pic.length != 0) {
+				// get all chatroom where we have to post this entry
+				ResultSet rs = con.createStatement().executeQuery(
+						"SELECT cg.chatroomID FROM ry_chatrooms_groups as cg, ry_clients as c WHERE c.gcmRegID = '"+userID+"' AND c.groupID = cg.groupID");
+				Boolean empty = rs.first();
+				
+				while (empty) {
+
+					// create new chat entry into ry_chats
+					stmt = con.prepareStatement("INSERT INTO ry_chats (timestamp,groupID,messageID,pictureID,chatroomID) VALUES (" + "now(),"
+							+ "(SELECT groupID FROM ry_clients WHERE gcmRegID = '"+userID+"'),"
+							+ (!message.isEmpty() ? "(SELECT MAX(messageID) FROM ry_messages)," : "NULL,")
+							+ (pic.length != 0 ? "(SELECT MAX(pictureID) FROM ry_pictures)," : "NULL,") + rs.getInt(1) +")");
+					stmt.execute();
+					// debug
+					System.out.println("Warnings insert ChatEntry: " + stmt.getWarnings());
+					stmt.close();
+					// save chatroom number in array
+					chatrooms.add(rs.getInt(1));
+					
+					// move result element-curser 1 element further
+					empty = rs.next();
+
+				}
+				rs.close();
+			}
+
+			// apply changes in database
 			con.commit();
 
 		} catch (SQLException e1) {
@@ -87,8 +97,8 @@ public class ChatHandler {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			return false;
+			throw new SQLHandlerException(e1);
 		}
-		return true;
+		return chatrooms;
 	}
 }
