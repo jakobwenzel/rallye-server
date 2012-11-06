@@ -32,6 +32,7 @@ public class ChatHandler {
 		Connection con = dh.getSqlCon();
 		PreparedStatement stmt = null;
 		Savepoint sPoint = null;
+		
 
 		try {
 			// disable auto commit
