@@ -1,9 +1,10 @@
 package de.stadtrallye.control;
 
+import java.io.IOException;
+import java.util.Formatter;
 import java.util.HashSet;
 
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -14,6 +15,7 @@ import javax.ws.rs.core.Response;
 
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
+import org.codehaus.jettison.json.JSONObject;
 
 import de.stadtrallye.model.ChatHandler;
 import de.stadtrallye.model.DataHandler;
@@ -44,7 +46,7 @@ public class ClientListener {
 	 * return MapHandler.getAllNodes(this.data); }
 	 */
 
-	@Path("map/getAllNodes")
+	@Path("map/get/nodes")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONArray getAllNodes() {
@@ -57,7 +59,7 @@ public class ClientListener {
 	// Chat Commands
 	// ==================================================================//
 
-	@Path("chat/getChatEntries/{userID}")
+	@Path("chat/get/{userID}")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONArray getChatEntries(@PathParam("userID") String user) throws SQLHandlerException, JSONException {
@@ -65,14 +67,14 @@ public class ClientListener {
 	}
 	
 	
-	@Path("chat/getChatEntries/{userID}/{timestamp}")
+	@Path("chat/get/{userID}/{timestamp}")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONArray getChatEntries(@PathParam("userID") String user, @PathParam("timestamp") int timestamp) throws SQLHandlerException, JSONException {
 		return ChatHandler.getChatEntries(this.data,user,timestamp);
 	}
 	
-	@Path("chat/setNewChatEntry/{userID}")
+	@Path("chat/add/{userID}")
 	@POST
 	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
 	@Produces(MediaType.TEXT_PLAIN)
@@ -80,7 +82,7 @@ public class ClientListener {
 		return this.setNewChatEntryInternal(payload, user, null);
 	}
 
-	@Path("chat/setNewChatEntry/{userID}/{message}")
+	@Path("chat/add/{userID}/{message}")
 	@POST
 	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
 	@Produces(MediaType.TEXT_PLAIN)
@@ -125,16 +127,65 @@ public class ClientListener {
 	@Path("getStatus")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public JSONArray getStatus() {
+	public JSONObject getStatus() {
 		// return
 		// Response.status(201).entity(OtherHandler.getStatus(this.data).toString()).build();
 		return OtherHandler.getStatus(this.data);
+	}
+	
+	@Path("postPic")
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject test(byte[] pic) {
+		
+		
+		
+		JSONObject o = new JSONObject();
+		
+		try {
+			o.put("pic1", ClientListener.hexEncode(pic));
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		return o;
+		// return
+		// Response.status(201).entity(OtherHandler.getStatus(this.data).toString()).build();
+		//return OtherHandler.getStatus(this.data);
 	}
 
 	// ==================================================================//
 	// Helper Methods
 	// ==================================================================//
 
+	private static Appendable hexEncode(byte buf[], Appendable sb)     
+	{     
+	    //final Formatter formatter = new Formatter(sb);     
+	    for (int i = 0; i < buf.length; i++)     
+	    {     
+	        int low = buf[i] & 0xF;  
+	        int high = (buf[i] >> 8) & 0xF;  
+	        try {
+				sb.append(Character.forDigit(high, 16));
+				sb.append(Character.forDigit(low, 16));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}   
+	    }     
+	    return sb;     
+	}
+	
+	private static String hexEncode(byte buf[])  
+    {  
+		String s = hexEncode(buf, new StringBuilder()).toString();
+		//System.out.println(s);
+        return s;  
+    }
+	
+	
 	/**
 	 * this method will respond to a chat event.
 	 * 

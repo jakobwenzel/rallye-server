@@ -9,6 +9,8 @@ import javax.ws.rs.core.UriBuilder;
 
 import org.glassfish.grizzly.http.server.HttpServer;
 import de.stadtrallye.model.DataHandler;
+
+import com.sun.jersey.api.container.filter.GZIPContentEncodingFilter;
 import com.sun.jersey.api.container.grizzly2.GrizzlyServerFactory;
 import com.sun.jersey.api.core.PackagesResourceConfig;
 import com.sun.jersey.api.core.ResourceConfig;
@@ -60,6 +62,10 @@ public class GameHandler {
 		
 		ResourceConfig rc = new PackagesResourceConfig("de.stadtrallye.control");
 		rc.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, true);
+		rc.getFeatures().put(ResourceConfig.PROPERTY_CONTAINER_REQUEST_FILTERS, true);
+		rc.getFeatures().put(ResourceConfig.PROPERTY_CONTAINER_RESPONSE_FILTERS, true);
+		rc.getContainerRequestFilters().add(new GZIPContentEncodingFilter());
+		rc.getContainerResponseFilters().add(new GZIPContentEncodingFilter());
 		HttpServer serv = GrizzlyServerFactory.createHttpServer(BASE_URI, rc);
 		return serv;
 	}
