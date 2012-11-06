@@ -1,4 +1,4 @@
-package de.rallye.control;
+package de.rallye.rest;
 
 import java.awt.Image;
 import java.awt.image.BufferedImage;
@@ -23,10 +23,11 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 
-import de.rallye.model.ChatHandler;
-import de.rallye.model.DataHandler;
-import de.rallye.model.MapHandler;
-import de.rallye.model.OtherHandler;
+import de.rallye.model.ScottlandYardRallye;
+import de.rallye.resource.ChatHandler;
+import de.rallye.resource.DataHandler;
+import de.rallye.resource.MapHandler;
+import de.rallye.resource.OtherHandler;
 import de.rallye.resource.exceptions.SQLHandlerException;
 
 /**
@@ -37,7 +38,7 @@ import de.rallye.resource.exceptions.SQLHandlerException;
 @Path("/StadtRallye")
 public class ClientListener {
 
-	DataHandler data = new DataHandler();
+	DataHandler data = new ScottlandYardRallye();
 
 	// ==================================================================//
 	// Map Commands

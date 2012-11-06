@@ -1,4 +1,4 @@
-package de.rallye.model;
+package de.rallye.resource;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -7,6 +7,8 @@ import java.sql.SQLException;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+
+import de.rallye.model.ScottlandYardRallye;
 
 
 
@@ -28,8 +30,8 @@ public class MapHandler {
 	 * public MapHandler(DataHandler dataHandler) { this.dh = dataHandler; }
 	 */
 
-	public static JSONArray getAllNodes(DataHandler dh) {
-		Connection con = dh.getSqlCon();
+	public static JSONArray getAllNodes(DataHandler data) {
+		Connection con = data.getSqlCon();
 		java.sql.Statement stmt;
 		JSONArray lst = new JSONArray();
 		try {

@@ -1,4 +1,4 @@
-package de.rallye.model;
+package de.rallye.resource;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,6 +11,7 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
+import de.rallye.model.ScottlandYardRallye;
 import de.rallye.resource.exceptions.SQLHandlerException;
 
 /**
@@ -27,9 +28,9 @@ public class ChatHandler {
 	public ChatHandler() {
 	}
 
-	public static HashSet<Integer> setNewChatEntry(DataHandler dh, byte[] pic, String userID, String message) throws SQLHandlerException {
+	public static HashSet<Integer> setNewChatEntry(DataHandler data, byte[] pic, String userID, String message) throws SQLHandlerException {
 		HashSet<Integer> chatrooms = new HashSet<Integer>();
-		Connection con = dh.getSqlCon();
+		Connection con = data.getSqlCon();
 		PreparedStatement stmt = null;
 		Savepoint sPoint = null;
 		
@@ -117,8 +118,8 @@ public class ChatHandler {
 	}
 	
 	
-	public static JSONArray getChatEntries(DataHandler dh, String user, int timestamp) throws SQLHandlerException, JSONException {
-		Connection con = dh.getSqlCon();
+	public static JSONArray getChatEntries(DataHandler data, String user, int timestamp) throws SQLHandlerException, JSONException {
+		Connection con = data.getSqlCon();
 		JSONArray lst = new JSONArray();
 		JSONObject o = null;
 		

@@ -1,4 +1,4 @@
-package de.rallye.model;
+package de.rallye.resource;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -8,6 +8,8 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
+import de.rallye.model.ScottlandYardRallye;
+
 
 /**
  * @author Felix HŸbner
@@ -16,8 +18,8 @@ import org.codehaus.jettison.json.JSONObject;
  */
 public class OtherHandler {
 	
-	public static JSONObject getStatus(DataHandler dh) {
-		Connection con = dh.getSqlCon();
+	public static JSONObject getStatus(DataHandler data) {
+		Connection con = data.getSqlCon();
 		java.sql.Statement stmt;
 		JSONObject a = new JSONObject();
 		
