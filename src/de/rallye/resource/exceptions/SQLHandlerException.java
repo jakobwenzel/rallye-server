@@ -1,4 +1,4 @@
-package de.stadtrallye.resource.exceptions;
+package de.rallye.resource.exceptions;
 
 import java.sql.SQLException;
 

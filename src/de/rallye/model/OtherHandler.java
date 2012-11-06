@@ -1,4 +1,4 @@
-package de.stadtrallye.model;
+package de.rallye.model;
 
 import java.sql.Connection;
 import java.sql.ResultSet;

@@ -1,8 +1,8 @@
-package de.stadtrallye;
+package de.rallye;
 
 import java.io.IOException;
 
-import de.stadtrallye.control.GameHandler;
+import de.rallye.control.GameHandler;
 
 /**
  * @author Felix HŸbner

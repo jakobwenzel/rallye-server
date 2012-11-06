@@ -1,4 +1,4 @@
-package de.stadtrallye.model;
+package de.rallye.model;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -11,7 +11,7 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
-import de.stadtrallye.resource.exceptions.SQLHandlerException;
+import de.rallye.resource.exceptions.SQLHandlerException;
 
 /**
  * @author Felix HŸbner

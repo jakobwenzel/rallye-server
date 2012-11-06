@@ -1,9 +1,14 @@
-package de.stadtrallye.control;
+package de.rallye.control;
 
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Formatter;
 import java.util.HashSet;
 
+import javax.imageio.ImageIO;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -17,11 +22,12 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
-import de.stadtrallye.model.ChatHandler;
-import de.stadtrallye.model.DataHandler;
-import de.stadtrallye.model.MapHandler;
-import de.stadtrallye.model.OtherHandler;
-import de.stadtrallye.resource.exceptions.SQLHandlerException;
+
+import de.rallye.model.ChatHandler;
+import de.rallye.model.DataHandler;
+import de.rallye.model.MapHandler;
+import de.rallye.model.OtherHandler;
+import de.rallye.resource.exceptions.SQLHandlerException;
 
 /**
  * @author Felix HŸbner
@@ -79,6 +85,20 @@ public class ClientListener {
 	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
 	@Produces(MediaType.TEXT_PLAIN)
 	public Response setNewChatEntry(byte[] payload, @PathParam("userID") String user) {
+		
+		//BufferedImage image = BufferedImage(payload);
+		
+		/*try {
+			InputStream is = new ByteArrayInputStream(payload);
+			BufferedImage bi = ImageIO.read(is);
+			Image scaled = bi.getScaledInstance(96, 96, BufferedImage.SCALE_SMOOTH);
+			
+			//JPEGEncoderParam param = new 
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}*/
+		
 		return this.setNewChatEntryInternal(payload, user, null);
 	}
 
