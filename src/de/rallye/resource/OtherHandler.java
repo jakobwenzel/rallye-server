@@ -3,45 +3,60 @@ package de.rallye.resource;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
-import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
+import javax.ws.rs.WebApplicationException;
 import org.codehaus.jettison.json.JSONObject;
-
-import de.rallye.model.ScottlandYardRallye;
-
 
 /**
  * @author Felix HŸbner
  * @version 1.0
- *
+ * 
  */
 public class OtherHandler {
-	
+
 	public static JSONObject getStatus(DataHandler data) {
-		Connection con = data.getSqlCon();
-		java.sql.Statement stmt;
+		Connection con = null;
+		Statement stmt = null;
 		JSONObject a = new JSONObject();
-		
+		ResultSet rs = null;
 		try {
+			con = data.getSqlCon();
+
 			stmt = con.createStatement();
-			ResultSet rs = stmt.executeQuery("SELECT MAX(roundID) as round, UNIX_TIMESTAMP() as serverTime FROM `ry_rounds` LIMIT 1");
-			try {
-				while (rs.next()) {
+			rs = stmt.executeQuery("SELECT MAX(roundID) as round, UNIX_TIMESTAMP() as serverTime FROM `ry_rounds` LIMIT 1");
 
-					
+			while (rs.next()) {
 
-					a.put("curRound", rs.getInt("round"));
-					a.put("serverTime", rs.getString("serverTime"));
-					
-				}
-			} catch (JSONException e) {
-				//this exception should not happen because all Keys are not ""
-				e.printStackTrace();
+				a.put("curRound", rs.getInt("round"));
+				a.put("serverTime", rs.getString("serverTime"));
+
 			}
-		} catch (SQLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			rs.close();
+			stmt.close();
+			con.close();
+
+		} catch (Exception e) {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException ignore) {
+				}
+			}
+			if (stmt != null) {
+				try {
+					stmt.close();
+				} catch (SQLException ignore) {
+				}
+			}
+			if (con != null) {
+				try {
+					con.close();
+				} catch (SQLException ignore) {
+				}
+			}
+			throw new WebApplicationException(500);
+
 		}
 		return a;
 	}

@@ -1,6 +1,9 @@
 package de.rallye;
 
+import java.beans.PropertyVetoException;
 import java.io.IOException;
+
+import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 import de.rallye.control.GameHandler;
 
@@ -14,13 +17,11 @@ public class StadtRallye {
 	/**
 	 * @param args
 	 * @author Felix HŸbner
+	 * @throws PropertyVetoException 
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws PropertyVetoException {
 		//create and init new GameHandler
 		GameHandler game = new GameHandler();
-		
-		
-		
 		
 		//temporary to hold the server open
 		System.out.println("Hit enter to stop server...");

@@ -4,13 +4,13 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import javax.ws.rs.WebApplicationException;
+
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import de.rallye.model.ScottlandYardRallye;
-
-
 
 /**
  * @author Felix HŸbner
@@ -31,32 +31,53 @@ public class MapHandler {
 	 */
 
 	public static JSONArray getAllNodes(DataHandler data) {
-		Connection con = data.getSqlCon();
-		java.sql.Statement stmt;
+		Connection con = null;
+		java.sql.Statement stmt = null;
 		JSONArray lst = new JSONArray();
+		ResultSet rs = null;
+
 		try {
+			con = data.getSqlCon();
+
 			stmt = con.createStatement();
-			ResultSet rs = stmt.executeQuery("SELECT NodeID,name,lat,lon,description FROM ry_nodes");
-			try {
-				while (rs.next()) {
+			rs = stmt.executeQuery("SELECT NodeID,name,lat,lon,description FROM ry_nodes");
 
-					JSONObject a = new JSONObject();
+			while (rs.next()) {
 
-					a.put("nodeID", rs.getInt("NodeID"));
-					a.put("name", rs.getString("name"));
-					a.put("lat", rs.getDouble("lat"));
-					a.put("lon", rs.getDouble("lon"));
-					a.put("description", rs.getString("description"));
+				JSONObject a = new JSONObject();
 
-					lst.put(a);
-				}
-			} catch (JSONException e) {
-				//this exception should not happen because all Keys are not ""
-				e.printStackTrace();
+				a.put("nodeID", rs.getInt("NodeID"));
+				a.put("name", rs.getString("name"));
+				a.put("lat", rs.getDouble("lat"));
+				a.put("lon", rs.getDouble("lon"));
+				a.put("description", rs.getString("description"));
+
+				lst.put(a);
 			}
-		} catch (SQLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			rs.close();
+			stmt.close();
+			con.close();
+
+		} catch (Exception e1) {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException ignore) {
+				}
+			}
+			if (stmt != null) {
+				try {
+					stmt.close();
+				} catch (SQLException ignore) {
+				}
+			}
+			if (con != null) {
+				try {
+					con.close();
+				} catch (SQLException ignore) {
+				}
+			}
+			throw new WebApplicationException(500);
 		}
 		return lst;
 	}

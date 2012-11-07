@@ -66,27 +66,22 @@ public class ClientListener {
 	// Chat Commands
 	// ==================================================================//
 
-	@Path("chat/get/{userID}")
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public JSONArray getChatEntries(@PathParam("userID") String user) throws SQLHandlerException, JSONException {
-		return ChatHandler.getChatEntries(this.data,user,0);
-	}
-	
-	
-	@Path("chat/get/{userID}/{timestamp}")
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public JSONArray getChatEntries(@PathParam("userID") String user, @PathParam("timestamp") int timestamp) throws SQLHandlerException, JSONException {
-		return ChatHandler.getChatEntries(this.data,user,timestamp);
-	}
-	
-	@Path("chat/add/{userID}")
+	@Path("chat/get")
 	@POST
-	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
-	@Produces(MediaType.TEXT_PLAIN)
-	public Response setNewChatEntry(byte[] payload, @PathParam("userID") String user) {
-		
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public JSONArray getChatEntries(JSONObject o) throws SQLHandlerException, JSONException {
+		return this.data.getChatEntries(o);
+	}
+	
+	
+	
+	
+	@Path("chat/add/")
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response setNewChatEntry(JSONObject o) {
+		return this.data.setNewChatEntry(o);
 		//BufferedImage image = BufferedImage(payload);
 		
 		/*try {
@@ -100,16 +95,16 @@ public class ClientListener {
 			e.printStackTrace();
 		}*/
 		
-		return this.setNewChatEntryInternal(payload, user, null);
+		
 	}
 
-	@Path("chat/add/{userID}/{message}")
+	/*@Path("chat/add/{userID}/{message}")
 	@POST
 	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
 	@Produces(MediaType.TEXT_PLAIN)
 	public Response setNewChatEntry(byte[] payload, @PathParam("userID") String user, @PathParam("message") String message) {
 		return this.setNewChatEntryInternal(payload, user, message);
-	}
+	}*/
 
 	/**
 	 * method to add a chat entry to database ( and a copy to file)
@@ -119,7 +114,7 @@ public class ClientListener {
 	 * @return a response with the http return code (and a error message)
 	 * @author Felix HŸbner
 	 */
-	private Response setNewChatEntryInternal(byte[] payload, String user, String message) {
+	/*private Response setNewChatEntryInternal(byte[] payload, String user, String message) {
 		HashSet<Integer> c;
 		
 		// some debug print
@@ -127,7 +122,7 @@ public class ClientListener {
 		
 		try {
 			// process ChatEntry
-			c = ChatHandler.setNewChatEntry(this.data, payload, user, message);
+			c = this.data.setNewChatEntry(payload, user, message);
 			// update devices in chatrooms
 			if (!c.isEmpty()) {
 				this.data.updateDevices(c);
@@ -139,6 +134,20 @@ public class ClientListener {
 			e.printStackTrace();
 			return Response.status(500).entity(e.getMessage()).build();
 		}
+	}*/
+	
+	// ==================================================================//
+	// Picture Commands
+	// ==================================================================//
+	
+	@Path("pic/add")
+	@POST
+	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONObject addPicture(byte[] pic) throws JSONException {
+		JSONObject o = new JSONObject();
+		o.put("picID", this.data.setPicture(pic));
+		return o;
 	}
 
 	// ==================================================================//
