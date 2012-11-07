@@ -1,19 +1,10 @@
 package de.rallye.rest;
 
-import java.awt.Image;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Formatter;
-import java.util.HashSet;
-
-import javax.imageio.ImageIO;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -24,7 +15,6 @@ import org.codehaus.jettison.json.JSONObject;
 
 
 import de.rallye.model.ScottlandYardRallye;
-import de.rallye.resource.ChatHandler;
 import de.rallye.resource.DataHandler;
 import de.rallye.resource.MapHandler;
 import de.rallye.resource.OtherHandler;
@@ -43,15 +33,6 @@ public class ClientListener {
 	// ==================================================================//
 	// Map Commands
 	// ==================================================================//
-
-	/*
-	 * @Path("map/getNodes")
-	 * 
-	 * @GET
-	 * 
-	 * @Produces(MediaType.APPLICATION_JSON) public JSONArray getNodes() {
-	 * return MapHandler.getAllNodes(this.data); }
-	 */
 
 	@Path("map/get/nodes")
 	@GET
@@ -74,67 +55,12 @@ public class ClientListener {
 		return this.data.getChatEntries(o);
 	}
 	
-	
-	
-	
 	@Path("chat/add/")
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response setNewChatEntry(JSONObject o) {
 		return this.data.setNewChatEntry(o);
-		//BufferedImage image = BufferedImage(payload);
-		
-		/*try {
-			InputStream is = new ByteArrayInputStream(payload);
-			BufferedImage bi = ImageIO.read(is);
-			Image scaled = bi.getScaledInstance(96, 96, BufferedImage.SCALE_SMOOTH);
-			
-			//JPEGEncoderParam param = new 
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}*/
-		
-		
 	}
-
-	/*@Path("chat/add/{userID}/{message}")
-	@POST
-	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
-	@Produces(MediaType.TEXT_PLAIN)
-	public Response setNewChatEntry(byte[] payload, @PathParam("userID") String user, @PathParam("message") String message) {
-		return this.setNewChatEntryInternal(payload, user, message);
-	}*/
-
-	/**
-	 * method to add a chat entry to database ( and a copy to file)
-	 * @param payload the picture if available
-	 * @param user userID GCM id !!!
-	 * @param message message if avaliable
-	 * @return a response with the http return code (and a error message)
-	 * @author Felix HŸbner
-	 */
-	/*private Response setNewChatEntryInternal(byte[] payload, String user, String message) {
-		HashSet<Integer> c;
-		
-		// some debug print
-		System.out.println("User: " + user + " Message: '" + message + "' Payload: " + (payload.length != 0 ? "available" : "empty"));
-		
-		try {
-			// process ChatEntry
-			c = this.data.setNewChatEntry(payload, user, message);
-			// update devices in chatrooms
-			if (!c.isEmpty()) {
-				this.data.updateDevices(c);
-			}
-			return Response.status(201).build();
-
-		} catch (SQLHandlerException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			return Response.status(500).entity(e.getMessage()).build();
-		}
-	}*/
 	
 	// ==================================================================//
 	// Picture Commands
@@ -146,7 +72,7 @@ public class ClientListener {
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject addPicture(byte[] pic) throws JSONException {
 		JSONObject o = new JSONObject();
-		o.put("picID", this.data.setPicture(pic));
+		o.put("pic", this.data.setPicture(pic));
 		return o;
 	}
 
