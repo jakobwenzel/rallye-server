@@ -7,10 +7,7 @@ import java.sql.SQLException;
 import javax.ws.rs.WebApplicationException;
 
 import org.codehaus.jettison.json.JSONArray;
-import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
-
-import de.rallye.model.ScottlandYardRallye;
 
 /**
  * @author Felix HŸbner
