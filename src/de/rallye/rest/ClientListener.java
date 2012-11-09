@@ -13,7 +13,6 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
-
 import de.rallye.model.ScottlandYardRallye;
 import de.rallye.resource.DataHandler;
 import de.rallye.resource.MapHandler;
@@ -54,18 +53,18 @@ public class ClientListener {
 	public JSONArray getChatEntries(JSONObject o) throws SQLHandlerException, JSONException {
 		return this.data.getChatEntries(o);
 	}
-	
+
 	@Path("chat/add/")
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response setNewChatEntry(JSONObject o) {
 		return this.data.setNewChatEntry(o);
 	}
-	
+
 	// ==================================================================//
 	// Picture Commands
 	// ==================================================================//
-	
+
 	@Path("pic/add")
 	@POST
 	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
@@ -74,6 +73,17 @@ public class ClientListener {
 		JSONObject o = new JSONObject();
 		o.put("pic", this.data.setPicture(pic));
 		return o;
+	}
+
+	// ==================================================================//
+	// User Commands
+	// ==================================================================//
+
+	@Path("user/login")
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response userLogin(JSONObject req) throws JSONException {
+		return this.data.userLogin(req);
 	}
 
 	// ==================================================================//
@@ -88,60 +98,53 @@ public class ClientListener {
 		// Response.status(201).entity(OtherHandler.getStatus(this.data).toString()).build();
 		return OtherHandler.getStatus(this.data);
 	}
-	
+
 	@Path("postPic")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject test(byte[] pic) {
-		
-		
-		
+
 		JSONObject o = new JSONObject();
-		
+
 		try {
 			o.put("pic1", ClientListener.hexEncode(pic));
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
+
 		return o;
 		// return
 		// Response.status(201).entity(OtherHandler.getStatus(this.data).toString()).build();
-		//return OtherHandler.getStatus(this.data);
+		// return OtherHandler.getStatus(this.data);
 	}
 
 	// ==================================================================//
 	// Helper Methods
 	// ==================================================================//
 
-	private static Appendable hexEncode(byte buf[], Appendable sb)     
-	{     
-	    //final Formatter formatter = new Formatter(sb);     
-	    for (int i = 0; i < buf.length; i++)     
-	    {     
-	        int low = buf[i] & 0xF;  
-	        int high = (buf[i] >> 8) & 0xF;  
-	        try {
+	private static Appendable hexEncode(byte buf[], Appendable sb) {
+		// final Formatter formatter = new Formatter(sb);
+		for (int i = 0; i < buf.length; i++) {
+			int low = buf[i] & 0xF;
+			int high = (buf[i] >> 8) & 0xF;
+			try {
 				sb.append(Character.forDigit(high, 16));
 				sb.append(Character.forDigit(low, 16));
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			}   
-	    }     
-	    return sb;     
+			}
+		}
+		return sb;
 	}
-	
-	private static String hexEncode(byte buf[])  
-    {  
+
+	private static String hexEncode(byte buf[]) {
 		String s = hexEncode(buf, new StringBuilder()).toString();
-		//System.out.println(s);
-        return s;  
-    }
-	
-	
+		// System.out.println(s);
+		return s;
+	}
+
 	/**
 	 * this method will respond to a chat event.
 	 * 

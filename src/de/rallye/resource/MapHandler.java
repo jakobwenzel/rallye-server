@@ -47,7 +47,11 @@ public class MapHandler {
 				a.put("name", rs.getString("name"));
 				a.put("lat", rs.getDouble("lat"));
 				a.put("lon", rs.getDouble("lon"));
+				if (rs.getString("description") != null) {
 				a.put("description", rs.getString("description"));
+				} else {
+					a.put("description", JSONObject.NULL);
+				}
 
 				lst.put(a);
 			}
@@ -74,7 +78,7 @@ public class MapHandler {
 				} catch (SQLException ignore) {
 				}
 			}
-			throw new WebApplicationException(500);
+			throw new WebApplicationException(e1,500);
 		}
 		return lst;
 	}
