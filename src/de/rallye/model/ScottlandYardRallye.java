@@ -1,5 +1,8 @@
 package de.rallye.model;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import de.rallye.resource.DataHandler;
 
 /**
@@ -9,7 +12,7 @@ import de.rallye.resource.DataHandler;
  */
 public class ScottlandYardRallye extends DataHandler {
 
-	
+	private Logger logger =  LogManager.getLogger(ScottlandYardRallye.class.getName());
 
 	/**
 	 * constructor
@@ -17,7 +20,5 @@ public class ScottlandYardRallye extends DataHandler {
 	public ScottlandYardRallye() {
 		super();
 	}
-	
-	
 	
 }

@@ -5,10 +5,15 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
@@ -26,8 +31,11 @@ import de.rallye.resource.exceptions.SQLHandlerException;
  */
 @Path("/StadtRallye")
 public class ClientListener {
+	
+	private Logger logger =  LogManager.getLogger(ClientListener.class.getName());
 
-	DataHandler data = new ScottlandYardRallye();
+
+	private DataHandler data = new ScottlandYardRallye();
 
 	// ==================================================================//
 	// Map Commands
@@ -37,9 +45,10 @@ public class ClientListener {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONArray getAllNodes() {
+		logger.entry();
 		// return
 		// Response.status(201).entity(MapHandler.getAllNodes(this.data).toString()).build();
-		return MapHandler.getAllNodes(this.data);
+		return logger.exit(MapHandler.getAllNodes(this.data));
 	}
 
 	// ==================================================================//
@@ -51,14 +60,16 @@ public class ClientListener {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public JSONArray getChatEntries(JSONObject o) throws SQLHandlerException, JSONException {
-		return this.data.getChatEntries(o);
+		logger.entry();
+		return logger.exit(this.data.getChatEntries(o));
 	}
 
-	@Path("chat/add/")
+	@Path("chat/add")
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response setNewChatEntry(JSONObject o) {
-		return this.data.setNewChatEntry(o);
+		logger.entry();
+		return logger.exit(this.data.setNewChatEntry(o));
 	}
 
 	// ==================================================================//
@@ -70,9 +81,24 @@ public class ClientListener {
 	@Consumes(MediaType.APPLICATION_OCTET_STREAM)
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject addPicture(byte[] pic) throws JSONException {
+		logger.entry();
 		JSONObject o = new JSONObject();
 		o.put("pic", this.data.setPicture(pic));
-		return o;
+		return logger.exit(o);
+	}
+	
+	@Path("pic/get/{picID}/{size}")
+	@GET
+	@Produces(MediaType.APPLICATION_OCTET_STREAM)
+	public byte[] returnPicture(@PathParam("picID") int picID, @PathParam("size") String size) {
+		logger.entry();
+		char s = size.toLowerCase().charAt(0);
+		if (s == 't' || s == 's' || s == 'l') {
+			return logger.exit(this.data.returnPic(picID, s));
+		}
+		else {
+			throw logger.throwing(new WebApplicationException(Response.status(400).entity("size is not valid").build()));
+		}
 	}
 
 	// ==================================================================//
@@ -83,7 +109,8 @@ public class ClientListener {
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response userLogin(JSONObject req) throws JSONException {
-		return this.data.userLogin(req);
+		logger.entry();
+		return logger.exit(this.data.userLogin(req));
 	}
 
 	// ==================================================================//
@@ -94,16 +121,15 @@ public class ClientListener {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject getStatus() {
-		// return
-		// Response.status(201).entity(OtherHandler.getStatus(this.data).toString()).build();
-		return OtherHandler.getStatus(this.data);
+		logger.entry();
+		return logger.exit(OtherHandler.getStatus(this.data));
 	}
 
 	@Path("postPic")
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject test(byte[] pic) {
-
+		logger.entry();
 		JSONObject o = new JSONObject();
 
 		try {
@@ -113,7 +139,7 @@ public class ClientListener {
 			e.printStackTrace();
 		}
 
-		return o;
+		return logger.exit(o);
 		// return
 		// Response.status(201).entity(OtherHandler.getStatus(this.data).toString()).build();
 		// return OtherHandler.getStatus(this.data);

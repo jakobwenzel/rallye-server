@@ -3,6 +3,9 @@ package de.rallye;
 import java.beans.PropertyVetoException;
 import java.io.IOException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import de.rallye.control.GameHandler;
 
 /**
@@ -18,11 +21,12 @@ public class StadtRallye {
 	 * @throws PropertyVetoException 
 	 */
 	public static void main(String[] args) throws PropertyVetoException {
+		Logger logger =  LogManager.getLogger(StadtRallye.class.getName());
 		//create and init new GameHandler
 		GameHandler game = new GameHandler();
 		
 		//temporary to hold the server open
-		System.out.println("Hit enter to stop server...");
+		logger.info("Hit enter to stop server...");
 		try {
 			System.in.read();
 		} catch (IOException e) {
@@ -34,7 +38,7 @@ public class StadtRallye {
 		
 		game.stopServer();
 		//game.start();
-		
+		logger.exit();
 	}
 
 }
