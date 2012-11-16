@@ -11,21 +11,35 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
+ * <p>
+ * A simple 2-level cache for byte[] images consisting of a small and fast
+ * in-memory cache (1st level cache) and a slower but bigger disk cache (2nd
+ * level cache). For second level caching, the application's cache directory
+ * will be used.
+ * </p>
+ * <p>
+ * When pulling from the cache, it will first attempt to load the image from
+ * memory. If that fails, it will try to load it from disk. If that succeeds,
+ * the image will be put in the 1st level cache and returned. Otherwise it's a
+ * cache miss, and the caller is responsible for loading the image from
+ * elsewhere (probably the Internet).
+ * </p>
+ * <p>
+ * Pushes to the cache are always write-through (i.e., the image will be stored
+ * both on disk and in memory).
+ * </p>
+ * <p>changed from android to PC, and from bitmap to byte[] by Felix HŸbner</p>
+ * @author Matthias Kaeppler
  * @author Felix HŸbner
  * @version 1.0
  * @source this class copied from
  *         http://www.java2s.com/Open-Source/Android/App/psnfriends
- *         /com/github/droidfu/imageloader/ImageCache.java.htm but for byte[]
- *         arrays
+ *         /com/github/droidfu/imageloader/ImageCache.java.htm
  * 
  */
+@SuppressWarnings("serial")
 public class BlobStore extends LinkedHashMap<String, byte[]> {
-
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 5632921081886680279L;
-
+	
 	static int firstLevelCacheSize = 10;
 
 	private static String secondLevelCacheDir;
@@ -82,9 +96,11 @@ public class BlobStore extends LinkedHashMap<String, byte[]> {
 		if (imageFile.exists()) {
 			// 2nd level cache hit (disk)
 			logger.info("Cache (2st Level) Hit for: " + imageUrl + " FileName: " + getImageFile(imageUrl));
-			blob = new byte[cacheMaxSize];
+			
 			try {
 				FileInputStream in = new FileInputStream(imageFile.getAbsolutePath());
+				blob = new byte[in.available()];
+				logger.trace("estimated length: "+in.available());
 				in.read(blob);
 				in.close();
 			} catch (IOException e) {
@@ -126,6 +142,32 @@ public class BlobStore extends LinkedHashMap<String, byte[]> {
 			logger.error("File size to big.");
 			throw new IllegalArgumentException("File to big");
 		}
+	}
+	
+	@Override
+	public byte[] remove(Object key) {
+		byte[] value = null;
+		
+		//delete in 1st level cache
+		value = super.remove(key);
+		
+		//delete in 2nd level cache
+		String imageUrl = (String) key;
+		File f = getImageFile(imageUrl);
+		if (f.exists()) {
+			try {
+				FileInputStream in = new FileInputStream(f.getAbsolutePath());
+				value = new byte[in.available()];
+				in.read(value);
+				in.close();
+			} catch (FileNotFoundException e) {
+			} catch (IOException e) {
+				logger.catching(e);
+			}
+			f.delete();
+		}
+		
+		return value;
 	}
 
 	private File getImageFile(String imageUrl) {
