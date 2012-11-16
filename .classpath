@@ -20,5 +20,6 @@
 	<classpathentry kind="lib" path="lib/mchange-commons-java-0.2.3.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-api-2.0-beta2.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-core-2.0-beta2.jar"/>
+	<classpathentry kind="lib" path="config"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
