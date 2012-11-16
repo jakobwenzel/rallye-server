@@ -105,12 +105,21 @@ public class ClientListener {
 	// User Commands
 	// ==================================================================//
 
-	@Path("user/login")
+	@Path("user/register")
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response userLogin(JSONObject req) throws JSONException {
+	@Produces(MediaType.APPLICATION_JSON)
+	public JSONArray registerUser(JSONObject req) throws JSONException {
 		logger.entry();
-		return logger.exit(this.data.userLogin(req));
+		return logger.exit(this.data.registerUser(req));
+	}
+	
+	@Path("user/unregister")
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response unregisterUser(JSONObject req) {
+		logger.entry();
+		return logger.exit(this.data.unregisterUser(req));
 	}
 
 	// ==================================================================//
