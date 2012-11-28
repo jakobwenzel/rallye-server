@@ -10,7 +10,6 @@ import java.net.Socket;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import de.rallye.StadtRallye;
 import de.rallye.resource.DataHandler;
 
 /**
@@ -32,7 +31,7 @@ public class GameConsole {
 		this.data = data;
 
 		try {
-			socket = new ServerSocket(10100);
+			socket = new ServerSocket(this.data.getConsolePort());
 		} catch (IOException e) {
 			logger.catching(e);
 		}
@@ -98,11 +97,13 @@ public class GameConsole {
 	 * @author Felix HŸbner
 	 */
 	public void close() {
+		logger.entry();
 		try {
 			socket.close();
 		} catch (IOException e) {
 			logger.catching(e);
 		}
+		logger.exit();
 	}
 
 }
