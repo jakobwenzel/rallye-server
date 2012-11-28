@@ -1,7 +1,6 @@
 package de.rallye;
 
 import java.beans.PropertyVetoException;
-import java.io.IOException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,7 +25,17 @@ public class StadtRallye {
 		GameHandler game = new GameHandler();
 		
 		//temporary to hold the server open
-		logger.info("Hit enter to stop server...");
+		while(true) {
+			try {
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				logger.throwing(e);
+			}
+		}
+		
+		
+		/*logger.info("Hit enter to stop server...");
 		try {
 			System.in.read();
 		} catch (IOException e) {
@@ -38,7 +47,7 @@ public class StadtRallye {
 		
 		game.stopServer();
 		//game.start();
-		logger.exit();
+		logger.exit();*/
 	}
 
 }
