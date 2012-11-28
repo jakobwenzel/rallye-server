@@ -41,7 +41,7 @@
         <logger name ="de.rallye" level="trace" additivity="false" > 
         	<appender-ref ref="STDOUT" />
         	<appender-ref ref="LogFile" level="warn" />
-            <appender-ref ref="DebugLogFile" level="info" />
+            <appender-ref ref="DebugLogFile" level="trace" />
         </logger>
         
         <root level="trace" >
