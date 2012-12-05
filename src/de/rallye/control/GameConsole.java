@@ -53,7 +53,7 @@ public class GameConsole {
 		try {
 			client = socket.accept();
 			
-			logger.trace("New client to address: "+client.getLocalAddress().getHostAddress()+"");
+			//logger.trace("New client on address: "+client.getLocalAddress().getHostAddress()+"");
 			if (!client.getLocalAddress().getHostAddress().equals("127.0.0.1")) {
 				client.close();
 				logger.warn("client not allowed! close connection. Bye Bye!");

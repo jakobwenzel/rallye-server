@@ -122,12 +122,13 @@ public class ClientListener {
 	// Other Commands
 	// ==================================================================//
 
-	@Path("getStatus")
-	@GET
+	@Path("status")
+	@POST
+	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getStatus() {
+	public Response getStatus(JSONObject o) {
 		logger.entry();
-		return logger.exit(this.data.getStatus());
+		return logger.exit(this.data.getStatus(o));
 	}
 
 	/*@Path("postPic")

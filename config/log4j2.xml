@@ -12,11 +12,11 @@
         </appender>
         
         <appender type="File" name="LogFile" fileName="${log}">
-            <layout type="PatternLayout" pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n%throwable{10}" />
+            <layout type="PatternLayout" pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36}.%method - %msg%n%throwable{10}" />
         </appender>
         
         <appender type="File" name="DebugLogFile" fileName="${debugLog}">
-            <layout type="PatternLayout" pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n%throwable{10}" />
+            <layout type="PatternLayout" pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36}.%method - %msg%n%throwable{10}" />
         </appender>
         
          <appender type="List" name="List">
