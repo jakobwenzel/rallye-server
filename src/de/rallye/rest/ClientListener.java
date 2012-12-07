@@ -89,9 +89,8 @@ public class ClientListener {
 	
 	@Path("pic/get/{picID}/{size}")
 	@GET
-	@Consumes(MediaType.APPLICATION_FORM_URLENCODED)
 	@Produces("image/jpeg")
-	public Response returnPicture(@PathParam("picID") int picID, @PathParam("size") String size) {
+	public Response getPicture(@PathParam("picID") int picID, @PathParam("size") String size) {
 		logger.entry();
 		char s = size.toLowerCase().charAt(0);
 		if (s == 't' || s == 's' || s == 'l') {
