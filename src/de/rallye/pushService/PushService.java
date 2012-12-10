@@ -13,7 +13,7 @@ import java.util.Map.Entry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import de.rallye.pushService.resource.PushCommands;
+import de.rallye.pushService.resource.PushCommand;
 import de.rallye.pushService.resource.PushServiceException;
 import de.rallye.resource.DataHandler;
 
@@ -61,7 +61,7 @@ public class PushService {
 	 */
 	public void updateChatroom(Map<String, Integer> lst, int chatroom)
 			throws PushServiceException {
-		this.push(lst, PushCommands.CHATROOM_UPDATE, String.valueOf(chatroom));
+		this.push(lst, PushCommand.CHATROOM_UPDATE, String.valueOf(chatroom));
 	}
 
 	/**

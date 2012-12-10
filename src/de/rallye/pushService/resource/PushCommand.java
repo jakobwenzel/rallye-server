@@ -9,7 +9,7 @@ package de.rallye.pushService.resource;
  * @version 1.0
  *
  */
-public class PushCommands {
+public class PushCommand {
 	
 	// chatroom commands
 	public static int CHATROOM_UPDATE = 100;
