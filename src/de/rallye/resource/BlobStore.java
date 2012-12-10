@@ -40,7 +40,7 @@ import org.apache.logging.log4j.Logger;
 @SuppressWarnings("serial")
 public class BlobStore extends LinkedHashMap<String, byte[]> {
 	
-	static int firstLevelCacheSize = 10;
+	private static int firstLevelCacheSize;
 
 	private static String secondLevelCacheDir;
 
@@ -61,11 +61,12 @@ public class BlobStore extends LinkedHashMap<String, byte[]> {
 	 *            in byte
 	 * @author Felix HŸbner
 	 */
-	public void initialize(String path, String cacheFolder, int maxFileSize) {
+	public void initialize(String path, String cacheFolder,int firstLevelSize, int maxFileSize) {
 
 		secondLevelCacheDir = path + "/blobStore/" + cacheFolder;
 		new File(secondLevelCacheDir).mkdirs();
 		cacheMaxSize = maxFileSize;
+		firstLevelCacheSize = firstLevelSize;
 
 		logger.info("Setup Blobstore at: " + secondLevelCacheDir + " - Cache size: " + firstLevelCacheSize + " Elements - Max Blob Size: "
 				+ cacheMaxSize + " Byte");
