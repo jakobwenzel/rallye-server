@@ -6,6 +6,7 @@ package de.rallye.pushService.resource;
 /**
  * @author Felix Huebner
  * @date 10.12.12
+ * @version 1.0
  *
  */
 public class PushCommands {

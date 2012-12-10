@@ -100,13 +100,15 @@ public class PushService {
 
 		// send the push to the clients - google cloud messaging
 		gcmPush.push(gcmIDs, changes, command, data);
-		this.fixClients(changes, PushService.DEVICE_GOOGLE);
-		changes.clear();
+		if (!changes.isEmpty()) {
+			this.fixClients(changes, PushService.DEVICE_GOOGLE);
+		}
 
 		// send the push to the clients - apple
 		// TODO add call for apple devices
-		this.fixClients(changes, PushService.DEVICE_APPLE);
-		changes.clear();
+		if (!changes.isEmpty()) {
+			this.fixClients(changes, PushService.DEVICE_APPLE);
+		}
 
 		logger.exit();
 	}
@@ -142,7 +144,7 @@ public class PushService {
 		case PushService.DEVICE_APPLE:
 			// TODO
 		}
-
+		lst.clear();
 		logger.exit();
 	}
 
