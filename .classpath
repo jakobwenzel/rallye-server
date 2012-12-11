@@ -22,5 +22,6 @@
 	<classpathentry kind="lib" path="lib/log4j-core-2.0-beta2.jar"/>
 	<classpathentry kind="lib" path="config"/>
 	<classpathentry kind="lib" path="lib/json-simple-1.1.1.jar"/>
+	<classpathentry kind="lib" path="lib/JavaPNS_2.2_javadoc.zip"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
