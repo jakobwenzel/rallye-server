@@ -10,7 +10,7 @@ import java.util.Map;
  * @author felix
  * 
  */
-public interface PushServiceInterface {
+public interface IPushService {
 
 	/**
 	 * this method push the info to the clients

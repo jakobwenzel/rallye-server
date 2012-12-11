@@ -16,7 +16,7 @@ import com.google.android.gcm.server.MulticastResult;
 import com.google.android.gcm.server.Result;
 import com.google.android.gcm.server.Sender;
 
-import de.rallye.pushService.resource.PushServiceInterface;
+import de.rallye.pushService.resource.IPushService;
 import de.rallye.resource.DataHandler;
 
 /**
@@ -24,7 +24,7 @@ import de.rallye.resource.DataHandler;
  * @date 10.12.12
  * 
  */
-public class GCMPushService implements PushServiceInterface {
+public class GCMPushService implements IPushService {
 
 	private Logger logger = LogManager
 			.getLogger(GCMPushService.class.getName());
@@ -40,9 +40,10 @@ public class GCMPushService implements PushServiceInterface {
 		this.GCM_API_KEY = gcmKey;
 	}
 
-	/**
-	 * Google GCM, single client push
+	/* (non-Javadoc)
+	 * @see de.rallye.pushService.resource.IPushService#push(java.util.List, java.util.Map, int, java.lang.String)
 	 */
+	@Override
 	public void push(String client, Map<String, String> lstChages, int type,
 			String value) {
 		logger.entry();
@@ -72,13 +73,10 @@ public class GCMPushService implements PushServiceInterface {
 		logger.exit();
 	}
 
-	/**
-	 * Google GCM, multi client push
-	 * 
-	 * @param ar
-	 * @param type
-	 * @param value
+	/* (non-Javadoc)
+	 * @see de.rallye.pushService.resource.IPushService#push(java.lang.String, java.util.Map, int, java.lang.String)
 	 */
+	@Override
 	public void push(List<String> lst, Map<String, String> lstChages, int type,
 			String value) {
 		logger.entry();
