@@ -4,11 +4,11 @@
 package de.rallye.pushService;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import javapns.communication.exceptions.KeystoreException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,8 +31,7 @@ public class PushService {
 
 	private DataHandler data = null;
 	private GCMPushService gcmPush = null;
-
-	// private ACMPushService acmPush = null;
+	private APNPushService apnPush = null;
 
 	/**
 	 * 
@@ -48,20 +47,31 @@ public class PushService {
 		gcmPush = new GCMPushService(this.data.getGoogleCloudMessagingKey());
 
 		// create the apple push service
-		// TODO
-
+		try {
+			apnPush = new APNPushService(this.data.getAPN_keyStore(),
+					this.data.getAPN_Password());
+		} catch (KeystoreException e) {
+			logger.catching(e);
+		}
 		logger.exit();
 	}
 
 	/**
-	 * this method sends a push to all clients given in list, to tell them that they have to update chatroom given in chatroom
-	 * @param lst list of clients to updatea
-	 * @param chatroom chatroom to update
-	 * @throws PushServiceException if a not valid DeviceType is found
+	 * this method sends a push to all clients given in list, to tell them that
+	 * they have to update chatroom given in chatroom
+	 * 
+	 * @param lst
+	 *            list of clients to updatea
+	 * @param chatroom
+	 *            chatroom to update
+	 * @throws PushServiceException
+	 *             if a not valid DeviceType is found
 	 */
 	public void updateChatroom(Map<String, Integer> lst, int chatroom)
 			throws PushServiceException {
+		logger.entry();
 		this.push(lst, PushCommand.CHATROOM_UPDATE, String.valueOf(chatroom));
+		logger.exit();
 	}
 
 	/**
@@ -79,7 +89,7 @@ public class PushService {
 			throws PushServiceException {
 		logger.entry();
 		LinkedList<String> gcmIDs = new LinkedList<String>();
-		LinkedList<String> acmIDs = new LinkedList<String>();
+		LinkedList<String> apnIDs = new LinkedList<String>();
 
 		HashMap<String, String> changes = new HashMap<String, String>();
 
@@ -90,7 +100,7 @@ public class PushService {
 				gcmIDs.add(e.getKey());
 				break;
 			case PushService.DEVICE_APPLE:
-				acmIDs.add(e.getKey());
+				apnIDs.add(e.getKey());
 				break;
 			default:
 				throw new PushServiceException("Invalid DeviceType found. ("
@@ -106,8 +116,11 @@ public class PushService {
 
 		// send the push to the clients - apple
 		// TODO add call for apple devices
-		if (!changes.isEmpty()) {
-			this.fixClients(changes, PushService.DEVICE_APPLE);
+		if (apnPush != null) {
+			apnPush.push(apnIDs, changes, command, data);
+			if (!changes.isEmpty()) {
+				this.fixClients(changes, PushService.DEVICE_APPLE);
+			}
 		}
 
 		logger.exit();
@@ -128,21 +141,33 @@ public class PushService {
 		switch (clientType) {
 		case PushService.DEVICE_GOOGLE:
 			for (Entry<String, String> e : lst.entrySet()) {
-				
-				logger.debug("Client: 1:"+e.getKey()+" 2:"+e.getValue());
-				
+
+				logger.debug("Client: 1:" + e.getKey() + " 2:" + e.getValue());
+
 				if (e.getValue() == null) {
 					// remove device
-					logger.info("remove device: "+e.getKey());
-					//TODO comment in to enable remove!!! this.data.removeUser(e.getKey());
+					logger.info("remove device: " + e.getKey());
+					// TODO comment in to enable remove!!!
+					// this.data.removeUser(e.getKey());
 				} else {
 					// update device
-					logger.info("update Device: from:"+e.getKey()+" to:"+e.getValue());
+					logger.info("update Device: from:" + e.getKey() + " to:"
+							+ e.getValue());
 					this.data.updateUser(e.getKey(), e.getValue());
 				}
 			}
 		case PushService.DEVICE_APPLE:
-			// TODO
+			for (Entry<String, String> e : lst.entrySet()) {
+
+				logger.debug("Client: 1:" + e.getKey() + " 2:" + e.getValue());
+
+				if (e.getValue() == null) {
+					// remove device
+					logger.info("remove device: " + e.getKey());
+					// TODO comment in to enable remove!!!
+					// this.data.removeUser(e.getKey());
+				}
+			}
 		}
 		lst.clear();
 		logger.exit();

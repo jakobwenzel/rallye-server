@@ -17,7 +17,6 @@ import com.google.android.gcm.server.Result;
 import com.google.android.gcm.server.Sender;
 
 import de.rallye.pushService.resource.IPushService;
-import de.rallye.resource.DataHandler;
 
 /**
  * @author Felix Huebner
@@ -37,7 +36,9 @@ public class GCMPushService implements IPushService {
 	 * @param data
 	 */
 	public GCMPushService(String gcmKey) {
+		logger.entry();
 		this.GCM_API_KEY = gcmKey;
+		logger.exit();
 	}
 
 	/* (non-Javadoc)
