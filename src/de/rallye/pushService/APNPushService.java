@@ -3,6 +3,7 @@
  */
 package de.rallye.pushService;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,8 @@ import javapns.devices.implementations.basic.BasicDevice;
 import javapns.notification.Payload;
 import javapns.notification.PushNotificationPayload;
 import javapns.notification.PushedNotification;
+import javapns.test.NotificationTest;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
@@ -40,19 +43,22 @@ public class APNPushService implements IPushService {
 	 *             if the keystore is not vaild
 	 * 
 	 */
-	public APNPushService(Object keystore, String password) throws KeystoreException {
+	public APNPushService(String keystore, String password)
+			throws KeystoreException {
 		logger.entry();
-		
+
 		// store the password
 		APNPushService.password = password;
 
 		// store the keyStore path
 		APNPushService.keyStore = keystore;
-		
-		// check if keystore, password, and production is vaild
-		//TODO comment in if a valid Keystore exists.
-		//NotificationTest.verifyKeystore(keystore, password, production);
 
+		// check if keystore, password, and production is vaild
+		// TODO comment in if a valid Keystore exists.
+		if ((new File(keystore)).exists()) {
+			NotificationTest.verifyKeystore(keystore, password, production);
+		}
+		
 		logger.exit();
 	}
 
@@ -70,6 +76,7 @@ public class APNPushService implements IPushService {
 
 			// create Payload
 			JSONObject o = new JSONObject();
+			o.put("aps", new JSONObject());
 			o.put("t", String.valueOf(type));
 			o.put("d", value);
 			Payload payload = PushNotificationPayload.fromJSON(o.toString());
@@ -83,7 +90,8 @@ public class APNPushService implements IPushService {
 			// process notifications
 			List<PushedNotification> notifications = Push.payload(payload,
 					APNPushService.keyStore, APNPushService.password,
-					APNPushService.production, APNPushService.workingThreads,deviceList);
+					APNPushService.production, APNPushService.workingThreads,
+					deviceList);
 
 			// debug result
 			for (PushedNotification pn : notifications) {
@@ -119,6 +127,7 @@ public class APNPushService implements IPushService {
 		try {
 			// create Payload
 			JSONObject o = new JSONObject();
+			o.put("aps", new JSONObject());
 			o.put("t", String.valueOf(type));
 			o.put("d", value);
 			Payload payload = PushNotificationPayload.fromJSON(o.toString());
@@ -139,11 +148,13 @@ public class APNPushService implements IPushService {
 							+ " ResponseMessage: "
 							+ pn.getResponse().getMessage());
 					if (pn.getResponse().isValidErrorMessage()) {
-						logger.trace("error status code: "+pn.getResponse().getStatus());
-						logger.trace("error status message:"+pn.getResponse().getMessage());
+						logger.trace("error status code: "
+								+ pn.getResponse().getStatus());
+						logger.trace("error status message:"
+								+ pn.getResponse().getMessage());
 						lstChanges.put(pn.getDevice().getDeviceId(), null);
 					}
-					
+
 				}
 			}
 
