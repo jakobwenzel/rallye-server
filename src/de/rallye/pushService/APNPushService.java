@@ -15,8 +15,6 @@ import javapns.devices.implementations.basic.BasicDevice;
 import javapns.notification.Payload;
 import javapns.notification.PushNotificationPayload;
 import javapns.notification.PushedNotification;
-import javapns.test.NotificationTest;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
@@ -51,7 +49,9 @@ public class APNPushService implements IPushService {
 		// store the keyStore path
 		APNPushService.keyStore = keystore;
 		
-		NotificationTest.verifyKeystore(keystore, password, production);
+		// check if keystore, password, and production is vaild
+		//TODO comment in if a valid Keystore exists.
+		//NotificationTest.verifyKeystore(keystore, password, production);
 
 		logger.exit();
 	}
