@@ -14,19 +14,20 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
+ * This Class implements a Cache that allows to remove entries after a defined lifetime.
  * @author Felix Huebner
  * @date 12.12.2012
  * 
  */
 @SuppressWarnings("serial")
-public class TemporarilyCache<E, V> extends LinkedHashMap<E, V> {
+public class TemporaryCache<E, V> extends LinkedHashMap<E, V> {
 
 	// temprarily time for a element default 5 minutes
 	private static int validTime = 5 * 60;
 	private TreeMap<E, Long> lifeTime = new TreeMap<E, Long>();
 	private Lock lock = new ReentrantLock();
 
-	private Logger logger = LogManager.getLogger(this.getClass().getName());
+	private Logger logger = LogManager.getLogger(TemporaryCache.class.getName());
 
 	/**
 	 * @param ValidTime_ms
@@ -35,7 +36,7 @@ public class TemporarilyCache<E, V> extends LinkedHashMap<E, V> {
 	public void initialize(int validTime_ms) {
 		validTime = validTime_ms * 1000;
 		lifeTime = new TreeMap<E, Long>();
-		logger.info("Setup TemporarilyCache: set validTime to: " + validTime_ms
+		logger.info("Setup "+TemporaryCache.class.getName()+": set validTime to: " + validTime_ms
 				+ "ms (" + validTime_ms / 60 + "min)");
 	}
 
@@ -109,7 +110,7 @@ public class TemporarilyCache<E, V> extends LinkedHashMap<E, V> {
 			str.append("Entry: ").append(i.next().toString()).append("\n");
 		}
 		
-		str.append("TemporarilyCache Status: ");
+		str.append(TemporaryCache.class.getName()).append(" Status: ");
 		str.append("Elements: " + super.size());
 		str.append(" oldestElement: " + e.getKey()+"="+super.get(e.getKey()).toString());
 		str.append(" lifeTime: "

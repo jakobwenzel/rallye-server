@@ -6,6 +6,8 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.LinkedHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -48,6 +50,8 @@ public class BlobStore extends LinkedHashMap<String, byte[]> {
 	private static int cacheMaxSize = 1024 * 1024;
 
 	private String compressedImageFormat = "jpg";
+	
+	private Lock lock = new ReentrantLock();
 
 	private Logger logger = LogManager.getLogger(this.getClass().getName());
 
@@ -84,12 +88,14 @@ public class BlobStore extends LinkedHashMap<String, byte[]> {
 
 	@Override
 	public byte[] get(Object key) {
+		lock.lock();
 		String imageUrl = (String) key;
 		byte[] blob = super.get(imageUrl);
 
 		if (blob != null) {
 			// 1st level cache hit (memory)
 			logger.info("Cache (1st Level) Hit for: " + imageUrl + " FileName: " + getImageFile(imageUrl));
+			lock.unlock();
 			return blob;
 		}
 
@@ -106,20 +112,24 @@ public class BlobStore extends LinkedHashMap<String, byte[]> {
 				in.close();
 			} catch (IOException e) {
 				// error while reading -> cache miss
+				lock.unlock();
 				return null;
 			}
 			// add to first level cache
 			super.put(imageUrl, blob);
+			lock.unlock();
 			return blob;
 		}
 
 		logger.info("Cache Miss for: " + imageUrl + " FileName: " + getImageFile(imageUrl));
 		// cache miss
+		lock.unlock();
 		return null;
 	}
 
 	@Override
 	public byte[] put(String imageUrl, byte[] image) {
+		lock.lock();
 		if (image.length <= cacheMaxSize) {
 			File imageFile = getImageFile(imageUrl);
 			try {
@@ -138,9 +148,11 @@ public class BlobStore extends LinkedHashMap<String, byte[]> {
 
 			logger.info("Add to Cache: " + imageUrl + " FileName: " + getImageFile(imageUrl));
 
+			lock.unlock();
 			return super.put(imageUrl, image);
 		} else {
 			logger.error("File size to big.");
+			lock.unlock();
 			throw new IllegalArgumentException("File to big");
 		}
 	}
@@ -148,6 +160,7 @@ public class BlobStore extends LinkedHashMap<String, byte[]> {
 	@Override
 	public byte[] remove(Object key) {
 		byte[] value = null;
+		lock.lock();
 		
 		//delete in 1st level cache
 		value = super.remove(key);
@@ -168,6 +181,7 @@ public class BlobStore extends LinkedHashMap<String, byte[]> {
 			f.delete();
 		}
 		
+		lock.unlock();
 		return value;
 	}
 
