@@ -53,7 +53,7 @@ public class BlobStore extends LinkedHashMap<String, byte[]> {
 	
 	private Lock lock = new ReentrantLock();
 
-	private Logger logger = LogManager.getLogger(this.getClass().getName());
+	private Logger logger = LogManager.getLogger(BlobStore.class.getName());
 
 	/**
 	 * 
@@ -194,5 +194,13 @@ public class BlobStore extends LinkedHashMap<String, byte[]> {
 	protected boolean removeEldestEntry(java.util.Map.Entry<String, byte[]> eldest) {
 		logger.info("1st LevelCache size: (" + size() + "/" + firstLevelCacheSize + ")");
 		return size() > firstLevelCacheSize;
+	}
+	
+	/**
+	 * return the status of the Blobstore
+	 * @return
+	 */
+	public String getStatus() {
+		return "1st LevelCache size: (" + size() + "/" + firstLevelCacheSize + ")\n2nd LevelCache size: "+(new File(secondLevelCacheDir).list().length);
 	}
 }

@@ -110,11 +110,15 @@ public class TemporaryCache<E, V> extends LinkedHashMap<E, V> {
 			str.append("Entry: ").append(i.next().toString()).append("\n");
 		}
 		
-		str.append(TemporaryCache.class.getName()).append(" Status: ");
+		if (e != null) {
+		str.append("Status: ");
 		str.append("Elements: " + super.size());
 		str.append(" oldestElement: " + e.getKey()+"="+super.get(e.getKey()).toString());
 		str.append(" lifeTime: "
 				+ ((System.currentTimeMillis() - e.getValue()) / 1000) + "ms");
+		} else  {
+			str.append("Status: Elements: empty OldestElement: NA Lifetime: NA");
+		}
 		lock.unlock();
 		return str.toString();
 	}
