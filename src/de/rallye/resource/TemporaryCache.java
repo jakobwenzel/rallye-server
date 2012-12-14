@@ -111,9 +111,8 @@ public class TemporaryCache<E, V> extends LinkedHashMap<E, V> {
 		}
 		
 		if (e != null) {
-		str.append("Status: ");
 		str.append("Elements: " + super.size());
-		str.append(" oldestElement: " + e.getKey()+"="+super.get(e.getKey()).toString());
+		str.append(" oldestElement: " + e.getKey()+"="+super.get(e.getKey()));
 		str.append(" lifeTime: "
 				+ ((System.currentTimeMillis() - e.getValue()) / 1000) + "ms");
 		} else  {
