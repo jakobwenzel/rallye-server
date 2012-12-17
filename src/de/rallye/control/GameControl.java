@@ -3,10 +3,7 @@
  */
 package de.rallye.control;
 
-import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jettison.json.JSONException;
@@ -39,12 +36,8 @@ public class GameControl extends Thread {
 	private boolean stop = false;
 	private TimedCommandPriorityQueue tasks = null;
 	private TimedCommand next = null;
-	private boolean validValues = false;
-	private int conf_rounds = 0;
-	private int conf_gameStartTime = Integer.MAX_VALUE;
-	private int conf_roundTime = Integer.MAX_VALUE;
-	private int conf_value_update_time = 10 * 60; // time in seconds
-
+	private GameControlConfig conf = null;
+	
 	/**
 	 * Constructor
 	 * 
@@ -54,7 +47,18 @@ public class GameControl extends Thread {
 	public GameControl(DataHandler d) {
 		logger.entry();
 		this.data = d;
-		this.loadConfigValues();
+		this.conf = new GameControlConfig(d);
+		this.conf.loadConfigValues();
+		logger.exit();
+	}
+	
+	/**
+	 * will init a stop of the thread
+	 */
+	public void done() {
+		logger.entry();
+		this.stop = true;
+		this.notify();
 		logger.exit();
 	}
 
@@ -67,7 +71,7 @@ public class GameControl extends Thread {
 		// init
 
 		// check values JSON
-		if (this.validValues == false) {
+		if (!this.conf.isConfValid()) {
 			logger.fatal("Readout from Database was not successful. this thread is now stopped.");
 			return;
 		}
@@ -80,14 +84,14 @@ public class GameControl extends Thread {
 		
 		// set the first status command
 		this.tasks.add(new TimedCommand(initTime
-				+ this.data.getTimePrintStatus(), GameControl.TASK_GETSTATUS));
+				+ this.conf.getConf_getStatus_update_time(), GameControl.TASK_GETSTATUS));
 
 		// set the first value update command
 		this.tasks.add(new TimedCommand(initTime
-				+ this.conf_value_update_time, GameControl.TASK_UPDATE_VALUES));
+				+ this.conf.getConf_value_update_time(), GameControl.TASK_UPDATE_VALUES));
 
 		// set game start command
-		this.tasks.add(new TimedCommand(this.conf_gameStartTime,
+		this.tasks.add(new TimedCommand(this.conf.getConf_gameStartTime(),
 				GameControl.TASK_GAME_START));
 
 		
@@ -167,7 +171,7 @@ public class GameControl extends Thread {
 
 			// create new task
 			this.tasks.add(new TimedCommand(currentTime
-					+ this.data.getTimePrintStatus(),
+					+ this.conf.getConf_getStatus_update_time(),
 					GameControl.TASK_GETSTATUS));
 			break;
 		}
@@ -195,11 +199,11 @@ public class GameControl extends Thread {
 			logger.entry("TASK_UPDATE_VALUES");
 
 			// process update
-			this.loadConfigValues();
+			this.conf.loadConfigValues();;
 
 			// create new task
 			this.tasks.add(new TimedCommand(currentTime
-					+ this.conf_value_update_time,
+					+ this.conf.getConf_value_update_time(),
 					GameControl.TASK_UPDATE_VALUES));
 			break;
 		}
@@ -245,7 +249,7 @@ public class GameControl extends Thread {
 	private void wait_ms(long ms) {
 		if (ms > 0) {
 			try {
-				Thread.sleep(ms);
+				sleep(ms);
 			} catch (InterruptedException e) {
 				logger.catching(e);
 			}
@@ -253,30 +257,110 @@ public class GameControl extends Thread {
 		
 	}
 
-	/**
-	 * 
-	 */
-	private void loadConfigValues() {
-		JSONObject o = this.data.getControlData();
+	
+}
 
+final class GameControlConfig {
+	private Logger logger = LogManager.getLogger(GameControl.class.getName());
+	private boolean conf_validValues = false;
+	private int conf_rounds = 0;
+	private int conf_gameStartTime = Integer.MAX_VALUE;
+	private int conf_roundTime = Integer.MAX_VALUE;
+	private int conf_value_update_time = 10 * 60; // time in seconds
+	private DataHandler data = null;
+	
+	GameControlConfig(DataHandler d) {
+		this.data = d;
+	}
+	
+	
+	/**
+	 * try to update the config values from database
+	 * if an error occure in this step the variables will be set to default values
+	 */
+	public void loadConfigValues() {
+		JSONObject o = this.data.getControlData();
+		if (o == null) {
+			this.setConfigToDefaults();
+			return;
+		}
+		
 		try {
 			this.conf_gameStartTime = o.getInt("gameStartTime");
 			this.conf_rounds = o.getInt("rounds");
 			this.conf_roundTime = o.getInt("roundTime");
 
-			this.validValues = true;
+			this.conf_validValues = true;
 		} catch (JSONException e) {
 			logger.catching(e);
-			this.validValues = false;
+			this.setConfigToDefaults();
 		}
 	}
+	
+	/**
+	 * set config to default settings
+	 */
+	private void setConfigToDefaults() {
+		this.conf_rounds = 0;
+		this.conf_gameStartTime = Integer.MAX_VALUE;
+		this.conf_roundTime = Integer.MAX_VALUE;
+		this.conf_validValues = false;
+	}
+
 
 	/**
-	 * will init a stop of the thread
+	 * @return the conf_validValues
+	 * @category getter
 	 */
-	public void done() {
-		logger.entry();
-		this.stop = true;
-		logger.exit();
+	public boolean isConfValid() {
+		return conf_validValues;
 	}
+
+
+	/**
+	 * @return the conf_rounds
+	 * @category getter
+	 */
+	public int getConf_rounds() {
+		return conf_rounds;
+	}
+
+
+	/**
+	 * @return the conf_gameStartTime
+	 * @category getter
+	 */
+	public int getConf_gameStartTime() {
+		return conf_gameStartTime;
+	}
+
+
+	/**
+	 * @return the conf_roundTime
+	 * @category getter
+	 */
+	public int getConf_roundTime() {
+		return conf_roundTime;
+	}
+
+
+	/**
+	 * @return the conf_value_update_time
+	 * @category getter
+	 */
+	public int getConf_value_update_time() {
+		return conf_value_update_time;
+	}
+	
+	/**
+	 * 
+	 * @return the conf getStatus update time
+	 * @category getter
+	 */
+	public int getConf_getStatus_update_time() {
+		return this.data.getTimePrintStatus();
+	}
+	
+	
+	
 }
