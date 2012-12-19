@@ -1,7 +1,8 @@
-package de.rallye.resource;
+package de.rallye.control.resource;
 
 import java.util.Comparator;
-import de.rallye.resource.TimedCommand;
+
+import de.rallye.control.commands.AbstractTimedCommand;
 
 /**
  * this class represents a comparator.
@@ -13,10 +14,10 @@ import de.rallye.resource.TimedCommand;
  * @date 13.12.2012
  *
  */
-public class TimedCommandComparator implements Comparator<TimedCommand> {
+public class TimedCommandComparator implements Comparator<AbstractTimedCommand> {
 
 	@Override
-	public int compare(TimedCommand arg0, TimedCommand arg1) {
+	public int compare(AbstractTimedCommand arg0, AbstractTimedCommand arg1) {
 		
 		if (arg0.getTimestamp() < arg1.getTimestamp()) {
 			return -1;

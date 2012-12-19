@@ -4,6 +4,7 @@
 package de.rallye.pushService;
 
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -41,8 +42,11 @@ public class GCMPushService implements IPushService {
 		logger.exit();
 	}
 
-	/* (non-Javadoc)
-	 * @see de.rallye.pushService.resource.IPushService#push(java.util.List, java.util.Map, int, java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see de.rallye.pushService.resource.IPushService#push(java.util.List,
+	 * java.util.Map, int, java.lang.String)
 	 */
 	@Override
 	public void push(String client, Map<String, String> lstChages, int type,
@@ -74,8 +78,11 @@ public class GCMPushService implements IPushService {
 		logger.exit();
 	}
 
-	/* (non-Javadoc)
-	 * @see de.rallye.pushService.resource.IPushService#push(java.lang.String, java.util.Map, int, java.lang.String)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see de.rallye.pushService.resource.IPushService#push(java.lang.String,
+	 * java.util.Map, int, java.lang.String)
 	 */
 	@Override
 	public void push(List<String> lst, Map<String, String> lstChages, int type,
@@ -87,22 +94,24 @@ public class GCMPushService implements IPushService {
 		try {
 			MulticastResult res = sender.send(msg, lst, 3);
 			if (res.getCanonicalIds() > 0 || res.getFailure() > 0) {
-				for (Result r : res.getResults()) {
+				Result r = null;
+				for (int i = 0; i < res.getResults().size(); i++) {
+					r = res.getResults().get(i);
 					if (r.getMessageId() != null) {
 						String canonicalRegId = r.getCanonicalRegistrationId();
 						if (canonicalRegId != null) {
 							logger.info("deviceID has changed! id: "
 									+ canonicalRegId);
-							lstChages.put(r.getMessageId(), canonicalRegId);
+							lstChages.put(lst.get(i), canonicalRegId);
 						}
 					} else {
 						String error = r.getErrorCodeName();
-						logger.trace(error);
+						//logger.trace(error);
 						if (error.equals(Constants.ERROR_NOT_REGISTERED)
 								|| error.equals(Constants.ERROR_INVALID_REGISTRATION)) {
 							logger.info("client has removed app from device: "
-									+ r.getMessageId());
-							lstChages.put(r.getMessageId(), null);
+									+ lst.get(i));
+							lstChages.put(lst.get(i), null);
 						}
 					}
 				}

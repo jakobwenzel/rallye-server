@@ -79,8 +79,14 @@ public class APNPushService implements IPushService {
 			o.put("aps", new JSONObject());
 			o.put("t", String.valueOf(type));
 			o.put("d", value);
-			Payload payload = PushNotificationPayload.fromJSON(o.toString());
+			//Payload payload = PushNotificationPayload.fromJSON(o.toString());
 
+			
+			Payload payload = PushNotificationPayload.complex();
+			payload.addCustomDictionary("t", type);
+			payload.addCustomDictionary("d", value);
+			
+			
 			// create Devices
 			List<Device> deviceList = new ArrayList<Device>(lst.size());
 			for (String s : lst) {

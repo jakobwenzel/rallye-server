@@ -47,12 +47,12 @@ public class PushService {
 		gcmPush = new GCMPushService(this.data.getGoogleCloudMessagingKey());
 
 		// create the apple push service
-		try {
+		/*try {
 			apnPush = new APNPushService(this.data.getAPN_keyStore(),
 					this.data.getAPN_Password());
 		} catch (KeystoreException e) {
 			logger.catching(e);
-		}
+		}*/
 		logger.exit();
 	}
 
@@ -72,6 +72,13 @@ public class PushService {
 		logger.entry();
 		this.push(lst, PushCommand.CHATROOM_UPDATE, String.valueOf(chatroom));
 		logger.exit();
+	}
+	
+	public void startGame(Map<String, Integer> lst, long startTime) throws PushServiceException {
+		logger.entry();
+		this.push(lst, PushCommand.GAME_START, Long.toString(startTime));
+		logger.exit();
+		
 	}
 
 	/**
@@ -115,7 +122,6 @@ public class PushService {
 		}
 
 		// send the push to the clients - apple
-		// TODO add call for apple devices
 		if (apnPush != null) {
 			apnPush.push(apnIDs, changes, command, data);
 			if (!changes.isEmpty()) {
@@ -137,12 +143,12 @@ public class PushService {
 	 *            client Type for the database access.
 	 */
 	private void fixClients(Map<String, String> lst, int clientType) {
-		logger.entry();
+		logger.entry(clientType);
 		switch (clientType) {
 		case PushService.DEVICE_GOOGLE:
 			for (Entry<String, String> e : lst.entrySet()) {
 
-				logger.debug("Client: 1:" + e.getKey() + " 2:" + e.getValue());
+				//logger.debug("Client: ID1:" + e.getKey() + " ID2:" + e.getValue());
 
 				if (e.getValue() == null) {
 					// remove device
@@ -156,10 +162,11 @@ public class PushService {
 					this.data.updateUser(e.getKey(), e.getValue());
 				}
 			}
+			break;
 		case PushService.DEVICE_APPLE:
 			for (Entry<String, String> e : lst.entrySet()) {
 
-				logger.debug("Client: 1:" + e.getKey() + " 2:" + e.getValue());
+				logger.debug("Client: ID1:" + e.getKey() + " ID2:" + e.getValue());
 
 				if (e.getValue() == null) {
 					// remove device
@@ -168,6 +175,7 @@ public class PushService {
 					// this.data.removeUser(e.getKey());
 				}
 			}
+			break;
 		}
 		lst.clear();
 		logger.exit();
