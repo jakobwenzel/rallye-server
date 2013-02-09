@@ -42,4 +42,17 @@ public class TimedCommandPriorityQueue extends
 		}
 	}
 
+	/**
+	 * this method compares all items of the list with the given task
+	 * @param type type to compare with
+	 * @return true if this type of command is available in the list
+	 */
+	public boolean containsType(AbstractTimedCommand.Task type) {
+		for (AbstractTimedCommand a : this) {
+			if (a.getCommand().compareTo(type) == 0)
+			return true;
+		}
+		return false;
+	}
+
 }

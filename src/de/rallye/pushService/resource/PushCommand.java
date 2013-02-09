@@ -10,19 +10,20 @@ package de.rallye.pushService.resource;
  *
  */
 public class PushCommand {
-	
+
 	// chatroom commands
-	public static int CHATROOM_UPDATE = 100;
+	public static final int CHATROOM_UPDATE = 100;
 	
 	// map commands
-	public static int MAP_UPDATE = 200;
+	public static final int MAP_UPDATE = 200;
 	
 	// group commands
-	public static int GROUP_UPDATE = 300;
+	public static final int GROUP_UPDATE = 300;
 	
 	// gameplay
-	public static int GAME_UPDATE = 400;
-	public static int GAME_START = 401;
-	public static int GAME_END = 402;
+	public static final int GAME_UPDATE = 400;
+	public static final int GAME_START = 401;
+	public static final int GAME_END = 402;
+	public static final int NEXT_ROUND = 403;
 	
 }

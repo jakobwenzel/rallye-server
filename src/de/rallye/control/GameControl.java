@@ -4,11 +4,14 @@
 package de.rallye.control;
 
 import java.util.Date;
+import java.util.LinkedList;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import de.rallye.control.commands.AbstractTimedCommand;
 import de.rallye.control.commands.GameStart;
 import de.rallye.control.commands.GetStatus;
+import de.rallye.control.commands.NextRound;
 import de.rallye.control.commands.UpdateValues;
 import de.rallye.control.resource.TimedCommandPriorityQueue;
 import de.rallye.resource.DataHandler;
@@ -28,19 +31,25 @@ public class GameControl extends Thread {
 	private boolean stop = false;
 	private TimedCommandPriorityQueue tasks = null;
 	private AbstractTimedCommand next = null;
-	private GameControlProcess process = null;
+	private long stepTime = 0;
 
 	/**
 	 * Constructor
 	 * 
-	 * @param d
+	 * @param data
 	 *            instance of a DataHandler
+	 * @param stepTime
+	 * 			delay time of the thread, this time indicates the maximal sleep time of the thread in ms
 	 */
-	public GameControl(DataHandler d) {
+	public GameControl(DataHandler data, long stepTime) {
 		logger.entry();
-		this.data = d;
-//		this.process = new GameControlProcess(d,DataHandler.gcconfig);
-		this.data.getGcconfig().loadConfigValues(); // if this is called before the DataHandler is created a NullPointer exception will be thrown
+		this.data = data;
+		this.stepTime = stepTime;
+		// this.process = new GameControlProcess(d,DataHandler.gcconfig);
+		this.data.getGcconfig().loadConfigValues(); // if this is called before
+													// the DataHandler is
+													// created a NullPointer
+													// exception will be thrown
 		logger.exit();
 	}
 
@@ -50,10 +59,10 @@ public class GameControl extends Thread {
 	public void done() {
 		logger.entry();
 		this.stop = true;
-		this.notify();
+		this.interrupt();
 		logger.exit();
 	}
-	
+
 	/**
 	 * call this method before leaving the thread
 	 */
@@ -67,7 +76,7 @@ public class GameControl extends Thread {
 	public void run() {
 		logger.entry();
 		// init
-		
+
 		// check values JSON
 		if (!this.data.getGcconfig().isConfValid()) {
 			logger.fatal("Readout from Database was not successful. this thread is now stopped.");
@@ -79,18 +88,9 @@ public class GameControl extends Thread {
 
 		long initTime = System.currentTimeMillis() / 1000;
 
-		// // fill the queue,
+		// fill the queue,
+		this.fillQueue(initTime, true);
 
-		// set the first getstatus command
-		this.tasks.add(GetStatus.createNewTask(data, initTime));
-
-		// set the first value update command
-		this.tasks.add(UpdateValues.createNewTask(data, initTime));
-
-		// set game start command
-		this.tasks.add(GameStart.createNewTask(data, initTime));
-		
-		
 		// TODO: add other tasks
 
 		// extract the first element from queue and store it in this.next
@@ -104,8 +104,9 @@ public class GameControl extends Thread {
 			}
 
 			// debug
-			logger.trace("Next Execution:  "
-					+ this.timestampToData(next.getTimestamp()) + " (Sleep: "
+			logger.trace("Next Execution: " + next.getCommand().toString()
+					+ " " + this.timestampToData(next.getTimestamp())
+					+ " (Sleep: "
 					+ (next.getTimestamp() * 1000 - System.currentTimeMillis())
 					+ "ms)");
 
@@ -114,21 +115,17 @@ public class GameControl extends Thread {
 					- System.currentTimeMillis());
 
 			// debug
-			logger.trace("Current Process: "
-					+ this.timestampToData(System.currentTimeMillis() / 1000));
+			// logger.trace("Current Process: "
+			// + this.timestampToData(System.currentTimeMillis() / 1000));
 
 			// process the task
+			if (!this.stop) {
 				this.tasks.add(this.next.execute());
 
-			//this.processTask(next);
-
-			// get next task from queue
-			if (this.tasks.peek() != null) {
-				this.next = this.tasks.poll();
-			} else {
-				//TODO this.next = new AbstractTimedCommand(
-					//	(System.currentTimeMillis() / 1000) + 10,
-					//	AbstractTimedCommand.TASK_EMPTY);
+				// get next task from queue
+				if (this.tasks.peek() != null) {
+					this.next = this.tasks.poll();
+				}
 			}
 		}
 		// stop/exit stuff if needed
@@ -138,95 +135,94 @@ public class GameControl extends Thread {
 	}
 
 	/**
-	 * this method process the different command types
+	 * this method has to move to DataHandler as Abstract method
 	 * 
-	 * @param task
-	 *            command to process
+	 * @param initTime
+	 *            time of the fill
+	 * @param cleanQueue
+	 *            if this is true the queue is completely cleaned before adding
+	 *            the entries, if false is set the elements in the queue will
+	 *            updated/checked
 	 */
-	/*private void processTask(AbstractTimedCommand task) {
-		if (task == null) {
-			return;
-		}
-		// store current time for creation of new tasks if needed
-		long currentTime = System.currentTimeMillis() / 1000;
+	public void fillQueue(long fillTime, boolean cleanQueue) {
+		if (cleanQueue) {
+			// clean queue and add new items
+			this.tasks.clear();
 
-		// decide which task it is and jump to the corresponding method
-		switch (task.getCommand()) {
-		case AbstractTimedCommand.TASK_EMPTY: {
-			logger.entry("TASK_EMPTY");
-			if (this.tasks.peek() == null) {
-				this.next = new AbstractTimedCommand(
-						(System.currentTimeMillis() / 1000) + 10,
-						AbstractTimedCommand.TASK_EMPTY);
+			// set the first getstatus command
+			this.tasks.add(GetStatus.createNewTask(this, fillTime));
+
+			// set the first value update command
+			this.tasks.add(UpdateValues.createNewTask(this, fillTime));
+
+			// set game start command
+			this.tasks.add(GameStart.createNewTask(this, fillTime));
+
+			// set next round command
+			this.tasks.add(NextRound.createNewTask(this, fillTime));
+		
+		} else {
+			
+			// update/and add tasks
+			AbstractTimedCommand n = null;
+			LinkedList<AbstractTimedCommand> nlst = new LinkedList<AbstractTimedCommand>();
+			for (AbstractTimedCommand a : this.tasks) {
+				n = a.updateTask(fillTime);
+				if (n != null) {
+					nlst.add(n);
+					n = null;
+				}
+			}
+			// remove all elements except of the elements in list nlst
+			this.tasks.retainAll(nlst);
+			
+			//check if getStatus exists
+			if (!this.tasks.containsType(GetStatus.getCommandType())) {
+				this.tasks.add(GetStatus.createNewTask(this, fillTime));
+			}
+			
+			//check if value update exists
+			if (!this.tasks.containsType(UpdateValues.getCommandType())) {
+				this.tasks.add(UpdateValues.createNewTask(this, fillTime));
+			}
+			
+			//check if start command exists
+			if (!this.tasks.containsType(GameStart.getCommandType())) {
+				this.tasks.add(GameStart.createNewTask(this, fillTime));
+			}
+			
+			//check if next round exists
+			if (!this.tasks.containsType(NextRound.getCommandType())) {
+				this.tasks.add(NextRound.createNewTask(this, fillTime));
 			}
 		}
-		case AbstractTimedCommand.TASK_GETSTATUS: {
-			logger.entry("TASK_GETSTATUS");
-			// process printout
-			this.printModelStatus();
-
-			// create new task
-			this.tasks.add(new AbstractTimedCommand(currentTime
-					+ DataHandler.gcconfig.getConf_getStatus_update_time(),
-					AbstractTimedCommand.TASK_GETSTATUS));
-			break;
-		}
-		case AbstractTimedCommand.TASK_GAME_START: {
-			//process the command
-			AbstractTimedCommand t = this.process.taskGameStart(currentTime);
-			// and add a new task to taskpool if needed
-			if (t != null) {
-				this.tasks.add(t);
-			}
-			break;
-		}
-		case AbstractTimedCommand.TASK_GAME_END: {
-			// TODO: implement
-			break;
-		}
-		case AbstractTimedCommand.TASK_NEXT_ROUND: {
-			// TODO: implement
-			break;
-		}
-		case AbstractTimedCommand.TASK_REMEMBER_NEXT_ROUND: {
-			// TODO: implement
-			break;
-		}
-		case AbstractTimedCommand.TASK_REMEMBER_NEXT_TURN: {
-			// TODO: implement
-			break;
-		}
-		case AbstractTimedCommand.TASK_UPDATE_VALUES: {
-			logger.entry("TASK_UPDATE_VALUES");
-
-			// process update
-			DataHandler.gcconfig.loadConfigValues();
-
-			// create new task
-			this.tasks.add(new AbstractTimedCommand(currentTime
-					+ DataHandler.gcconfig.getConf_value_update_time(),
-					AbstractTimedCommand.TASK_UPDATE_VALUES));
-			break;
-		}
-		default: {
-			break;
-		}
-		}
-
-		logger.exit();
-
-	}*/
+	}
 
 	/**
-	 * print the Status of the Model to log
+	 * print the Status of this Class
 	 */
-	public void printModelStatus() {
-		// process printout
-		String s = this.data.getModelStatus();
-		for (String str : s.split("\n")) {
-			logger.info(str);
+	public String getStatus() {
+		StringBuilder str = new StringBuilder();
+		int count = this.tasks.size();
+
+		if (next != null) {
+			count++;
 		}
-		logger.info("GameControl: numTasks: " + this.tasks.size());
+		str.append("Num Tasks: ").append(count).append("\n");
+		if (next != null) {
+			str.append("Next Task: Type: ")
+					.append(this.next.getCommand().toString())
+					.append(" Execution Time: ")
+					.append(this.timestampToData(this.next.getTimestamp()))
+					.append("\n");
+		}
+		for (AbstractTimedCommand a : this.tasks) {
+			str.append("Next Task: Type: ").append(a.getCommand().toString())
+					.append(" Execution Time: ")
+					.append(this.timestampToData(a.getTimestamp()))
+					.append("\n");
+		}
+		return str.toString();
 	}
 
 	/**
@@ -249,38 +245,50 @@ public class GameControl extends Thread {
 	 *            time to sleep
 	 */
 	private void wait_ms(long ms) {
-		if (ms > 0) {
-			try {
-				sleep(ms);
-			} catch (InterruptedException e) {
-				logger.catching(e);
+		long endTime = System.currentTimeMillis()+ms;
+		long doubleStepTime = this.stepTime*2;
+		
+		//check if illigal values are given
+		if (ms <= 0) {
+			return;
+		}
+		
+		logger.trace("complete sleep: "+ms);
+		
+		//loop
+		try {
+		while (ms > 0) {
+			ms = endTime-System.currentTimeMillis();
+			if (ms > doubleStepTime) {
+				// sleep the maximal sleep time
+				GameControl.sleep(this.stepTime);
+			} else if (ms > this.stepTime) {
+				// between double stepTime and and single stepTime
+				logger.trace("second last sleep: "+(ms/2));
+				GameControl.sleep(ms/2);
+				
+			} else  {
+				// sleep the rest waitTime
+				logger.trace("last sleep: "+ms);
+				GameControl.sleep(ms);
+				ms = 0;
+			}
+			
+			
+			// check if a GameControl.done was called. if this was called we have to leave
+			if (this.stop) {
+				ms = 0;
 			}
 		}
-
-	}
-
-}
-
-final class GameControlProcess {
-	private Logger logger = LogManager.getLogger(GameControlProcess.class
-			.getName());
-	private DataHandler data = null;
-	private GameControlConfig config = null;
-
-	GameControlProcess(DataHandler d, GameControlConfig c) {
-		this.data = d;
-		this.config = c;
+		} catch (InterruptedException e) {
+			logger.catching(e);
+		}
 	}
 
 	/**
-	 * process the task: game_start
-	 * 
-	 * @param time timestamp of the time the method was called
-	 * @return null
+	 * @return the DataHandler object
 	 */
-	public AbstractTimedCommand taskGameStart(long time) {
-		//process the command in model
-		this.data.startGame(time);
-		return null;
+	public DataHandler getDataHandler() {
+		return this.data;
 	}
 }

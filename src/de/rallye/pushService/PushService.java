@@ -80,6 +80,12 @@ public class PushService {
 		logger.exit();
 		
 	}
+	
+	public void nextRound(HashMap<String, Integer> lst, long startTime) throws PushServiceException {
+		logger.entry();
+		this.push(lst, PushCommand.NEXT_ROUND, Long.toString(startTime));
+		logger.exit();
+	}
 
 	/**
 	 * send push notifications to the clients given in lst

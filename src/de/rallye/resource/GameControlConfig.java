@@ -14,6 +14,7 @@ public class GameControlConfig {
 	private int conf_roundTime = Integer.MAX_VALUE;
 	private int conf_update_time = Integer.MAX_VALUE;//10 * 60; // time in seconds //TODO: this has to move to dataHandler
 	private int conf_printStatus = Integer.MAX_VALUE;//5*60; // time in seconds //TODO: this has to move to dataHandler
+	private int conf_currentRound = Integer.MAX_VALUE;
 	private DataHandler data = null;
 
 	/**
@@ -40,10 +41,10 @@ public class GameControlConfig {
 			this.conf_gameStartTime = o.getInt("gameStartTime");
 			this.conf_rounds = o.getInt("rounds");
 			this.conf_roundTime = o.getInt("roundTime");
-			
+			this.conf_currentRound = o.getInt("currentRound");
 			//TODO load from dataHandler
 			
-			this.conf_update_time = 10*60;
+			this.conf_update_time = 2*60;
 			this.conf_printStatus = 5*60;
 			
 			this.conf_validValues = true;
@@ -63,8 +64,20 @@ public class GameControlConfig {
 		this.conf_roundTime = Integer.MAX_VALUE;
 		this.conf_update_time = Integer.MAX_VALUE;
 		this.conf_printStatus = Integer.MAX_VALUE;
+		this.conf_currentRound = Integer.MAX_VALUE;
 		
 		this.conf_validValues = false;
+	}
+	
+	public String getStatus() {
+		StringBuilder str = new StringBuilder();
+		str.append("Rounds: ").append(this.conf_rounds).append("\n");
+		str.append("Round Time: ").append(this.conf_roundTime).append("\n");
+		str.append("Game Start Time: ").append(this.conf_gameStartTime).append("\n");
+		str.append("Current Round: ").append(this.conf_currentRound).append("\n");
+		str.append("Value Update Interval: ").append(this.conf_update_time).append("\n");
+		str.append("Print Status Interval: ").append(this.conf_printStatus).append("\n");
+		return str.toString();
 	}
 
 	/**
@@ -114,6 +127,21 @@ public class GameControlConfig {
 	 */
 	public int getConf_getStatus_update_time() {
 		return this.conf_printStatus;
+	}
+
+	/**
+	 * @return the conf_currentRound
+	 * @category getter
+	 */
+	public int getConf_currentRound() {
+		return conf_currentRound;
+	}
+	
+	/**
+	 * this method increments the currentRound in the settings
+	 */
+	public void setNextRound() {
+		this.conf_currentRound++;
 	}
 
 }

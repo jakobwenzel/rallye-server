@@ -20,15 +20,16 @@ import de.rallye.resource.DataHandler;
 public class GameConsole {
 	Logger logger = LogManager.getLogger(GameConsole.class.getName());
 	private DataHandler data = null;
-
+	private GameControl control = null;
 	private ServerSocket socket = null;
 
 	/**
-	 *  create a tcp-console on localhost.
+	 * create a tcp-console on localhost.
 	 */
-	public GameConsole(DataHandler data) {
+	public GameConsole(DataHandler data, GameControl control) {
 		logger.entry();
 		this.data = data;
+		this.control = control;
 
 		try {
 			socket = new ServerSocket(this.data.getConsolePort());
@@ -40,6 +41,7 @@ public class GameConsole {
 
 	/**
 	 * wait for next connection
+	 * 
 	 * @return return true if the server should be closed, otherwise false
 	 * @author Felix HŸbner
 	 */
@@ -52,23 +54,25 @@ public class GameConsole {
 
 		try {
 			client = socket.accept();
-			
-			//logger.trace("New client on address: "+client.getLocalAddress().getHostAddress()+"");
+
+			// logger.trace("New client on address: "+client.getLocalAddress().getHostAddress()+"");
 			if (!client.getLocalAddress().getHostAddress().equals("127.0.0.1")) {
 				client.close();
 				logger.warn("client not allowed! close connection. Bye Bye!");
 				return false;
 			}
-			
+
 			output = new PrintWriter(client.getOutputStream(), true);
-			input = new BufferedReader(new InputStreamReader(client.getInputStream()));
+			input = new BufferedReader(new InputStreamReader(
+					client.getInputStream()));
 
 			output.println("RallyeServ Telnet Server. Send ? for help.");
-			logger.info("Client logged into Server Console from: "+client.getInetAddress()+":"+client.getPort());
+			logger.info("Client logged into Server Console from: "
+					+ client.getInetAddress() + ":" + client.getPort());
 
 			while ((inputLine = input.readLine()) != null) {
 				if (inputLine.equals("?")) {
-					output.println("Available Commands: quit,stop.");
+					output.println("Available Commands: quit,stop,status.");
 				} else if (inputLine.equals("quit")) {
 					logger.info("Client Disconnected.");
 					output.println("Bye.");
@@ -77,6 +81,15 @@ public class GameConsole {
 					logger.info("Stopping Server. Bye.");
 					output.println("Stopping Server. Bye.");
 					return logger.exit(true);
+				} else if (inputLine.equals("status")) {
+					logger.info("print Status");
+					// output.println("Status:");
+					output.print(this.data.getModelStatus());
+					if (this.control != null) {
+						for (String s : this.control.getStatus().split("\n")) {
+							output.println("GameControl: " + s);
+						}
+					}
 				} else {
 					output.println("Unknown Command. Send ? for help.");
 				}
@@ -90,7 +103,7 @@ public class GameConsole {
 
 		return logger.exit(false);
 	}
-	
+
 	/**
 	 * try to close the Game Console Socket
 	 * 
