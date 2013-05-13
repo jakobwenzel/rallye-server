@@ -14,12 +14,11 @@ import org.apache.logging.log4j.Logger;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
-import de.rallye.model.ScottlandYardRallye;
 import de.rallye.resource.DataHandler;
 import de.rallye.resource.exceptions.SQLHandlerException;
 
 /**
- * @author Felix HŸbner
+ * @author Felix Hï¿½bner
  * @version 1.0
  * 
  */
@@ -29,7 +28,7 @@ public class ClientListener {
 	private Logger logger =  LogManager.getLogger(ClientListener.class.getName());
 
 
-	private DataHandler data = new ScottlandYardRallye();
+	private DataHandler data = DataHandler.getInstance();
 
 	// ==================================================================//
 	// Map Commands
