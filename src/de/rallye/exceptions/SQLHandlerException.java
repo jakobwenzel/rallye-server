@@ -1,9 +1,9 @@
-package de.rallye.resource.exceptions;
+package de.rallye.exceptions;
 
 import java.sql.SQLException;
 
 /**
- * @author Felix HŸbner
+ * @author Felix Hï¿½bner
  * @version 1.0
  *
  */

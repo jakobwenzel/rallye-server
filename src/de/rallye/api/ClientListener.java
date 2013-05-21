@@ -1,4 +1,4 @@
-package de.rallye.rest;
+package de.rallye.api;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -14,8 +14,8 @@ import org.apache.logging.log4j.Logger;
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
+import de.rallye.exceptions.SQLHandlerException;
 import de.rallye.resource.DataHandler;
-import de.rallye.resource.exceptions.SQLHandlerException;
 
 /**
  * @author Felix H�bner
@@ -33,16 +33,8 @@ public class ClientListener {
 	// ==================================================================//
 	// Map Commands
 	// ==================================================================//
-
-	@Path("map/nodes")
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response getAllNodes() {
-		logger.entry();
-		return logger.exit(this.data.getAllNodes());
-	}
 	
-	@Path("map/edges")
+	@Path("map2/edges")
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getAllEdges() {

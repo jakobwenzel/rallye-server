@@ -1,4 +1,4 @@
-package de.rallye.rest.auth;
+package de.rallye.auth;
 
 import javax.xml.bind.DatatypeConverter;
 

@@ -1,11 +1,11 @@
-package de.rallye.resource.exceptions;
+package de.rallye.exceptions;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 /**
- * @author Felix HŸbner
+ * @author Felix Hï¿½bner
  * @version 1.0
  *
  */

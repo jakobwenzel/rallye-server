@@ -1,4 +1,4 @@
-package de.rallye.rest.auth;
+package de.rallye.auth;
 
 import java.security.Principal;
 
@@ -59,7 +59,7 @@ public class AuthFilter implements ResourceFilter, ContainerRequestFilter {
         //DO YOUR DATABASE CHECK HERE (replace that line behind)...
         final boolean result = DataHandler.getInstance().isAuthOk(lap);
  
-        //Our system refuse login and password
+        //Our system refuses login and password
         if(result == false){
             throw new WebApplicationException(Status.UNAUTHORIZED);
 //        	return containerRequest;
