@@ -33,4 +33,22 @@ public class Ry {
 		public static final String B = "nodeB";
 		public static final String TYPE = "type";
 	}
+	
+	@Deprecated //TODO: specific for Scotland Yard, not modular
+	public static class Config {
+		public static final String TABLE = "ry_config";
+		public static final String ID = "configID";
+		public static final String TYPE = "gameType";
+		public static final String NAME = "gameName";
+		public static final String LAT = "location_lat";
+		public static final String LON = "location_lon";
+		public static final String TICKETS_BIKE = "tickets_bike";
+		public static final String TICKETS_FOOT = "tickets_foot";
+		public static final String TICKETS_TRAM = "tickets_tram";
+		public static final String TICKETS_BUS = "tickets_bus";
+		public static final String ROUNDS = "rounds";
+		public static final String ROUND_TIME = "roundTime";
+		public static final String START_TIME = "gameStartTime";
+		public static final String SPAWN_ANYWHERE = "freeStartPoint";
+	}
 }

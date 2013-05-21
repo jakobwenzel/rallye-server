@@ -16,6 +16,7 @@ import de.rallye.exceptions.DataException;
 import de.rallye.model.structures.Group;
 import de.rallye.model.structures.Node;
 import de.rallye.model.structures.PrimitiveEdge;
+import de.rallye.model.structures.ServerConfig;
 
 public class DataAdapter {
 	
@@ -128,6 +129,31 @@ public class DataAdapter {
 			}
 
 			return edges;
+		} catch (SQLException e) {
+			throw new DataException(e);
+		} finally {
+			close(con, st, rs);
+		}
+	}
+	
+	public ServerConfig getServerConfig() throws DataException {
+		Connection con = null;
+		Statement st = null;
+		ResultSet rs = null;
+		
+		try {
+			con = dataSource.getConnection();
+			st = con.createStatement();
+			rs = st.executeQuery("SELECT "+
+					strStr(Ry.Config.NAME, Ry.Config.NAME, Ry.Config.LAT, Ry.Config.LON,
+							Ry.Config.ROUNDS, Ry.Config.ROUND_TIME, "UNIX_TIMESTAMP("+ Ry.Config.START_TIME +")") +" FROM "+ Ry.Config.TABLE);
+			
+			rs.next();
+			
+			ServerConfig res = new ServerConfig(rs.getString(1), rs.getDouble(2), rs.getDouble(3),
+					rs.getInt(4), rs.getInt(5), rs.getLong(6));
+			
+			return res;
 		} catch (SQLException e) {
 			throw new DataException(e);
 		} finally {
