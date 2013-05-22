@@ -9,8 +9,18 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-@Path("pics")
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import de.rallye.control.GameHandler;
+import de.rallye.db.DataAdapter;
+
+@Path("rallye/pics")
 public class Pics {
+	
+	private Logger logger =  LogManager.getLogger(Groups.class);
+
+	private DataAdapter data = GameHandler.data;//TODO: get it _NOT_ from gameHandler (perhaps inject using Guice??)
 	
 	@PUT
 	@Path("{hash}")
@@ -30,7 +40,35 @@ public class Pics {
 	@GET
 	@Path("{pictureID}/{size}")
 	@Produces("image/jpeg")
-	public Response getPicture(@PathParam("pictureID") int pictureID, @PathParam("size") char size) {
-		return null;
+	public Response getPicture(@PathParam("pictureID") int pictureID, @PathParam("size") String size) {
+		return returnPic(pictureID, size.charAt(0));
+	}
+	
+	@Deprecated
+	private Response returnPic(int picID, char size) {
+		Response r = null;
+		logger.entry();
+		byte[] blob = GameHandler.blobStore.get(getImageName(picID, size));
+		r = Response.ok().entity(blob).type("image/jpeg").build();
+		if (blob == null) {
+			r = Response.status(400)
+					.entity("picID not found or not available in this size")
+					.build();
+		}
+		return logger.exit(r);
+	}
+
+	/**
+	 * this method creates the name for the blob entries
+	 * 
+	 * @param picID
+	 *            running number of the picture from database
+	 * @param size
+	 *            't','s','l' to add at the end
+	 * @return a String with the created name
+	 * @author Felix H�bner
+	 */
+	private String getImageName(int picID, char size) {
+		return String.format("%08d_%c", picID, size);
 	}
 }

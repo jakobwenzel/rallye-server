@@ -14,7 +14,7 @@ public class Ry {
 	public static class Users {
 		public static final String TABLE = "ry_clients";
 		public static final String ID = "clientID";
-		public static final String FOREIGN_GROUP = Groups.ID;
+		public static final String ID_GROUP = Groups.ID;
 		public static final String GCM = "gcmRegID";
 	}
 
@@ -32,6 +32,43 @@ public class Ry {
 		public static final String A = "nodeA";
 		public static final String B = "nodeB";
 		public static final String TYPE = "type";
+	}
+	
+	public static class Chatrooms {
+		public static final String TABLE = "ry_chatrooms";
+		public static final String ID = "chatroomID";
+		public static final String NAME = "name";
+	}
+	
+	public static class Groups_Chatrooms {
+		public static final String TABLE = "ry_chatrooms_groups";
+		public static final String ID_GROUPS = Groups.ID;
+		public static final String ID_CHATROOMS = Chatrooms.ID;
+	}
+	
+	public static class Messages {
+		public static final String TABLE = "ry_messages";
+		public static final String ID = "messageID";
+		public static final String MSG = "message";
+	}
+	
+	public static class Pictures {
+		public static final String TABLE = "ry_pictures";
+		public static final String ID = "pictureID";
+		public static final String ID_USER = Users.ID;
+		public static final String TIMESTAMP = "timestamp";
+	}
+	
+	public static class Chats {
+		public static final String TABLE = "ry_chats";
+		public static final String ID = "chatID";
+		public static final String TIMESTAMP = "timestamp";
+		public static final String ID_CLIENT = Users.ID;
+		public static final String ID_GROUP = Groups.ID;
+		public static final String ID_MESSAGE = Messages.ID;
+		public static final String ID_PICTURE = Pictures.ID;
+		public static final String ID_CHATROOM = Chatrooms.ID;
+		public static final String ID_USER = Users.ID;
 	}
 	
 	@Deprecated //TODO: specific for Scotland Yard, not modular

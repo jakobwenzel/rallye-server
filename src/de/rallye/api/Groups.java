@@ -27,7 +27,7 @@ import de.rallye.db.DataAdapter;
 import de.rallye.exceptions.DataException;
 import de.rallye.model.structures.Group;
 
-@Path("groups")
+@Path("rallye/groups")
 public class Groups {
 	
 	private Logger logger =  LogManager.getLogger(Groups.class);

@@ -1,11 +1,13 @@
 package de.rallye.db;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,6 +15,8 @@ import org.apache.logging.log4j.Logger;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 import de.rallye.exceptions.DataException;
+import de.rallye.model.structures.ChatEntry;
+import de.rallye.model.structures.Chatroom;
 import de.rallye.model.structures.Group;
 import de.rallye.model.structures.Node;
 import de.rallye.model.structures.PrimitiveEdge;
@@ -154,6 +158,126 @@ public class DataAdapter {
 					rs.getInt(4), rs.getInt(5), rs.getLong(6));
 			
 			return res;
+		} catch (SQLException e) {
+			throw new DataException(e);
+		} finally {
+			close(con, st, rs);
+		}
+	}
+	
+	public int[] isAuthOk(String[] login) throws SQLException {
+		Connection con = null;
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		
+		try {
+			String[] usr = login[0].split("@");//0: userID, 1:groupID
+			
+			
+			con = dataSource.getConnection();
+			st = con.prepareStatement("SELECT "+ strStr(Ry.Users.ID, Ry.Users.ID_GROUP, Ry.Groups.PASSWORD)
+												+" FROM "+ Ry.Users.TABLE +" LEFT JOIN "+ Ry.Groups.TABLE +" USING("+ Ry.Users.ID_GROUP +")"
+												+" WHERE "+ Ry.Users.ID +"=? AND "+ Ry.Groups.ID +"=? AND "+ Ry.Groups.PASSWORD +"=MD5(?)");
+			st.setString(1, usr[0]);
+			st.setString(2, usr[1]);
+			st.setString(3, login[1]);
+			
+			rs = st.executeQuery();
+			
+			if (rs.next()) {
+				return new int[] { Integer.valueOf(usr[0]), Integer.valueOf(usr[1]) };
+			} else {
+				return null;
+			}
+		} catch (SQLException e) {
+			throw e;
+		} finally {
+			close(con, st, rs);
+		}
+	}
+	
+	public boolean hasRightsForChatroom(int groupID, int roomID) throws DataException {
+		Connection con = null;
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		
+		try {
+			con = dataSource.getConnection();
+			st = con.prepareStatement("SELECT count(*)"
+					+" FROM "+ Ry.Groups_Chatrooms.TABLE
+					+" WHERE "+ Ry.Groups_Chatrooms.ID_GROUPS +"=? AND "+ Ry.Groups_Chatrooms.ID_CHATROOMS +"=?");
+			st.setInt(1, groupID);
+			st.setInt(2, roomID);
+			rs = st.executeQuery();
+			
+			rs = st.executeQuery();
+			
+			return rs.first();
+		} catch (SQLException e) {
+			throw new DataException(e);
+		} finally {
+			close(con, st, rs);
+		}
+	}
+
+	public List<Chatroom> getChatrooms(int groupID) throws DataException {
+		Connection con = null;
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		
+		try {
+			con = dataSource.getConnection();
+			st = con.prepareStatement("SELECT "+ strStr(Ry.Chatrooms.ID, Ry.Chatrooms.NAME)
+					+" FROM "+ Ry.Groups_Chatrooms.TABLE +" LEFT JOIN "+ Ry.Chatrooms.TABLE +" USING ("+ Ry.Chatrooms.ID +")"
+					+"WHERE "+ Ry.Groups_Chatrooms.ID_GROUPS +"=?");
+			st.setInt(1, groupID);
+			rs = st.executeQuery();
+			
+			List<Chatroom> chatrooms = new ArrayList<Chatroom>();
+			
+			while (rs.next()) {
+				chatrooms.add(new Chatroom(rs.getInt(1), rs.getString(2)));
+			}
+			
+			return chatrooms;
+		} catch (SQLException e) {
+			throw new DataException(e);
+		} finally {
+			close(con, st, rs);
+		}
+	}
+
+	public List<ChatEntry> getChats(int roomID, long timestamp, int groupID) throws DataException {
+		Connection con = null;
+		PreparedStatement st = null;
+		ResultSet rs = null;
+
+		try {
+			con = dataSource.getConnection();
+	
+			//TODO: throw Unauthorized if no rights to access chatroom
+			st = con.prepareStatement("SELECT "+ strStr(Ry.Chats.ID, Ry.Messages.MSG, "UNIX_TIMESTAMP("+Ry.Chats.TIMESTAMP+")", Ry.Chats.ID_USER, "chats."+Ry.Chats.ID_GROUP, Ry.Chats.ID_PICTURE)+
+										" FROM "+ Ry.Chats.TABLE +" AS chats"+
+										" LEFT JOIN "+ Ry.Messages.TABLE +" AS msg USING ("+ Ry.Chats.ID_MESSAGE +") "+
+										"LEFT JOIN "+ Ry.Groups_Chatrooms.TABLE +" AS gc USING ("+ Ry.Chats.ID_CHATROOM +") "+
+										"WHERE chats."+Ry.Chats.ID_CHATROOM +" =? "+
+										"AND gc."+Ry.Groups_Chatrooms.ID_GROUPS +" =? "+
+										"AND "+ Ry.Chats.TIMESTAMP +" >=FROM_UNIXTIME(?) "+
+										"ORDER BY "+ Ry.Chats.TIMESTAMP);
+
+
+			st.setInt(1, roomID);
+			st.setInt(2, groupID);
+			st.setLong(3, timestamp);
+			rs = st.executeQuery();
+
+			List<ChatEntry> chats = new ArrayList<ChatEntry>();
+			
+			while (rs.next()) {
+				chats.add(new ChatEntry(rs.getInt(1), rs.getString(2), rs.getLong(3), rs.getInt(4), rs.getInt(5), rs.getInt(6)));
+			}
+
+			return chats;
 		} catch (SQLException e) {
 			throw new DataException(e);
 		} finally {

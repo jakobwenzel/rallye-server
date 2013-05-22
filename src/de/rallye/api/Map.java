@@ -18,7 +18,7 @@ import de.rallye.exceptions.DataException;
 import de.rallye.model.structures.Node;
 import de.rallye.model.structures.PrimitiveEdge;
 
-@Path("map")
+@Path("rallye/map")
 public class Map {
 	
 	private Logger logger =  LogManager.getLogger(Map.class.getName());

@@ -31,18 +31,6 @@ public class ClientListener {
 	private DataHandler data = DataHandler.getInstance();
 
 	// ==================================================================//
-	// Map Commands
-	// ==================================================================//
-	
-	@Path("map2/edges")
-	@GET
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response getAllEdges() {
-		logger.entry();
-		return logger.exit(this.data.getAllEdges());
-	}
-
-	// ==================================================================//
 	// Chat Commands
 	// ==================================================================//
 

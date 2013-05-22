@@ -30,9 +30,9 @@ import org.apache.logging.log4j.Logger;
  * Pushes to the cache are always write-through (i.e., the image will be stored
  * both on disk and in memory).
  * </p>
- * <p>changed from android to PC, and from bitmap to byte[] by Felix HŸbner</p>
+ * <p>changed from android to PC, and from bitmap to byte[] by Felix Hï¿½bner</p>
  * @author Matthias Kaeppler
- * @author Felix HŸbner
+ * @author Felix Hï¿½bner
  * @version 1.0
  * @source this class copied from
  *         http://www.java2s.com/Open-Source/Android/App/psnfriends
@@ -53,7 +53,7 @@ public class BlobStore extends LinkedHashMap<String, byte[]> {
 	
 	private Lock lock = new ReentrantLock();
 
-	private Logger logger = LogManager.getLogger(BlobStore.class.getName());
+	private Logger logger = LogManager.getLogger(BlobStore.class);
 
 	/**
 	 * 
@@ -63,7 +63,7 @@ public class BlobStore extends LinkedHashMap<String, byte[]> {
 	 *            name of the folder to store the files
 	 * @param maxFileSize
 	 *            in byte
-	 * @author Felix HŸbner
+	 * @author Felix Hï¿½bner
 	 */
 	public void initialize(String path, String cacheFolder,int firstLevelSize, int maxFileSize) {
 
@@ -102,7 +102,7 @@ public class BlobStore extends LinkedHashMap<String, byte[]> {
 		File imageFile = getImageFile(imageUrl);
 		if (imageFile.exists()) {
 			// 2nd level cache hit (disk)
-			logger.info("Cache (2st Level) Hit for: " + imageUrl + " FileName: " + getImageFile(imageUrl));
+			logger.info("Cache (2st Level) Hit for: " + imageUrl + " FileName: " + getImageFile(imageUrl));//TODO: opening files just for debug??
 			
 			try {
 				FileInputStream in = new FileInputStream(imageFile.getAbsolutePath());
@@ -185,7 +185,7 @@ public class BlobStore extends LinkedHashMap<String, byte[]> {
 		return value;
 	}
 
-	private File getImageFile(String imageUrl) {
+	private File getImageFile(String imageUrl) {//TODO: why the fuck hexcode? why not just use the damn id
 		String fileName = Integer.toHexString(imageUrl.hashCode()) + "." + compressedImageFormat;
 		return new File(secondLevelCacheDir + "/" + fileName);
 	}
