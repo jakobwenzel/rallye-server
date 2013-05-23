@@ -24,10 +24,11 @@ import de.rallye.auth.RallyePrincipal;
 import de.rallye.control.GameHandler;
 import de.rallye.db.DataAdapter;
 import de.rallye.exceptions.DataException;
+import de.rallye.exceptions.InputException;
 import de.rallye.model.structures.ChatEntry;
 import de.rallye.model.structures.Chatroom;
+import de.rallye.model.structures.SimpleChatEntry;
 
-@ResourceFilters(AuthFilter.class)
 @Path("rallye/chatrooms")
 public class Chatrooms {
 	
@@ -91,8 +92,27 @@ public class Chatrooms {
 	@Path("{roomID}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public ChatEntry addChat(@Context SecurityContext sec) {
-		return null;
+	public ChatEntry addChat(@PathParam("roomID") int roomID, SimpleChatEntry chat, @Context SecurityContext sec) {
+		logger.entry();
+		
+		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
+		int groupID = p.getGroupID();
+		int userID = p.getUserID();
+		
+		if (chat.message.isEmpty())
+			throw new WebApplicationException(new InputException("Message must not be empty"), Response.Status.BAD_REQUEST);
+		
+		try {
+			if (!data.hasRightsForChatroom(groupID, roomID)) {
+				logger.warn("group "+ groupID +" has no access rights for chatroom "+ roomID);
+			}
+			
+			ChatEntry res = data.addChat(chat, roomID, groupID, userID);
+			return logger.exit(res);
+		} catch (DataException e) {
+			logger.error("getChats failed", e);
+			throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
+		}
 	}
 	
 	@PUT

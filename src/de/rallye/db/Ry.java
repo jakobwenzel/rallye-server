@@ -63,12 +63,11 @@ public class Ry {
 		public static final String TABLE = "ry_chats";
 		public static final String ID = "chatID";
 		public static final String TIMESTAMP = "timestamp";
-		public static final String ID_CLIENT = Users.ID;
+		public static final String ID_USER = Users.ID;
 		public static final String ID_GROUP = Groups.ID;
 		public static final String ID_MESSAGE = Messages.ID;
 		public static final String ID_PICTURE = Pictures.ID;
 		public static final String ID_CHATROOM = Chatrooms.ID;
-		public static final String ID_USER = Users.ID;
 	}
 	
 	@Deprecated //TODO: specific for Scotland Yard, not modular

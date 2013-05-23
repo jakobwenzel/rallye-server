@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,12 +16,15 @@ import org.apache.logging.log4j.Logger;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 import de.rallye.exceptions.DataException;
+import de.rallye.exceptions.InputException;
+import de.rallye.exceptions.SQLHandlerException;
 import de.rallye.model.structures.ChatEntry;
 import de.rallye.model.structures.Chatroom;
 import de.rallye.model.structures.Group;
 import de.rallye.model.structures.Node;
 import de.rallye.model.structures.PrimitiveEdge;
 import de.rallye.model.structures.ServerConfig;
+import de.rallye.model.structures.SimpleChatEntry;
 
 public class DataAdapter {
 	
@@ -281,6 +285,86 @@ public class DataAdapter {
 		} catch (SQLException e) {
 			throw new DataException(e);
 		} finally {
+			close(con, st, rs);
+		}
+	}
+
+	public ChatEntry addChat(SimpleChatEntry chat, int roomID, int groupID, int userID) throws DataException {
+		Connection con = null;
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		Savepoint transaction = null;
+		boolean success = false;
+		
+		try {
+			con = dataSource.getConnection();
+			con.setAutoCommit(false);
+			
+			transaction = con.setSavepoint();
+
+			//Insert message
+			st = con.prepareStatement("INSERT INTO "+ Ry.Messages.TABLE +" ("+ Ry.Messages.MSG +") VALUES (?)", Statement.RETURN_GENERATED_KEYS);
+			st.setString(1, chat.message);
+			st.execute();
+
+			rs = st.getGeneratedKeys();
+			rs.first();
+
+			int msgID = rs.getInt(1);
+
+			rs.close();
+			st.close();
+			
+			//TODO: check for existance of picture
+			//Insert Chat
+			st = con.prepareStatement("INSERT INTO "+ Ry.Chats.TABLE +" ("+
+					strStr(Ry.Chats.ID_CHATROOM, Ry.Chats.ID_USER, Ry.Chats.ID_GROUP, Ry.Chats.ID_MESSAGE, Ry.Chats.ID_PICTURE)
+					+") VALUES (?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+			
+			
+			st.setInt(1, roomID);
+			st.setInt(2, userID);
+			st.setInt(3, groupID);
+			st.setInt(4, msgID);
+			if (chat.hasPicture()) {
+				st.setInt(5, chat.pictureID);
+			} else {
+				st.setNull(5, java.sql.Types.INTEGER);
+			}
+			
+			st.execute();
+			
+			rs = st.getGeneratedKeys();
+			rs.next();
+			int chatID = rs.getInt(1);
+			
+			rs.close();
+			st.close();
+			
+			st = con.prepareStatement("SELECT UNIX_TIMESTAMP("+ Ry.Chats.TIMESTAMP +") FROM "+ Ry.Chats.TABLE +" WHERE "+ Ry.Chats.ID +"=?");
+			st.setInt(1, chatID);
+			rs = st.executeQuery();
+			rs.first();
+			long timestamp = rs.getLong(1);
+			
+			ChatEntry newChat = new ChatEntry(chatID, chat.message, timestamp, groupID, userID, chat.pictureID);
+			
+			success = true;
+			//TODO: notifiyNewChatEntry()
+			
+			return newChat;
+		} catch (SQLException e) {
+			throw new DataException(e);
+		} finally {
+			try {
+				if (success) {
+					con.commit();
+				} else {
+					con.rollback(transaction);
+					logger.error("Rolling back new chat");
+				}
+			} catch (Exception e) {}
+			
 			close(con, st, rs);
 		}
 	}

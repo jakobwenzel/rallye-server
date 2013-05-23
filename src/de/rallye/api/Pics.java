@@ -8,9 +8,11 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codehaus.jettison.json.JSONObject;
 
 import de.rallye.control.GameHandler;
 import de.rallye.db.DataAdapter;
@@ -33,7 +35,7 @@ public class Pics {
 	@PUT
 	@Consumes("image/jpeg")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response uploadPicture(byte[] pic) {
+	public JSONObject uploadPicture(byte[] pic) {
 		return null;
 	}
 	
