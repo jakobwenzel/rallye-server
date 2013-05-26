@@ -1,5 +1,7 @@
 package de.rallye.db;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -8,6 +10,9 @@ import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+
+import javax.xml.bind.DatatypeConverter;
 
 
 import org.apache.logging.log4j.LogManager;
@@ -23,8 +28,10 @@ import de.rallye.model.structures.Chatroom;
 import de.rallye.model.structures.Group;
 import de.rallye.model.structures.Node;
 import de.rallye.model.structures.PrimitiveEdge;
+import de.rallye.model.structures.PushSettings;
 import de.rallye.model.structures.ServerConfig;
 import de.rallye.model.structures.SimpleChatEntry;
+import de.rallye.model.structures.UserLogin;
 
 public class DataAdapter {
 	
@@ -169,7 +176,7 @@ public class DataAdapter {
 		}
 	}
 	
-	public int[] isAuthOk(String[] login) throws SQLException {
+	public int[] isKnownUserAuthorized(String[] login) throws SQLException {
 		Connection con = null;
 		PreparedStatement st = null;
 		ResultSet rs = null;
@@ -179,9 +186,9 @@ public class DataAdapter {
 			
 			
 			con = dataSource.getConnection();
-			st = con.prepareStatement("SELECT "+ strStr(Ry.Users.ID, Ry.Users.ID_GROUP, Ry.Groups.PASSWORD)
-												+" FROM "+ Ry.Users.TABLE +" LEFT JOIN "+ Ry.Groups.TABLE +" USING("+ Ry.Users.ID_GROUP +")"
-												+" WHERE "+ Ry.Users.ID +"=? AND "+ Ry.Groups.ID +"=? AND "+ Ry.Groups.PASSWORD +"=MD5(?)");
+			st = con.prepareStatement("SELECT "+ strStr(Ry.Users.ID, Ry.Users.ID_GROUP)
+												+" FROM "+ Ry.Users.TABLE +" AS usr LEFT JOIN "+ Ry.Groups.TABLE +" as grp USING("+ Ry.Users.ID_GROUP +")"
+												+" WHERE "+ Ry.Users.ID +"=? AND "+ Ry.Groups.ID +"=? AND usr."+ Ry.Users.PASSWORD +"=?");
 			st.setString(1, usr[0]);
 			st.setString(2, usr[1]);
 			st.setString(3, login[1]);
@@ -195,6 +202,93 @@ public class DataAdapter {
 			}
 		} catch (SQLException e) {
 			throw e;
+		} finally {
+			close(con, st, rs);
+		}
+	}
+	
+	public int isNewUserAuthorized(String[] login) throws SQLException {
+		Connection con = null;
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		
+		try {
+			
+			con = dataSource.getConnection();
+			st = con.prepareStatement("SELECT "+ strStr(Ry.Users.ID_GROUP)
+												+" FROM "+ Ry.Groups.TABLE
+												+" WHERE "+ Ry.Groups.ID +"=? AND "+ Ry.Groups.PASSWORD +"=?");
+			st.setString(1, login[0]);
+			st.setString(2, login[1]);
+			
+			rs = st.executeQuery();
+			
+			if (rs.next()) {
+				return Integer.valueOf(login[0]);
+			} else {
+				return -1;
+			}
+		} catch (SQLException e) {
+			throw e;
+		} finally {
+			close(con, st, rs);
+		}
+	}
+	
+	public UserLogin login(int groupID, String name) throws DataException {
+		Connection con = null;
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		
+		try {//TODO: cleanup old accounts
+			
+			String password = generateNewUserPassword(groupID);
+			
+			con = dataSource.getConnection();
+			st = con.prepareStatement("INSERT INTO "+ Ry.Users.TABLE +" ("+ strStr(Ry.Users.ID_GROUP, Ry.Users.PASSWORD, Ry.Users.NAME) +")" +
+					" VALUES (?,?,?)", Statement.RETURN_GENERATED_KEYS);
+			
+			st.setInt(1, groupID);
+			st.setString(2, password);
+			st.setString(3, name);
+			st.execute();
+			
+			rs = st.getGeneratedKeys();
+			
+			if (rs.first()) {
+				return new UserLogin(rs.getInt(1), groupID, password);
+			} else {
+				throw new DataException("User could not be created");
+			}
+		} catch (SQLException e) {
+			throw new DataException(e);
+		} finally {
+			close(con, st, rs);
+		}
+	}
+	
+	private String generateNewUserPassword(int groupID) {
+		long pw = System.currentTimeMillis() + groupID + new Random().nextInt();
+		
+		return Long.toHexString(pw);
+	}
+	
+	public boolean logout(int groupID, int userID) throws DataException {
+		Connection con = null;
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		
+		try {
+			con = dataSource.getConnection();
+			st = con.prepareStatement("DELETE FROM "+ Ry.Users.TABLE +
+					" WHERE "+ Ry.Users.ID +"=?");
+			
+			st.setInt(1, userID);
+			st.executeUpdate();
+			
+			return true;
+		} catch (SQLException e) {
+			throw new DataException(e);
 		} finally {
 			close(con, st, rs);
 		}
@@ -365,6 +459,32 @@ public class DataAdapter {
 				}
 			} catch (Exception e) {}
 			
+			close(con, st, rs);
+		}
+	}
+
+	public void configPush(int groupID, int userID, PushSettings push) throws DataException {
+		Connection con = null;
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		
+		try {// add universal push
+			con = dataSource.getConnection();
+			st = con.prepareStatement("UPDATE "+ Ry.Users.TABLE +" SET "+ Ry.Users.GCM +"=?"+ 
+										" WHERE "+ Ry.Users.ID +"=?");
+			
+			st.setString(1, push.gcm);
+			st.setInt(2, userID);
+			int count = st.executeUpdate();
+			
+			if (count > 1) {
+				throw new DataException("Impossible!!!!");
+			} else if (count < 1) {
+				throw new DataException("Push Configuration change failed");
+			}
+		} catch (SQLException e) {
+			throw new DataException(e);
+		} finally {
 			close(con, st, rs);
 		}
 	}

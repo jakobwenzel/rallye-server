@@ -1,10 +1,8 @@
 package de.rallye.auth;
 
-import java.security.Principal;
 import java.sql.SQLException;
 
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.logging.log4j.LogManager;
@@ -16,7 +14,6 @@ import com.sun.jersey.spi.container.ContainerResponseFilter;
 import com.sun.jersey.spi.container.ResourceFilter;
 
 import de.rallye.control.GameHandler;
-import de.rallye.resource.DataHandler;
 
 public class AuthFilter implements ResourceFilter, ContainerRequestFilter {
 	
@@ -42,14 +39,20 @@ public class AuthFilter implements ResourceFilter, ContainerRequestFilter {
         if(login == null || login.length != 2){
         	throw new WebApplicationException(Status.UNAUTHORIZED);
         }
- 
-        // Checking for User
+        
+        checkAuthenticaion(containerRequest, login);
+        
+        return logger.exit(containerRequest);
+    }
+    
+    protected void checkAuthenticaion(ContainerRequest containerRequest, String[] login) {
+    	// Checking for User
         int[] result;
 		try {
-			result = GameHandler.data.isAuthOk(login);
+			result = GameHandler.data.isKnownUserAuthorized(login);
 		} catch (SQLException e) {
-			logger.catching(e);
-			throw new WebApplicationException(Status.UNAUTHORIZED);
+			logger.error(e);
+			throw new WebApplicationException(e);
 		}
  
         // login refused
@@ -60,7 +63,6 @@ public class AuthFilter implements ResourceFilter, ContainerRequestFilter {
         
         containerRequest.setSecurityContext(new RallyeSecurityContext(result[0], result[1]));
         logger.info("Authorized: "+ result[0] +" for group "+ result[1]);
-        return logger.exit(containerRequest);
     }
 
 	@Override
