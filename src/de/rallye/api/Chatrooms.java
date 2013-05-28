@@ -17,6 +17,8 @@ import javax.ws.rs.core.SecurityContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 import com.sun.jersey.spi.container.ResourceFilters;
 
 import de.rallye.auth.AuthFilter;
@@ -121,7 +123,7 @@ public class Chatrooms {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public ChatEntry addChatWithHash(@Context SecurityContext sec, @PathParam("hash") String hash) {
-		return null;
+		throw new NotImplementedException();
 	}
 	
 }
