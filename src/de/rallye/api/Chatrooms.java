@@ -123,7 +123,7 @@ public class Chatrooms {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public ChatEntry addChatWithHash(@Context SecurityContext sec, @PathParam("hash") String hash) {
-		throw new NotImplementedException();
+		throw new NotImplementedException();//TODO
 	}
 	
 }

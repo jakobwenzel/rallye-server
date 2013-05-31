@@ -31,7 +31,7 @@ import de.rallye.model.structures.PrimitiveEdge;
 import de.rallye.model.structures.PushSettings;
 import de.rallye.model.structures.ServerConfig;
 import de.rallye.model.structures.SimpleChatEntry;
-import de.rallye.model.structures.UserLogin;
+import de.rallye.model.structures.UserAuth;
 
 public class DataAdapter {
 	
@@ -235,7 +235,7 @@ public class DataAdapter {
 		}
 	}
 	
-	public UserLogin login(int groupID, String name) throws DataException {
+	public UserAuth login(int groupID, String name) throws DataException {
 		Connection con = null;
 		PreparedStatement st = null;
 		ResultSet rs = null;
@@ -256,7 +256,7 @@ public class DataAdapter {
 			rs = st.getGeneratedKeys();
 			
 			if (rs.first()) {
-				return new UserLogin(rs.getInt(1), groupID, password);
+				return new UserAuth(rs.getInt(1), password);
 			} else {
 				throw new DataException("User could not be created");
 			}

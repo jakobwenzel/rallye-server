@@ -32,7 +32,7 @@ import de.rallye.exceptions.DataException;
 import de.rallye.model.structures.Group;
 import de.rallye.model.structures.LoginName;
 import de.rallye.model.structures.PushSettings;
-import de.rallye.model.structures.UserLogin;
+import de.rallye.model.structures.UserAuth;
 
 @Path("rallye/groups")
 public class Groups {
@@ -85,7 +85,7 @@ public class Groups {
 	@ResourceFilters(NewUserAuthFilter.class)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public UserLogin login(@PathParam("groupID") int groupID, LoginName name, @Context SecurityContext sec) {
+	public UserAuth login(@PathParam("groupID") int groupID, LoginName name, @Context SecurityContext sec) {
 		logger.entry();
 		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
 		
@@ -94,7 +94,7 @@ public class Groups {
 		p.checkGroupMatches(groupID);
 		
 		try {
-			UserLogin login = data.login(authGroup, name.name);
+			UserAuth login = data.login(authGroup, name.name);
 			return login;
 		} catch (DataException e) {
 			logger.error("login failed", e);

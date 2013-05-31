@@ -14,6 +14,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jettison.json.JSONObject;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 import de.rallye.control.GameHandler;
 import de.rallye.db.DataAdapter;
 
@@ -29,14 +31,14 @@ public class Pics {
 	@Consumes("image/jpeg")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response uploadPictureWithHash(byte[] pic, @PathParam("hash") String hash) {
-		return null;
+		throw new NotImplementedException();//TODO
 	}
 	
 	@PUT
 	@Consumes("image/jpeg")
 	@Produces(MediaType.APPLICATION_JSON)
 	public JSONObject uploadPicture(byte[] pic) {
-		return null;
+		throw new NotImplementedException();//TODO
 	}
 	
 	@GET

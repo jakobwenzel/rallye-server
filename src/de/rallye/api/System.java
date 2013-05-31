@@ -32,7 +32,7 @@ public class System {
 	@ResourceFilters(AuthFilter.class)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getStatus() {
-		throw new NotImplementedException();
+		throw new NotImplementedException();//TODO
 	}
 	
 	@GET
