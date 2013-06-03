@@ -2,6 +2,11 @@ package de.rallye.db;
 
 public class Ry {
 	
+	public static class PushModes {
+		public static final String TABLE = "ry_pushModes";
+		public static final String ID = "pushModeID";
+		public static final String NAME = "name";
+	}
 	
 	public static class Groups {
 		public static final String TABLE = "ry_groups";
@@ -15,7 +20,9 @@ public class Ry {
 		public static final String TABLE = "ry_clients";
 		public static final String ID = "clientID";
 		public static final String ID_GROUP = Groups.ID;
-		public static final String GCM = "gcmRegID";
+		public static final String PUSH_ID = "pushID";
+		public static final String ID_PUSH_MODE = "pushMode";
+		public static final String UNIQUE_ID = "uniqueID";
 		public static final String PASSWORD = "password";
 		public static final String NAME = "name";
 	}

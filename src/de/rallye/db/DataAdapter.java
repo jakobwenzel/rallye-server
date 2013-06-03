@@ -26,11 +26,14 @@ import de.rallye.exceptions.SQLHandlerException;
 import de.rallye.model.structures.ChatEntry;
 import de.rallye.model.structures.Chatroom;
 import de.rallye.model.structures.Group;
+import de.rallye.model.structures.LoginInfo;
 import de.rallye.model.structures.Node;
 import de.rallye.model.structures.PrimitiveEdge;
-import de.rallye.model.structures.PushSettings;
+import de.rallye.model.structures.PushMode;
+import de.rallye.model.structures.PushConfig;
 import de.rallye.model.structures.ServerConfig;
 import de.rallye.model.structures.SimpleChatEntry;
+import de.rallye.model.structures.User;
 import de.rallye.model.structures.UserAuth;
 
 public class DataAdapter {
@@ -160,7 +163,7 @@ public class DataAdapter {
 			con = dataSource.getConnection();
 			st = con.createStatement();
 			rs = st.executeQuery("SELECT "+
-					strStr(Ry.Config.NAME, Ry.Config.NAME, Ry.Config.LAT, Ry.Config.LON,
+					strStr(Ry.Config.NAME, Ry.Config.LAT, Ry.Config.LON,
 							Ry.Config.ROUNDS, Ry.Config.ROUND_TIME, "UNIX_TIMESTAMP("+ Ry.Config.START_TIME +")") +" FROM "+ Ry.Config.TABLE);
 			
 			rs.next();
@@ -235,30 +238,83 @@ public class DataAdapter {
 		}
 	}
 	
-	public UserAuth login(int groupID, String name) throws DataException {
+	public UserAuth login(int groupID, LoginInfo info) throws DataException, InputException {
 		Connection con = null;
 		PreparedStatement st = null;
 		ResultSet rs = null;
 		
 		try {//TODO: cleanup old accounts
 			
+			con = dataSource.getConnection();
+			
 			String password = generateNewUserPassword(groupID);
 			
-			con = dataSource.getConnection();
-			st = con.prepareStatement("INSERT INTO "+ Ry.Users.TABLE +" ("+ strStr(Ry.Users.ID_GROUP, Ry.Users.PASSWORD, Ry.Users.NAME) +")" +
-					" VALUES (?,?,?)", Statement.RETURN_GENERATED_KEYS);
+			int pushModeID = 0;
 			
-			st.setInt(1, groupID);
-			st.setString(2, password);
-			st.setString(3, name);
-			st.execute();
+			if (info.pushMode != null) {
+				st = con.prepareStatement("SELECT "+ Ry.PushModes.ID +" FROM "+ Ry.PushModes.TABLE +" WHERE "+ Ry.PushModes.NAME +" LIKE '?'");
+				st.setString(1, info.pushMode);
+				
+				rs = st.executeQuery();
+				
+				if (!rs.first())
+					throw new InputException("PushMode '"+ info.pushMode +"' not supported");
+				
+				pushModeID = rs.getInt(1);
+				
+				close(null, st, rs);
+			}
 			
-			rs = st.getGeneratedKeys();
+			int userID = -1;
 			
-			if (rs.first()) {
-				return new UserAuth(rs.getInt(1), password);
+			if (info.uniqueID != null && info.uniqueID.length() > 3) {
+				st = con.prepareStatement("SELECT "+ strStr(Ry.Users.ID, Ry.Users.ID_GROUP, Ry.Users.ID_PUSH_MODE, Ry.Users.NAME, Ry.Users.PASSWORD, Ry.Users.PUSH_ID, Ry.Users.UNIQUE_ID) +
+											" FROM "+ Ry.Users.TABLE +" WHERE "+ Ry.Users.UNIQUE_ID +" LIKE '?'");
+				st.setString(1, info.uniqueID);
+				rs = st.executeQuery();
+				
+				if (rs.first()) {
+					userID = rs.getInt(1);
+					password = rs.getString(5);
+				}
+				close(null, st, rs);
+			}
+			
+			if (userID > 0) {
+				st = con.prepareStatement("UPDATE "+ Ry.Users.NAME +" SET "+
+						Ry.Users.ID_GROUP +"=?, "+ Ry.Users.ID_PUSH_MODE +"=?, "+ Ry.Users.NAME +"=?, "+ Ry.Users.PASSWORD +"=?, "+ Ry.Users.PUSH_ID +"=? "+
+						"WHERE "+ Ry.Users.ID +"=?");
+				st.setInt(1, groupID);
+				st.setInt(2, pushModeID);
+				st.setString(3, info.name);
+				st.setString(4, password);
+				st.setString(5, info.pushID);
+				st.setInt(6, userID);
+				
+				if (st.executeUpdate() > 0) {
+					return new UserAuth(userID, password);
+				} else {
+					throw new DataException("User could not be reused");
+				}
 			} else {
-				throw new DataException("User could not be created");
+				st = con.prepareStatement("INSERT INTO "+ Ry.Users.TABLE +" ("+ strStr(Ry.Users.ID_GROUP, Ry.Users.PASSWORD, Ry.Users.NAME, Ry.Users.UNIQUE_ID, Ry.Users.ID_PUSH_MODE, Ry.Users.PUSH_ID) +")" +
+						" VALUES (?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+				
+				st.setInt(1, groupID);
+				st.setString(2, password);
+				st.setString(3, info.name);
+				st.setString(4, info.uniqueID);
+				st.setInt(5, pushModeID);
+				st.setString(6, info.pushID);
+				st.execute();
+				
+				rs = st.getGeneratedKeys();
+				
+				if (rs.first()) {
+					return new UserAuth(rs.getInt(1), password);
+				} else {
+					throw new DataException("User could not be created");
+				}
 			}
 		} catch (SQLException e) {
 			throw new DataException(e);
@@ -463,18 +519,20 @@ public class DataAdapter {
 		}
 	}
 
-	public void configPush(int groupID, int userID, PushSettings push) throws DataException {
+	public void setPushConfig(int groupID, int userID, PushConfig push) throws DataException {
 		Connection con = null;
 		PreparedStatement st = null;
 		ResultSet rs = null;
 		
-		try {// add universal push
+		try {
 			con = dataSource.getConnection();
-			st = con.prepareStatement("UPDATE "+ Ry.Users.TABLE +" SET "+ Ry.Users.GCM +"=?"+ 
+			st = con.prepareStatement("UPDATE "+ Ry.Users.TABLE +" SET "+ Ry.Users.PUSH_ID +"=?, " + Ry.Users.ID_PUSH_MODE +
+										"=(SELECT "+ Ry.PushModes.ID +" FROM "+ Ry.PushModes.TABLE +" WHERE "+ Ry.PushModes.NAME +" LIKE '?')"+
 										" WHERE "+ Ry.Users.ID +"=?");
 			
-			st.setString(1, push.gcm);
-			st.setInt(2, userID);
+			st.setString(1, push.pushID);
+			st.setString(2, push.pushMode);
+			st.setInt(3, userID);
 			int count = st.executeUpdate();
 			
 			if (count > 1) {
@@ -482,6 +540,84 @@ public class DataAdapter {
 			} else if (count < 1) {
 				throw new DataException("Push Configuration change failed");
 			}
+		} catch (SQLException e) {
+			throw new DataException(e);
+		} finally {
+			close(con, st, rs);
+		}
+	}
+	
+	public PushConfig getPushConfig(int groupID, int userID) throws DataException {
+		Connection con = null;
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		
+		try {
+			con = dataSource.getConnection();
+			st = con.prepareStatement("SELECT "+ strStr("push."+Ry.PushModes.NAME, "usr."+Ry.Users.PUSH_ID) +
+										" FROM "+ Ry.Users.TABLE +" AS usr LEFT JOIN "+ Ry.PushModes.TABLE +" AS push USING("+ Ry.Users.ID_PUSH_MODE +")"+
+										" WHERE "+ Ry.Users.ID +"=? "+ Ry.Users.ID_GROUP +"=?");
+			
+			st.setInt(1, userID);
+			st.setInt(2, groupID);
+			rs = st.executeQuery();
+			
+			if (!rs.first()) {
+				throw new DataException("User is not in group (should never have gotten here)");
+			}
+			
+			PushConfig cfg = new PushConfig(rs.getString(2), rs.getString(1));
+			return cfg;
+		} catch (SQLException e) {
+			throw new DataException(e);
+		} finally {
+			close(con, st, rs);
+		}
+	}
+
+	public List<PushMode> getPushModes() throws DataException {
+		Statement st = null;
+		Connection con = null;
+		ResultSet rs = null;
+
+		try {
+			con = dataSource.getConnection();
+			st = con.createStatement();
+			rs = st.executeQuery("SELECT "+ strStr(Ry.PushModes.ID, Ry.PushModes.NAME) +" FROM "+ Ry.PushModes.TABLE);
+
+			List<PushMode> modes = new ArrayList<PushMode>();
+			
+			while (rs.next()) {
+				modes.add(new PushMode(rs.getInt(1), rs.getString(2)));
+			}
+
+			return modes;
+		} catch (SQLException e) {
+			throw new DataException(e);
+		} finally {
+			close(con, st, rs);
+		}
+	}
+
+	public List<User> getMembers(int groupID) throws DataException {
+		PreparedStatement st = null;
+		Connection con = null;
+		ResultSet rs = null;
+
+		try {
+			con = dataSource.getConnection();
+			st = con.prepareStatement("SELECT "+ strStr(Ry.Users.ID, Ry.Users.NAME) +" FROM "+ Ry.Users.TABLE +" WHERE "+ Ry.Users.ID_GROUP +"=?");
+			st.setInt(1, groupID);
+			
+			rs = st.executeQuery();
+
+			List<User> users = new ArrayList<User>();
+			
+			while (rs.next()) {
+				users.add(new User(rs.getInt(1), rs.getString(2)));
+			}
+
+			return users;
 		} catch (SQLException e) {
 			throw new DataException(e);
 		} finally {

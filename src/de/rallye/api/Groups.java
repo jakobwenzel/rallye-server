@@ -29,9 +29,11 @@ import de.rallye.auth.RallyePrincipal;
 import de.rallye.control.GameHandler;
 import de.rallye.db.DataAdapter;
 import de.rallye.exceptions.DataException;
+import de.rallye.exceptions.InputException;
 import de.rallye.model.structures.Group;
-import de.rallye.model.structures.LoginName;
-import de.rallye.model.structures.PushSettings;
+import de.rallye.model.structures.LoginInfo;
+import de.rallye.model.structures.PushConfig;
+import de.rallye.model.structures.User;
 import de.rallye.model.structures.UserAuth;
 
 @Path("rallye/groups")
@@ -56,23 +58,63 @@ public class Groups {
 	}
 	
 	@GET
+	@Path("{groupID}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<User> getMembers(@PathParam("groupID") int groupID) {
+		logger.entry();
+		
+		try {
+			List<User> res = data.getMembers(groupID);
+			return logger.exit(res);
+		} catch (DataException e) {
+			logger.error("getGroups failed", e);
+			throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	@GET
 	@Path("{groupID}/avatar")
 	@Produces("image/jpeg")
 	public Response getGroupAvatar(@PathParam("groupID") int groupID) {
 		throw new NotImplementedException();
 	}
 	
-	@POST
-	@Path("{groupID}/{userID}/push")
-	@Consumes(MediaType.APPLICATION_JSON)
-	public Response setPush(@PathParam("groupID") int groupID, @PathParam("userID") int userID, PushSettings push, @Context SecurityContext sec) {
+	@GET
+	@Path("{groupID}/{userID}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getUserInfo(@PathParam("groupID") int groupID, @PathParam("userID") int userID) {
+		throw new NotImplementedException();
+	}
+	
+	@GET
+	@Path("{groupID}/{userID}/pushSettings")
+	@Produces(MediaType.APPLICATION_JSON)
+	public PushConfig getPushSettings(@PathParam("groupID") int groupID, @PathParam("userID") int userID, @Context SecurityContext sec) {
 		logger.entry();
 		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
 		
 		p.checkBothMatch(userID, groupID);
 		
 		try {
-			data.configPush(groupID, userID, push);
+			PushConfig res = data.getPushConfig(groupID, userID);
+			return logger.exit(res);
+		} catch (DataException e) {
+			logger.error("logout failed", e);
+			throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	@POST
+	@Path("{groupID}/{userID}/pushSettings")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response setPushConfig(@PathParam("groupID") int groupID, @PathParam("userID") int userID, PushConfig push, @Context SecurityContext sec) {
+		logger.entry();
+		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
+		
+		p.checkBothMatch(userID, groupID);
+		
+		try {
+			data.setPushConfig(groupID, userID, push);
 			return Response.ok().build();
 		} catch (DataException e) {
 			logger.error("logout failed", e);
@@ -85,7 +127,7 @@ public class Groups {
 	@ResourceFilters(NewUserAuthFilter.class)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public UserAuth login(@PathParam("groupID") int groupID, LoginName name, @Context SecurityContext sec) {
+	public UserAuth login(@PathParam("groupID") int groupID, LoginInfo info, @Context SecurityContext sec) {
 		logger.entry();
 		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
 		
@@ -94,12 +136,16 @@ public class Groups {
 		p.checkGroupMatches(groupID);
 		
 		try {
-			UserAuth login = data.login(authGroup, name.name);
+			UserAuth login = data.login(authGroup, info);
 			return login;
 		} catch (DataException e) {
 			logger.error("login failed", e);
 			throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
+		} catch (InputException e) {
+			logger.catching(e);
+			throw new WebApplicationException(e, Response.Status.BAD_REQUEST);
 		}
+		
 	}
 	
 	@DELETE

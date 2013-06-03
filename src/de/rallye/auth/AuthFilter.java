@@ -3,6 +3,7 @@ package de.rallye.auth;
 import java.sql.SQLException;
 
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.logging.log4j.LogManager;
@@ -18,6 +19,9 @@ import de.rallye.control.GameHandler;
 public class AuthFilter implements ResourceFilter, ContainerRequestFilter {
 	
 	private static Logger logger = LogManager.getLogger(AuthFilter.class);
+
+	protected Response unauthorized = Response.status(Status.UNAUTHORIZED).header("WWW-Authenticate", "Basic realm=\"RallyeAuth\"").build();
+	
     /**
      * Apply the filter : check input request, validate or not with user auth
      * @param containerRequest The request from Tomcat server
@@ -30,14 +34,14 @@ public class AuthFilter implements ResourceFilter, ContainerRequestFilter {
  
         // No Basic Auth was provided
         if(auth == null){
-            throw new WebApplicationException(Status.UNAUTHORIZED);
+            throw new WebApplicationException(unauthorized);
         }
  
         String[] login = BasicAuth.decode(auth);
  
         // Not matching Basic auth conventions:  user:password
         if(login == null || login.length != 2){
-        	throw new WebApplicationException(Status.UNAUTHORIZED);
+        	throw new WebApplicationException(unauthorized);
         }
         
         checkAuthenticaion(containerRequest, login);
@@ -58,7 +62,7 @@ public class AuthFilter implements ResourceFilter, ContainerRequestFilter {
         // login refused
         if(result == null || result.length != 2){
         	logger.info("Unauthorized: "+ login[0]);
-            throw new WebApplicationException(Status.UNAUTHORIZED);
+            throw new WebApplicationException(unauthorized);
         }
         
         containerRequest.setSecurityContext(new RallyeSecurityContext(result[0], result[1]));

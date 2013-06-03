@@ -22,6 +22,7 @@ import de.rallye.resource.DataHandler;
  * @version 1.0
  * 
  */
+@Deprecated
 @Path("/StadtRallye")
 public class ClientListener {
 	

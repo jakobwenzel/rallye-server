@@ -3,6 +3,7 @@ package de.rallye.auth;
 import java.sql.SQLException;
 
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.logging.log4j.LogManager;
@@ -17,6 +18,10 @@ import de.rallye.control.GameHandler;
 public class NewUserAuthFilter extends AuthFilter implements ResourceFilter {
 	
 	private static Logger logger = LogManager.getLogger(NewUserAuthFilter.class);
+	
+	public NewUserAuthFilter() {
+		unauthorized = Response.status(Status.UNAUTHORIZED).header("WWW-Authenticate", "Basic realm=\"RallyeNewUser\"").build();
+	}
 
 	@Override
 	protected void checkAuthenticaion(ContainerRequest containerRequest, String[] login) {

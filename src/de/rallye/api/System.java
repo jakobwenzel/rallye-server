@@ -1,5 +1,7 @@
 package de.rallye.api;
 
+import java.util.List;
+
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -18,9 +20,10 @@ import de.rallye.auth.AuthFilter;
 import de.rallye.control.GameHandler;
 import de.rallye.db.DataAdapter;
 import de.rallye.exceptions.DataException;
+import de.rallye.model.structures.PushMode;
 import de.rallye.model.structures.ServerConfig;
 
-@Path("system")
+@Path("rallye/system")
 public class System {
 
 	private static Logger logger = LogManager.getLogger(System.class);
@@ -46,6 +49,21 @@ public class System {
 			return logger.exit(res);
 		} catch (DataException e) {
 			logger.error("getConfig failed", e);
+			throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	@GET
+	@Path("pushModes")
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<PushMode> getPushModes() {
+		logger.entry();
+		
+		try {
+			List<PushMode> res = data.getPushModes();
+			return logger.exit(res);
+		} catch (DataException e) {
+			logger.error("getPushModes failed", e);
 			throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
 		}
 	}
