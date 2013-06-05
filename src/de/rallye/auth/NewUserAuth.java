@@ -13,22 +13,23 @@ import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerRequestFilter;
 import com.sun.jersey.spi.container.ResourceFilter;
 
-import de.rallye.control.GameHandler;
+import de.rallye.RallyeServer;
 
-public class NewUserAuthFilter extends AuthFilter implements ResourceFilter {
+public class NewUserAuth extends KnownUserAuth implements ResourceFilter {
 	
-	private static Logger logger = LogManager.getLogger(NewUserAuthFilter.class);
+	private static Logger logger = LogManager.getLogger(NewUserAuth.class);
 	
-	public NewUserAuthFilter() {
-		unauthorized = Response.status(Status.UNAUTHORIZED).header("WWW-Authenticate", "Basic realm=\"RallyeNewUser\"").build();
+	@Override
+	protected Response getUnauthorized() {
+		return Response.status(Status.UNAUTHORIZED).header("WWW-Authenticate", "Basic realm=\"RallyeNewUser\"").build();
 	}
 
 	@Override
-	protected void checkAuthenticaion(ContainerRequest containerRequest, String[] login) {
+	protected void checkAuthentication(ContainerRequest containerRequest, String[] login) {
 		// Checking for User
         int result;
 		try {
-			result = GameHandler.data.isNewUserAuthorized(login);
+			result = RallyeServer.getResources().data.isNewUserAuthorized(login);
 		} catch (SQLException e) {
 			logger.error(e);
 			throw new WebApplicationException(e);
@@ -46,6 +47,6 @@ public class NewUserAuthFilter extends AuthFilter implements ResourceFilter {
 	
 	@Override
 	public ContainerRequestFilter getRequestFilter() {
-		return new NewUserAuthFilter();
+		return new NewUserAuth();
 	}
 }

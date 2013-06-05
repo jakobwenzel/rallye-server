@@ -21,7 +21,7 @@ public class Ry {
 		public static final String ID = "clientID";
 		public static final String ID_GROUP = Groups.ID;
 		public static final String PUSH_ID = "pushID";
-		public static final String ID_PUSH_MODE = "pushMode";
+		public static final String ID_PUSH_MODE = PushModes.ID;
 		public static final String UNIQUE_ID = "uniqueID";
 		public static final String PASSWORD = "password";
 		public static final String NAME = "name";

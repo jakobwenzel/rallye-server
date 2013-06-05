@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src"/>
+	<classpathentry excluding="de/rallye/resources/DataHandler.java|de/rallye/control/commands/|de/rallye/control/|de/rallye/resources/GameControlConfig.java|de/rallye/pushService/PushService.java|de/rallye/api/ClientListener.java|de/rallye/resources/" kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/gcm-server.jar" sourcepath="Resources/gcm-server-src.jar"/>
 	<classpathentry kind="lib" path="lib/asm-3.3.1.jar"/>

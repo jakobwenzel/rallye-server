@@ -8,7 +8,7 @@ import org.apache.logging.log4j.Logger;
 
 import de.rallye.control.GameControl;
 import de.rallye.control.commands.AbstractTimedCommand.Task;
-import de.rallye.resource.DataHandler;
+import de.rallye.resources.DataHandler;
 
 /**
  * @author Felix Huebner

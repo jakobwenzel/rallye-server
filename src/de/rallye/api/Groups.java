@@ -1,7 +1,11 @@
 package de.rallye.api;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -23,11 +27,11 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import com.sun.jersey.spi.container.ResourceFilters;
 
-import de.rallye.auth.AuthFilter;
-import de.rallye.auth.NewUserAuthFilter;
+import de.rallye.RallyeResources;
+import de.rallye.RallyeServer;
+import de.rallye.auth.KnownUserAuth;
+import de.rallye.auth.NewUserAuth;
 import de.rallye.auth.RallyePrincipal;
-import de.rallye.control.GameHandler;
-import de.rallye.db.DataAdapter;
 import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.InputException;
 import de.rallye.model.structures.Group;
@@ -41,7 +45,7 @@ public class Groups {
 	
 	private Logger logger =  LogManager.getLogger(Groups.class);
 
-	private DataAdapter data = GameHandler.data;//TODO: get it _NOT_ from gameHandler (perhaps inject using Guice??)
+	private RallyeResources R = RallyeServer.getResources();
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -49,7 +53,7 @@ public class Groups {
 		logger.entry();
 		
 		try {
-			List<Group> res = data.getGroups();
+			List<Group> res = R.data.getGroups();
 			return logger.exit(res);
 		} catch (DataException e) {
 			logger.error("getGroups failed", e);
@@ -64,7 +68,7 @@ public class Groups {
 		logger.entry();
 		
 		try {
-			List<User> res = data.getMembers(groupID);
+			List<User> res = R.data.getMembers(groupID);
 			return logger.exit(res);
 		} catch (DataException e) {
 			logger.error("getGroups failed", e);
@@ -75,8 +79,16 @@ public class Groups {
 	@GET
 	@Path("{groupID}/avatar")
 	@Produces("image/jpeg")
-	public Response getGroupAvatar(@PathParam("groupID") int groupID) {
-		throw new NotImplementedException();
+	public BufferedImage getGroupAvatar(@PathParam("groupID") int groupID) {
+		File f = new File("game/"+ groupID +"/avatar.jpg");
+		
+		try {
+			BufferedImage avt = ImageIO.read(f);
+			return avt;
+		} catch (IOException e) {
+			logger.error(e);
+			throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
+		}
 	}
 	
 	@GET
@@ -96,7 +108,7 @@ public class Groups {
 		p.checkBothMatch(userID, groupID);
 		
 		try {
-			PushConfig res = data.getPushConfig(groupID, userID);
+			PushConfig res = R.data.getPushConfig(groupID, userID);
 			return logger.exit(res);
 		} catch (DataException e) {
 			logger.error("logout failed", e);
@@ -114,7 +126,7 @@ public class Groups {
 		p.checkBothMatch(userID, groupID);
 		
 		try {
-			data.setPushConfig(groupID, userID, push);
+			R.data.setPushConfig(groupID, userID, push);
 			return Response.ok().build();
 		} catch (DataException e) {
 			logger.error("logout failed", e);
@@ -124,7 +136,7 @@ public class Groups {
 	
 	@PUT
 	@Path("{groupID}")
-	@ResourceFilters(NewUserAuthFilter.class)
+	@ResourceFilters(NewUserAuth.class)
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public UserAuth login(@PathParam("groupID") int groupID, LoginInfo info, @Context SecurityContext sec) {
@@ -136,7 +148,7 @@ public class Groups {
 		p.checkGroupMatches(groupID);
 		
 		try {
-			UserAuth login = data.login(authGroup, info);
+			UserAuth login = R.data.login(authGroup, info);
 			return login;
 		} catch (DataException e) {
 			logger.error("login failed", e);
@@ -150,7 +162,7 @@ public class Groups {
 	
 	@DELETE
 	@Path("{groupID}/{userID}")
-	@ResourceFilters(AuthFilter.class)
+	@ResourceFilters(KnownUserAuth.class)
 	public Response logout(@PathParam("groupID") int groupID, @PathParam("userID") int userID, @Context SecurityContext sec) {
 		logger.entry();
 		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
@@ -158,7 +170,7 @@ public class Groups {
 		p.checkBothMatch(userID, groupID);
 		
 		try {
-			data.logout(groupID, userID);
+			R.data.logout(groupID, userID);
 			return Response.ok().build();
 		} catch (DataException e) {
 			logger.error("logout failed", e);

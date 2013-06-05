@@ -1,7 +1,5 @@
 package de.rallye.db;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -12,9 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import javax.xml.bind.DatatypeConverter;
-
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -22,7 +17,6 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.InputException;
-import de.rallye.exceptions.SQLHandlerException;
 import de.rallye.model.structures.ChatEntry;
 import de.rallye.model.structures.Chatroom;
 import de.rallye.model.structures.Group;
@@ -52,7 +46,7 @@ public class DataAdapter {
 	 * @param strings
 	 * @return
 	 */
-	private static String strStr(String... strings) {
+	private static String cols(String... strings) {
 		StringBuilder b = new StringBuilder();
 		
 		int l = strings.length-1;
@@ -63,6 +57,10 @@ public class DataAdapter {
 		}
 		
 		return b.toString();
+	}
+	
+	public void closeConnection() {
+		dataSource.close();
 	}
 	
 	private static void close(Connection con, Statement st, ResultSet rs) {
@@ -90,7 +88,7 @@ public class DataAdapter {
 		try {
 			con = dataSource.getConnection();
 			st = con.createStatement();
-			rs = st.executeQuery("SELECT "+ strStr(Ry.Groups.ID, Ry.Groups.NAME, Ry.Groups.DESCRIPTION) +" FROM "+ Ry.Groups.TABLE);
+			rs = st.executeQuery("SELECT "+ cols(Ry.Groups.ID, Ry.Groups.NAME, Ry.Groups.DESCRIPTION) +" FROM "+ Ry.Groups.TABLE);
 
 			List<Group> groups = new ArrayList<Group>();
 			
@@ -114,7 +112,7 @@ public class DataAdapter {
 		try {
 			con = dataSource.getConnection();
 			st = con.createStatement();
-			rs = st.executeQuery("SELECT "+ strStr(Ry.Nodes.ID, Ry.Nodes.NAME, Ry.Nodes.LAT, Ry.Nodes.LON, Ry.Nodes.DESCRIPTION) +" FROM "+ Ry.Nodes.TABLE);
+			rs = st.executeQuery("SELECT "+ cols(Ry.Nodes.ID, Ry.Nodes.NAME, Ry.Nodes.LAT, Ry.Nodes.LON, Ry.Nodes.DESCRIPTION) +" FROM "+ Ry.Nodes.TABLE);
 
 			ArrayList<Node> nodes = new ArrayList<Node>();
 			
@@ -138,7 +136,7 @@ public class DataAdapter {
 		try {
 			con = dataSource.getConnection();
 			st = con.createStatement();
-			rs = st.executeQuery("SELECT "+ strStr(Ry.Edges.A, Ry.Edges.B, Ry.Edges.TYPE) +" FROM "+ Ry.Edges.TABLE);
+			rs = st.executeQuery("SELECT "+ cols(Ry.Edges.A, Ry.Edges.B, Ry.Edges.TYPE) +" FROM "+ Ry.Edges.TABLE);
 
 			ArrayList<PrimitiveEdge> edges = new ArrayList<PrimitiveEdge>();
 			
@@ -163,7 +161,7 @@ public class DataAdapter {
 			con = dataSource.getConnection();
 			st = con.createStatement();
 			rs = st.executeQuery("SELECT "+
-					strStr(Ry.Config.NAME, Ry.Config.LAT, Ry.Config.LON,
+					cols(Ry.Config.NAME, Ry.Config.LAT, Ry.Config.LON,
 							Ry.Config.ROUNDS, Ry.Config.ROUND_TIME, "UNIX_TIMESTAMP("+ Ry.Config.START_TIME +")") +" FROM "+ Ry.Config.TABLE);
 			
 			rs.next();
@@ -189,7 +187,7 @@ public class DataAdapter {
 			
 			
 			con = dataSource.getConnection();
-			st = con.prepareStatement("SELECT "+ strStr(Ry.Users.ID, Ry.Users.ID_GROUP)
+			st = con.prepareStatement("SELECT "+ cols(Ry.Users.ID, Ry.Users.ID_GROUP)
 												+" FROM "+ Ry.Users.TABLE +" AS usr LEFT JOIN "+ Ry.Groups.TABLE +" as grp USING("+ Ry.Users.ID_GROUP +")"
 												+" WHERE "+ Ry.Users.ID +"=? AND "+ Ry.Groups.ID +"=? AND usr."+ Ry.Users.PASSWORD +"=?");
 			st.setString(1, usr[0]);
@@ -218,7 +216,7 @@ public class DataAdapter {
 		try {
 			
 			con = dataSource.getConnection();
-			st = con.prepareStatement("SELECT "+ strStr(Ry.Users.ID_GROUP)
+			st = con.prepareStatement("SELECT "+ cols(Ry.Users.ID_GROUP)
 												+" FROM "+ Ry.Groups.TABLE
 												+" WHERE "+ Ry.Groups.ID +"=? AND "+ Ry.Groups.PASSWORD +"=?");
 			st.setString(1, login[0]);
@@ -238,12 +236,13 @@ public class DataAdapter {
 		}
 	}
 	
+	@SuppressWarnings("resource")
 	public UserAuth login(int groupID, LoginInfo info) throws DataException, InputException {
 		Connection con = null;
 		PreparedStatement st = null;
 		ResultSet rs = null;
 		
-		try {//TODO: cleanup old accounts
+		try {
 			
 			con = dataSource.getConnection();
 			
@@ -268,7 +267,7 @@ public class DataAdapter {
 			int userID = -1;
 			
 			if (info.uniqueID != null && info.uniqueID.length() > 3) {
-				st = con.prepareStatement("SELECT "+ strStr(Ry.Users.ID, Ry.Users.ID_GROUP, Ry.Users.ID_PUSH_MODE, Ry.Users.NAME, Ry.Users.PASSWORD, Ry.Users.PUSH_ID, Ry.Users.UNIQUE_ID) +
+				st = con.prepareStatement("SELECT "+ cols(Ry.Users.ID, Ry.Users.ID_GROUP, Ry.Users.ID_PUSH_MODE, Ry.Users.NAME, Ry.Users.PASSWORD, Ry.Users.PUSH_ID, Ry.Users.UNIQUE_ID) +
 											" FROM "+ Ry.Users.TABLE +" WHERE "+ Ry.Users.UNIQUE_ID +" LIKE '?'");
 				st.setString(1, info.uniqueID);
 				rs = st.executeQuery();
@@ -297,7 +296,7 @@ public class DataAdapter {
 					throw new DataException("User could not be reused");
 				}
 			} else {
-				st = con.prepareStatement("INSERT INTO "+ Ry.Users.TABLE +" ("+ strStr(Ry.Users.ID_GROUP, Ry.Users.PASSWORD, Ry.Users.NAME, Ry.Users.UNIQUE_ID, Ry.Users.ID_PUSH_MODE, Ry.Users.PUSH_ID) +")" +
+				st = con.prepareStatement("INSERT INTO "+ Ry.Users.TABLE +" ("+ cols(Ry.Users.ID_GROUP, Ry.Users.PASSWORD, Ry.Users.NAME, Ry.Users.UNIQUE_ID, Ry.Users.ID_PUSH_MODE, Ry.Users.PUSH_ID) +")" +
 						" VALUES (?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
 				
 				st.setInt(1, groupID);
@@ -336,10 +335,14 @@ public class DataAdapter {
 		
 		try {
 			con = dataSource.getConnection();
-			st = con.prepareStatement("DELETE FROM "+ Ry.Users.TABLE +
-					" WHERE "+ Ry.Users.ID +"=?");
+//			st = con.prepareStatement("DELETE FROM "+ Ry.Users.TABLE +
+//					" WHERE "+ Ry.Users.ID +"=?");
 			
-			st.setInt(1, userID);
+			st = con.prepareStatement("UPDATE "+ Ry.Users.TABLE +" SET "+ Ry.Users.ID_PUSH_MODE +"=? "+
+										"WHERE "+ Ry.Users.ID +"=?");
+			
+			st.setInt(1, 0);
+			st.setInt(2, userID);
 			st.executeUpdate();
 			
 			return true;
@@ -381,7 +384,7 @@ public class DataAdapter {
 		
 		try {
 			con = dataSource.getConnection();
-			st = con.prepareStatement("SELECT "+ strStr(Ry.Chatrooms.ID, Ry.Chatrooms.NAME)
+			st = con.prepareStatement("SELECT "+ cols(Ry.Chatrooms.ID, Ry.Chatrooms.NAME)
 					+" FROM "+ Ry.Groups_Chatrooms.TABLE +" LEFT JOIN "+ Ry.Chatrooms.TABLE +" USING ("+ Ry.Chatrooms.ID +")"
 					+"WHERE "+ Ry.Groups_Chatrooms.ID_GROUPS +"=?");
 			st.setInt(1, groupID);
@@ -410,7 +413,7 @@ public class DataAdapter {
 			con = dataSource.getConnection();
 	
 			//TODO: throw Unauthorized if no rights to access chatroom
-			st = con.prepareStatement("SELECT "+ strStr(Ry.Chats.ID, Ry.Messages.MSG, "UNIX_TIMESTAMP("+Ry.Chats.TIMESTAMP+")", Ry.Chats.ID_USER, "chats."+Ry.Chats.ID_GROUP, Ry.Chats.ID_PICTURE)+
+			st = con.prepareStatement("SELECT "+ cols(Ry.Chats.ID, Ry.Messages.MSG, "UNIX_TIMESTAMP("+Ry.Chats.TIMESTAMP+")", Ry.Chats.ID_USER, "chats."+Ry.Chats.ID_GROUP, Ry.Chats.ID_PICTURE)+
 										" FROM "+ Ry.Chats.TABLE +" AS chats"+
 										" LEFT JOIN "+ Ry.Messages.TABLE +" AS msg USING ("+ Ry.Chats.ID_MESSAGE +") "+
 										"LEFT JOIN "+ Ry.Groups_Chatrooms.TABLE +" AS gc USING ("+ Ry.Chats.ID_CHATROOM +") "+
@@ -468,7 +471,7 @@ public class DataAdapter {
 			//TODO: check for existance of picture
 			//Insert Chat
 			st = con.prepareStatement("INSERT INTO "+ Ry.Chats.TABLE +" ("+
-					strStr(Ry.Chats.ID_CHATROOM, Ry.Chats.ID_USER, Ry.Chats.ID_GROUP, Ry.Chats.ID_MESSAGE, Ry.Chats.ID_PICTURE)
+					cols(Ry.Chats.ID_CHATROOM, Ry.Chats.ID_USER, Ry.Chats.ID_GROUP, Ry.Chats.ID_MESSAGE, Ry.Chats.ID_PICTURE)
 					+") VALUES (?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
 			
 			
@@ -554,7 +557,7 @@ public class DataAdapter {
 		
 		try {
 			con = dataSource.getConnection();
-			st = con.prepareStatement("SELECT "+ strStr("push."+Ry.PushModes.NAME, "usr."+Ry.Users.PUSH_ID) +
+			st = con.prepareStatement("SELECT "+ cols("push."+Ry.PushModes.NAME, "usr."+Ry.Users.PUSH_ID) +
 										" FROM "+ Ry.Users.TABLE +" AS usr LEFT JOIN "+ Ry.PushModes.TABLE +" AS push USING("+ Ry.Users.ID_PUSH_MODE +")"+
 										" WHERE "+ Ry.Users.ID +"=? "+ Ry.Users.ID_GROUP +"=?");
 			
@@ -583,7 +586,7 @@ public class DataAdapter {
 		try {
 			con = dataSource.getConnection();
 			st = con.createStatement();
-			rs = st.executeQuery("SELECT "+ strStr(Ry.PushModes.ID, Ry.PushModes.NAME) +" FROM "+ Ry.PushModes.TABLE);
+			rs = st.executeQuery("SELECT "+ cols(Ry.PushModes.ID, Ry.PushModes.NAME) +" FROM "+ Ry.PushModes.TABLE);
 
 			List<PushMode> modes = new ArrayList<PushMode>();
 			
@@ -606,7 +609,7 @@ public class DataAdapter {
 
 		try {
 			con = dataSource.getConnection();
-			st = con.prepareStatement("SELECT "+ strStr(Ry.Users.ID, Ry.Users.NAME) +" FROM "+ Ry.Users.TABLE +" WHERE "+ Ry.Users.ID_GROUP +"=?");
+			st = con.prepareStatement("SELECT "+ cols(Ry.Users.ID, Ry.Users.NAME) +" FROM "+ Ry.Users.TABLE +" WHERE "+ Ry.Users.ID_GROUP +"=?");
 			st.setInt(1, groupID);
 			
 			rs = st.executeQuery();
@@ -618,6 +621,32 @@ public class DataAdapter {
 			}
 
 			return users;
+		} catch (SQLException e) {
+			throw new DataException(e);
+		} finally {
+			close(con, st, rs);
+		}
+	}
+
+	public int assignNewPictureID(int userID) throws DataException {
+		PreparedStatement st = null;
+		Connection con = null;
+		ResultSet rs = null;
+
+		try {
+			con = dataSource.getConnection();
+			st = con.prepareStatement("INSERT INTO "+ Ry.Pictures.TABLE +" ("+ cols(Ry.Pictures.ID_USER) +") VALUES (?)", Statement.RETURN_GENERATED_KEYS);
+			st.setInt(1, userID);
+			
+			st.execute();
+			
+			rs = st.getGeneratedKeys();
+			
+			if (rs.first()) {
+				return rs.getInt(1);
+			} else {
+				throw new DataException("No new ID assigned by DB");
+			}
 		} catch (SQLException e) {
 			throw new DataException(e);
 		} finally {

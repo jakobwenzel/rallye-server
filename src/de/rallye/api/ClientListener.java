@@ -15,7 +15,7 @@ import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 
 import de.rallye.exceptions.SQLHandlerException;
-import de.rallye.resource.DataHandler;
+import de.rallye.resources.DataHandler;
 
 /**
  * @author Felix H�bner

@@ -1,4 +1,4 @@
-package de.rallye.resource;
+package de.rallye.images;
 
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -12,7 +12,7 @@ import java.awt.image.BufferedImage;
  */
 public class ImageScaler {
 
-    protected static BufferedImage scaleImage(BufferedImage img, Dimension d) {
+    public static BufferedImage scaleImage(BufferedImage img, Dimension d) {
         img = scaleByHalf(img, d);
         img = scaleExact(img, d);
         return img;

@@ -15,7 +15,7 @@ import org.apache.logging.log4j.Logger;
 
 import de.rallye.pushService.resource.PushCommand;
 import de.rallye.pushService.resource.PushServiceException;
-import de.rallye.resource.DataHandler;
+import de.rallye.resources.DataHandler;
 
 /**
  * @author Felix Huebner

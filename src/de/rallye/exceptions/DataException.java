@@ -9,6 +9,9 @@ public class DataException extends Exception {
 		super("Data Retrieval failed", e);
 	}
 
+	public DataException(String string, Throwable e) {
+		super(string, e);
+	}
 
 	public DataException(String string) {
 		super(string);

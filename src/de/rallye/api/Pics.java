@@ -1,78 +1,105 @@
 package de.rallye.api;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.StreamingOutput;
+import javax.ws.rs.core.SecurityContext;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codehaus.jettison.json.JSONObject;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import com.sun.jersey.spi.container.ResourceFilters;
 
-import de.rallye.control.GameHandler;
-import de.rallye.db.DataAdapter;
+import de.rallye.RallyeResources;
+import de.rallye.RallyeServer;
+import de.rallye.auth.KnownUserAuth;
+import de.rallye.auth.RallyePrincipal;
+import de.rallye.exceptions.DataException;
+import de.rallye.model.structures.Picture;
+import de.rallye.model.structures.PictureSize;
 
 @Path("rallye/pics")
 public class Pics {
 	
 	private Logger logger =  LogManager.getLogger(Groups.class);
-
-	private DataAdapter data = GameHandler.data;//TODO: get it _NOT_ from gameHandler (perhaps inject using Guice??)
+	
+	private RallyeResources R = RallyeServer.getResources();
 	
 	@PUT
 	@Path("{hash}")
+	@ResourceFilters(KnownUserAuth.class)
 	@Consumes("image/jpeg")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response uploadPictureWithHash(byte[] pic, @PathParam("hash") String hash) {
-		throw new NotImplementedException();//TODO
+	public Picture uploadPictureWithHash(BufferedImage img, @PathParam("hash") String hash, @Context SecurityContext sec) {
+		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
+		
+		Picture pic = savePicture(img, p);
+		if (p != null) {
+			
+			
+		}
+		
+		return pic;
 	}
 	
 	@PUT
+	@ResourceFilters(KnownUserAuth.class)
 	@Consumes("image/jpeg")
 	@Produces(MediaType.APPLICATION_JSON)
-	public JSONObject uploadPicture(byte[] pic) {
-		throw new NotImplementedException();//TODO
+	public Picture uploadPicture(BufferedImage img, @Context SecurityContext sec) {//TODO: keep unedited original including EXIF
+		return savePicture(img, (RallyePrincipal) sec.getUserPrincipal());
+	}
+	
+	private Picture savePicture(BufferedImage img, RallyePrincipal p) {
+		logger.entry();
+		
+		int pictureID;
+		
+		try {
+			pictureID = R.data.assignNewPictureID(p.getUserID());
+			R.imgRepo.put(pictureID, img);
+		} catch (DataException e) {
+			logger.error("could not assign new pictureID", e);
+			throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
+		}
+	
+		return logger.exit(new Picture(pictureID));
+	}
+	
+	@GET
+	@Path("test")
+	@Produces("Image/jpeg")
+	public File test() {
+		return new File("pics/1_org.jpg");
+	}
+	
+	@GET
+	@Path("{pictureID}")
+	@Produces("image/jpeg")
+	public BufferedImage getPicture(@PathParam("pictureID") int pictureID) {
+		logger.entry();
+		
+		BufferedImage res = R.imgRepo.get(pictureID, PictureSize.Standard);
+		return logger.exit(res);
 	}
 	
 	@GET
 	@Path("{pictureID}/{size}")
 	@Produces("image/jpeg")
-	public Response getPicture(@PathParam("pictureID") int pictureID, @PathParam("size") String size) {
-		return returnPic(pictureID, size.charAt(0));
-	}
-	
-	@Deprecated
-	private Response returnPic(int picID, char size) {
-		Response r = null;
+	public BufferedImage getPicture(@PathParam("pictureID") int pictureID, @PathParam("size") PictureSize.PictureSizeString size) {
 		logger.entry();
-		byte[] blob = GameHandler.blobStore.get(getImageName(picID, size));
-		r = Response.ok().entity(blob).type("image/jpeg").build();
-		if (blob == null) {
-			r = Response.status(400)
-					.entity("picID not found or not available in this size")
-					.build();
-		}
-		return logger.exit(r);
-	}
-
-	/**
-	 * this method creates the name for the blob entries
-	 * 
-	 * @param picID
-	 *            running number of the picture from database
-	 * @param size
-	 *            't','s','l' to add at the end
-	 * @return a String with the created name
-	 * @author Felix H�bner
-	 */
-	private String getImageName(int picID, char size) {
-		return String.format("%08d_%c", picID, size);
+		
+		BufferedImage res = R.imgRepo.get(pictureID, size.size);
+		return logger.exit(res);
 	}
 }

@@ -16,8 +16,9 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import com.sun.jersey.spi.container.ResourceFilters;
 
-import de.rallye.auth.AuthFilter;
-import de.rallye.control.GameHandler;
+import de.rallye.RallyeResources;
+import de.rallye.RallyeServer;
+import de.rallye.auth.KnownUserAuth;
 import de.rallye.db.DataAdapter;
 import de.rallye.exceptions.DataException;
 import de.rallye.model.structures.PushMode;
@@ -28,11 +29,11 @@ public class System {
 
 	private static Logger logger = LogManager.getLogger(System.class);
 	
-	private DataAdapter data = GameHandler.data;//TODO: get it _NOT_ from gameHandler (perhaps inject using Guice??)
+	private RallyeResources R = RallyeServer.getResources();
 
 	@GET
 	@Path("status")
-	@ResourceFilters(AuthFilter.class)
+	@ResourceFilters(KnownUserAuth.class)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getStatus() {
 		throw new NotImplementedException();//TODO
@@ -45,7 +46,7 @@ public class System {
 		logger.entry();
 		
 		try {
-			ServerConfig res = data.getServerConfig();
+			ServerConfig res = R.data.getServerConfig();
 			return logger.exit(res);
 		} catch (DataException e) {
 			logger.error("getConfig failed", e);
@@ -60,7 +61,7 @@ public class System {
 		logger.entry();
 		
 		try {
-			List<PushMode> res = data.getPushModes();
+			List<PushMode> res = R.data.getPushModes();
 			return logger.exit(res);
 		} catch (DataException e) {
 			logger.error("getPushModes failed", e);

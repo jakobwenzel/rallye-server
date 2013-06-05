@@ -21,9 +21,10 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import com.sun.jersey.spi.container.ResourceFilters;
 
-import de.rallye.auth.AuthFilter;
+import de.rallye.RallyeResources;
+import de.rallye.RallyeServer;
+import de.rallye.auth.KnownUserAuth;
 import de.rallye.auth.RallyePrincipal;
-import de.rallye.control.GameHandler;
 import de.rallye.db.DataAdapter;
 import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.InputException;
@@ -36,10 +37,10 @@ public class Chatrooms {
 	
 	private Logger logger =  LogManager.getLogger(Chatrooms.class);
 
-	private DataAdapter data = GameHandler.data;//TODO: get it _NOT_ from gameHandler (perhaps inject using Guice??)
+	private RallyeResources R = RallyeServer.getResources();
 
 	@GET
-	@ResourceFilters(AuthFilter.class)
+	@ResourceFilters(KnownUserAuth.class)
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<Chatroom> getChatrooms(@Context SecurityContext sec) {
 		logger.entry();
@@ -47,7 +48,7 @@ public class Chatrooms {
 		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
 		
 		try {
-			List<Chatroom> res = data.getChatrooms(p.getGroupID());
+			List<Chatroom> res = R.data.getChatrooms(p.getGroupID());
 			return logger.exit(res);
 		} catch (DataException e) {
 			logger.error("getChatrooms failed", e);
@@ -56,7 +57,7 @@ public class Chatrooms {
 	}
 	
 	@GET
-	@ResourceFilters(AuthFilter.class)
+	@ResourceFilters(KnownUserAuth.class)
 	@Path("{roomID}/since/{timestamp}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<ChatEntry> getChats(@PathParam("roomID") int roomID, @PathParam("timestamp") long timestamp, @Context SecurityContext sec) {
@@ -65,7 +66,7 @@ public class Chatrooms {
 	}
 	
 	@GET
-	@ResourceFilters(AuthFilter.class)
+	@ResourceFilters(KnownUserAuth.class)
 	@Path("{roomID}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<ChatEntry> getChats(@PathParam("roomID") int roomID, @Context SecurityContext sec) {
@@ -77,11 +78,11 @@ public class Chatrooms {
 		logger.entry();
 		
 		try {
-			if (!data.hasRightsForChatroom(groupID, roomID)) {
+			if (!R.data.hasRightsForChatroom(groupID, roomID)) {
 				logger.warn("group "+ groupID +" has no access rights for chatroom "+ roomID);
 			}
 			
-			List<ChatEntry> res = data.getChats(roomID, timestamp, groupID);
+			List<ChatEntry> res = R.data.getChats(roomID, timestamp, groupID);
 			return logger.exit(res);
 		} catch (DataException e) {
 			logger.error("getChats failed", e);
@@ -90,7 +91,7 @@ public class Chatrooms {
 	}
 	
 	@PUT
-	@ResourceFilters(AuthFilter.class)
+	@ResourceFilters(KnownUserAuth.class)
 	@Path("{roomID}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
@@ -105,11 +106,11 @@ public class Chatrooms {
 			throw new WebApplicationException(new InputException("Message must not be empty"), Response.Status.BAD_REQUEST);
 		
 		try {
-			if (!data.hasRightsForChatroom(groupID, roomID)) {
+			if (!R.data.hasRightsForChatroom(groupID, roomID)) {
 				logger.warn("group "+ groupID +" has no access rights for chatroom "+ roomID);
 			}
 			
-			ChatEntry res = data.addChat(chat, roomID, groupID, userID);
+			ChatEntry res = R.data.addChat(chat, roomID, groupID, userID);
 			return logger.exit(res);
 		} catch (DataException e) {
 			logger.error("getChats failed", e);
@@ -118,7 +119,7 @@ public class Chatrooms {
 	}
 	
 	@PUT
-	@ResourceFilters(AuthFilter.class)
+	@ResourceFilters(KnownUserAuth.class)
 	@Path("{roomID}/{hash}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)

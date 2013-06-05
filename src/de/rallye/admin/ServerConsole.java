@@ -1,4 +1,4 @@
-package de.rallye.control;
+package de.rallye.admin;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,40 +10,34 @@ import java.net.Socket;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import de.rallye.resource.DataHandler;
-
 /**
- * @author Felix HŸbner
+ * @author Felix Hï¿½bner
  * @version 1.0
  * 
  */
-public class GameConsole {
-	Logger logger = LogManager.getLogger(GameConsole.class.getName());
-	private DataHandler data = null;
-	private GameControl control = null;
+public class ServerConsole {
+	
+	public static Logger logger = LogManager.getLogger(ServerConsole.class);
+
 	private ServerSocket socket = null;
 
 	/**
 	 * create a tcp-console on localhost.
 	 */
-	public GameConsole(DataHandler data, GameControl control) {
-		logger.entry();
-		this.data = data;
-		this.control = control;
+	public ServerConsole(int port) {
 
 		try {
-			socket = new ServerSocket(this.data.getConsolePort());
+			socket = new ServerSocket(port);
 		} catch (IOException e) {
 			logger.catching(e);
 		}
-		logger.exit();
 	}
 
 	/**
 	 * wait for next connection
 	 * 
 	 * @return return true if the server should be closed, otherwise false
-	 * @author Felix HŸbner
+	 * @author Felix Hï¿½bner
 	 */
 	public boolean accept() {
 		logger.entry();
@@ -82,14 +76,8 @@ public class GameConsole {
 					output.println("Stopping Server. Bye.");
 					return logger.exit(true);
 				} else if (inputLine.equals("status")) {
-					logger.info("print Status");
-					// output.println("Status:");
-					output.print(this.data.getModelStatus());
-					if (this.control != null) {
-						for (String s : this.control.getStatus().split("\n")) {
-							output.println("GameControl: " + s);
-						}
-					}
+					logger.info("Status:");
+//					output.print();//TODO: status
 				} else {
 					output.println("Unknown Command. Send ? for help.");
 				}
@@ -107,7 +95,7 @@ public class GameConsole {
 	/**
 	 * try to close the Game Console Socket
 	 * 
-	 * @author Felix HŸbner
+	 * @author Felix Hï¿½bner
 	 */
 	public void close() {
 		logger.entry();

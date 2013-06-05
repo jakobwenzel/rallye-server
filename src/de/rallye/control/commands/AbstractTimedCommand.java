@@ -5,8 +5,8 @@ import org.apache.logging.log4j.Logger;
 
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import de.rallye.control.GameControl;
-import de.rallye.resource.DataHandler;
-import de.rallye.resource.GameControlConfig;
+import de.rallye.resources.DataHandler;
+import de.rallye.resources.GameControlConfig;
 
 /**
  * @author Felix Huebner

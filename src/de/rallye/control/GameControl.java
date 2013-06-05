@@ -14,8 +14,8 @@ import de.rallye.control.commands.GetStatus;
 import de.rallye.control.commands.NextRound;
 import de.rallye.control.commands.UpdateValues;
 import de.rallye.control.resource.TimedCommandPriorityQueue;
-import de.rallye.resource.DataHandler;
-import de.rallye.resource.GameControlConfig;
+import de.rallye.resources.DataHandler;
+import de.rallye.resources.GameControlConfig;
 
 /**
  * this class controls the game and sends push-notifications to the clients

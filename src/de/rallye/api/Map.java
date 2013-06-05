@@ -12,8 +12,8 @@ import javax.ws.rs.core.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import de.rallye.control.GameHandler;
-import de.rallye.db.DataAdapter;
+import de.rallye.RallyeResources;
+import de.rallye.RallyeServer;
 import de.rallye.exceptions.DataException;
 import de.rallye.model.structures.Node;
 import de.rallye.model.structures.PrimitiveEdge;
@@ -23,7 +23,7 @@ public class Map {
 	
 	private Logger logger =  LogManager.getLogger(Map.class.getName());
 
-	private DataAdapter data = GameHandler.data;//TODO: get it _NOT_ from gameHandler (perhaps inject using Guice??)
+	private RallyeResources R = RallyeServer.getResources();
 
 	@GET
 	@Path("nodes")
@@ -32,7 +32,7 @@ public class Map {
 		logger.entry();
 		
 		try {
-			List<Node> res = data.getNodes();
+			List<Node> res = R.data.getNodes();
 			return logger.exit(res);
 		} catch (DataException e) {
 			logger.error("getNodes failed", e);
@@ -47,7 +47,7 @@ public class Map {
 		logger.entry();
 		
 		try {
-			List<PrimitiveEdge> res = data.getEdges();
+			List<PrimitiveEdge> res = R.data.getEdges();
 			return logger.exit(res);
 		} catch (DataException e) {
 			logger.error("getEdges failed", e);

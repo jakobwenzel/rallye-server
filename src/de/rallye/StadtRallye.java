@@ -1,29 +1,31 @@
 package de.rallye;
 
-import java.beans.PropertyVetoException;
+import de.rallye.admin.ServerConsole;
+import de.rallye.db.DataAdapter;
+import de.rallye.images.ImageRepository;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import de.rallye.control.GameHandler;
-
-/**
- * @author Felix HŸbner
- * @version 1.0
- *
- */
 public class StadtRallye {
 
-	/**
-	 * @param args
-	 * @author Felix HŸbner
-	 * @throws PropertyVetoException 
-	 */
-	public static void main(String[] args) throws PropertyVetoException {
-		Logger logger =  LogManager.getLogger(StadtRallye.class.getName());
-		//create and init new GameHandler		
-		GameHandler game = new GameHandler((args.length > 0 ? args[0]: null));
+	public static void main(String[] args) {
 		
+		String host = (args.length > 0 ? args[0]: RallyeConfig.host);
+		
+		
+		
+		DataAdapter data = RallyeConfig.getMySQLDataAdapter();//TODO: instantiate RallyeConfig, read Connection-Details from file
+		ImageRepository imgRepo = RallyeConfig.getImageRepository();
+		//TODO: read game config from file
+		//TODO: create a Game Object
+		
+		RallyeServer server = new RallyeServer(host, RallyeConfig.port, data, imgRepo);
+		
+		ServerConsole console = new ServerConsole(RallyeConfig.consolePort);
+
+		//wait until server should be closed by console command
+		while (!console.accept());//TODO: move to Console Thread
+		
+		server.stopServer();
+				
 	}
 
 }

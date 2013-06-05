@@ -7,7 +7,6 @@ import javax.ws.rs.WebApplicationException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import de.rallye.api.Groups;
 import de.rallye.exceptions.InputException;
 
 public class RallyePrincipal implements Principal {
