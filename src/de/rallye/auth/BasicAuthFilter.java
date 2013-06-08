@@ -21,7 +21,7 @@ public abstract class BasicAuthFilter implements ResourceFilter, ContainerReques
      */
     @Override
     public ContainerRequest filter(ContainerRequest containerRequest) throws WebApplicationException {
-    	logger.entry();
+//    	logger.entry();
     	
         String auth = containerRequest.getHeaderValue("authorization");
  
@@ -39,7 +39,8 @@ public abstract class BasicAuthFilter implements ResourceFilter, ContainerReques
         
         checkAuthentication(containerRequest, login);
         
-        return logger.exit(containerRequest);
+//        return logger.exit(containerRequest);
+        return containerRequest;
     }
     
     @Override

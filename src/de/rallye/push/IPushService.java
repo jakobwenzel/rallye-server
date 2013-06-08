@@ -1,7 +1,7 @@
 /**
  * 
  */
-package de.rallye.pushService.resource;
+package de.rallye.push;
 
 import java.util.List;
 import java.util.Map;

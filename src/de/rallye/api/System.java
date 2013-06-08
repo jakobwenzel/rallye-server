@@ -19,7 +19,6 @@ import com.sun.jersey.spi.container.ResourceFilters;
 import de.rallye.RallyeResources;
 import de.rallye.RallyeServer;
 import de.rallye.auth.KnownUserAuth;
-import de.rallye.db.DataAdapter;
 import de.rallye.exceptions.DataException;
 import de.rallye.model.structures.PushMode;
 import de.rallye.model.structures.ServerConfig;

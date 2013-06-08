@@ -1,7 +1,7 @@
 /**
  * 
  */
-package de.rallye.pushService;
+package de.rallye.push;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -17,7 +17,6 @@ import com.google.android.gcm.server.MulticastResult;
 import com.google.android.gcm.server.Result;
 import com.google.android.gcm.server.Sender;
 
-import de.rallye.pushService.resource.IPushService;
 
 /**
  * @author Felix Huebner

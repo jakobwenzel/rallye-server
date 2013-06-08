@@ -25,6 +25,7 @@ import de.rallye.RallyeServer;
 import de.rallye.auth.KnownUserAuth;
 import de.rallye.auth.RallyePrincipal;
 import de.rallye.exceptions.DataException;
+import de.rallye.model.structures.ChatPictureLink;
 import de.rallye.model.structures.Picture;
 import de.rallye.model.structures.PictureSize;
 
@@ -44,9 +45,8 @@ public class Pics {
 		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
 		
 		Picture pic = savePicture(img, p);
-		if (p != null) {
-			
-			
+		if (pic != null) {
+			ChatPictureLink.getLink(R.hashMap, hash, R.data).setPicture(pic.pictureID);
 		}
 		
 		return pic;
@@ -74,13 +74,6 @@ public class Pics {
 		}
 	
 		return logger.exit(new Picture(pictureID));
-	}
-	
-	@GET
-	@Path("test")
-	@Produces("Image/jpeg")
-	public File test() {
-		return new File("pics/1_org.jpg");
 	}
 	
 	@GET

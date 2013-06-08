@@ -2,7 +2,9 @@ package de.rallye;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 
 import javax.ws.rs.core.UriBuilder;
@@ -19,6 +21,8 @@ import com.sun.jersey.api.json.JSONConfiguration;
 
 import de.rallye.db.DataAdapter;
 import de.rallye.images.ImageRepository;
+import de.rallye.model.structures.ChatPictureLink;
+import de.rallye.push.PushService;
 
 public class RallyeServer {
 	
@@ -36,15 +40,15 @@ public class RallyeServer {
 	
 	private static RallyeResources resources;
 
-	public RallyeServer(String host, int port, DataAdapter data, ImageRepository imgRepo) {
+	public RallyeServer(String host, int port, DataAdapter data, ImageRepository imgRepo, PushService push) {
 		logger.entry();
 
 		// create URI
 		URI uri = UriBuilder.fromUri("http://" + host + "/").port(10101).build();
 		
-		HashMap hashmap = null;
+		Map<String, ChatPictureLink> hashmap = Collections.synchronizedMap(new HashMap<String, ChatPictureLink>());
 		
-		resources = new RallyeResources(data, imgRepo, hashmap);
+		resources = new RallyeResources(data, imgRepo, hashmap, push);
 
 		// start http server
 		try {

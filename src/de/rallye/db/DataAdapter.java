@@ -13,6 +13,8 @@ import java.util.Random;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 import de.rallye.exceptions.DataException;
@@ -338,7 +340,7 @@ public class DataAdapter {
 //			st = con.prepareStatement("DELETE FROM "+ Ry.Users.TABLE +
 //					" WHERE "+ Ry.Users.ID +"=?");
 			
-			st = con.prepareStatement("UPDATE "+ Ry.Users.TABLE +" SET "+ Ry.Users.ID_PUSH_MODE +"=? "+
+			st = con.prepareStatement("UPDATE "+ Ry.Users.TABLE +" SET "+ Ry.Users.ID_PUSH_MODE +"=? "+//TODO: set status=offline?
 										"WHERE "+ Ry.Users.ID +"=?");
 			
 			st.setInt(1, 0);
@@ -431,7 +433,7 @@ public class DataAdapter {
 			List<ChatEntry> chats = new ArrayList<ChatEntry>();
 			
 			while (rs.next()) {
-				chats.add(new ChatEntry(rs.getInt(1), rs.getString(2), rs.getLong(3), rs.getInt(4), rs.getInt(5), rs.getInt(6)));
+				chats.add(new ChatEntry(rs.getInt(1), rs.getString(2), rs.getLong(3), rs.getInt(5), rs.getInt(4), rs.getInt(6)));
 			}
 
 			return chats;
@@ -647,6 +649,28 @@ public class DataAdapter {
 			} else {
 				throw new DataException("No new ID assigned by DB");
 			}
+		} catch (SQLException e) {
+			throw new DataException(e);
+		} finally {
+			close(con, st, rs);
+		}
+	}
+
+	public void editChatAddPicture(int chatID, int pictureID) throws DataException {
+		PreparedStatement st = null;
+		Connection con = null;
+		ResultSet rs = null;
+		
+		try {
+			con = dataSource.getConnection();
+			st = con.prepareStatement("UPDATE "+ Ry.Chats.TABLE +" SET "+ Ry.Chats.ID_PICTURE +"=? WHERE "+ Ry.Chats.ID +"=?");
+			st.setInt(1, pictureID);
+			st.setInt(2, chatID);
+			
+			if (st.executeUpdate() > 0)
+				return;
+			else
+				throw new DataException("Failed to add picture to Chat");
 		} catch (SQLException e) {
 			throw new DataException(e);
 		} finally {

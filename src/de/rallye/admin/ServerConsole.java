@@ -10,27 +10,40 @@ import java.net.Socket;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import de.rallye.RallyeServer;
+
 /**
  * @author Felix H�bner
  * @version 1.0
  * 
  */
-public class ServerConsole {
+public class ServerConsole implements Runnable {
 	
 	public static Logger logger = LogManager.getLogger(ServerConsole.class);
 
 	private ServerSocket socket = null;
+	private RallyeServer server;
 
 	/**
 	 * create a tcp-console on localhost.
 	 */
-	public ServerConsole(int port) {
+	public ServerConsole(int port, RallyeServer server) {
+		this.server = server;
 
 		try {
 			socket = new ServerSocket(port);
+			
+			new Thread(this, "Console-Thread").start();
 		} catch (IOException e) {
 			logger.catching(e);
 		}
+	}
+	
+	@Override
+	public void run() {
+		while (!accept());
+		
+		server.stopServer();
 	}
 
 	/**

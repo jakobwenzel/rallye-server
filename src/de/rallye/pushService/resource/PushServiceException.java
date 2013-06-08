@@ -10,6 +10,8 @@ package de.rallye.pushService.resource;
  */
 public class PushServiceException extends Exception {
 
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * 
 	 */

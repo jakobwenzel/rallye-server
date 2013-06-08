@@ -17,20 +17,18 @@ import javax.ws.rs.core.SecurityContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import com.sun.jersey.spi.container.ResourceFilters;
 
 import de.rallye.RallyeResources;
 import de.rallye.RallyeServer;
 import de.rallye.auth.KnownUserAuth;
 import de.rallye.auth.RallyePrincipal;
-import de.rallye.db.DataAdapter;
 import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.InputException;
 import de.rallye.model.structures.ChatEntry;
+import de.rallye.model.structures.ChatPictureLink;
 import de.rallye.model.structures.Chatroom;
-import de.rallye.model.structures.SimpleChatEntry;
+import de.rallye.model.structures.SimpleChatWithPictureHash;
 
 @Path("rallye/chatrooms")
 public class Chatrooms {
@@ -95,7 +93,7 @@ public class Chatrooms {
 	@Path("{roomID}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public ChatEntry addChat(@PathParam("roomID") int roomID, SimpleChatEntry chat, @Context SecurityContext sec) {
+	public ChatEntry addChat(@PathParam("roomID") int roomID, SimpleChatWithPictureHash chat, @Context SecurityContext sec) {
 		logger.entry();
 		
 		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
@@ -110,21 +108,27 @@ public class Chatrooms {
 				logger.warn("group "+ groupID +" has no access rights for chatroom "+ roomID);
 			}
 			
-			ChatEntry res = R.data.addChat(chat, roomID, groupID, userID);
+			ChatEntry res;
+			
+			if (chat.pictureHash != null) {
+				ChatPictureLink link = ChatPictureLink.getLink(R.hashMap, chat.pictureHash, R.data);
+				
+				Integer picID = link.getPictureID();
+				if (picID != null) {
+					chat.pictureID = picID;
+					res = R.data.addChat(chat, roomID, groupID, userID);
+				} else {
+					res = R.data.addChat(chat, roomID, groupID, userID);
+					link.setChat(res.chatID);
+				}
+			} else
+				res = R.data.addChat(chat, roomID, groupID, userID);
+			
 			return logger.exit(res);
 		} catch (DataException e) {
 			logger.error("getChats failed", e);
 			throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
 		}
-	}
-	
-	@PUT
-	@ResourceFilters(KnownUserAuth.class)
-	@Path("{roomID}/{hash}")
-	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
-	public ChatEntry addChatWithHash(@Context SecurityContext sec, @PathParam("hash") String hash) {
-		throw new NotImplementedException();//TODO
 	}
 	
 }

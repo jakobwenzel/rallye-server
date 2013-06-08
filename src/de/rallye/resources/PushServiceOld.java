@@ -22,7 +22,7 @@ import de.rallye.resources.DataHandler;
  * @date 10.12.12
  * 
  */
-public class PushService {
+public class PushServiceOld {
 
 	private Logger logger = LogManager.getLogger(PushService.class.getName());
 

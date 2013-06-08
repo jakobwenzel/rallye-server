@@ -1,7 +1,7 @@
 /**
  * 
  */
-package de.rallye.pushService;
+package de.rallye.push;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -23,7 +23,6 @@ import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import de.rallye.pushService.resource.IPushService;
 
 /**
  * @author Felix Huebner
