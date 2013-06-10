@@ -51,8 +51,8 @@ public class Ry {
 	
 	public static class Groups_Chatrooms {
 		public static final String TABLE = "ry_chatrooms_groups";
-		public static final String ID_GROUPS = Groups.ID;
-		public static final String ID_CHATROOMS = Chatrooms.ID;
+		public static final String ID_GROUP = Groups.ID;
+		public static final String ID_CHATROOM = Chatrooms.ID;
 	}
 	
 	public static class Messages {

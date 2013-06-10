@@ -64,11 +64,11 @@ public class Groups {
 	@GET
 	@Path("{groupID}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<User> getMembers(@PathParam("groupID") int groupID) {
+	public List<? extends User> getMembers(@PathParam("groupID") int groupID) {
 		logger.entry();
 		
 		try {
-			List<User> res = R.data.getMembers(groupID);
+			List<? extends User> res = R.data.getMembers(groupID);
 			return logger.exit(res);
 		} catch (DataException e) {
 			logger.error("getGroups failed", e);

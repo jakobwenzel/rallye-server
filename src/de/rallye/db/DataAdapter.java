@@ -7,7 +7,9 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Random;
 
 import org.apache.logging.log4j.LogManager;
@@ -31,6 +33,7 @@ import de.rallye.model.structures.ServerConfig;
 import de.rallye.model.structures.SimpleChatEntry;
 import de.rallye.model.structures.User;
 import de.rallye.model.structures.UserAuth;
+import de.rallye.model.structures.UserInternal;
 
 public class DataAdapter {
 	
@@ -362,9 +365,9 @@ public class DataAdapter {
 		
 		try {
 			con = dataSource.getConnection();
-			st = con.prepareStatement("SELECT count(*)"
+			st = con.prepareStatement("SELECT *"
 					+" FROM "+ Ry.Groups_Chatrooms.TABLE
-					+" WHERE "+ Ry.Groups_Chatrooms.ID_GROUPS +"=? AND "+ Ry.Groups_Chatrooms.ID_CHATROOMS +"=?");
+					+" WHERE "+ Ry.Groups_Chatrooms.ID_GROUP +"=? AND "+ Ry.Groups_Chatrooms.ID_CHATROOM +"=?");
 			st.setInt(1, groupID);
 			st.setInt(2, roomID);
 			rs = st.executeQuery();
@@ -388,7 +391,7 @@ public class DataAdapter {
 			con = dataSource.getConnection();
 			st = con.prepareStatement("SELECT "+ cols(Ry.Chatrooms.ID, Ry.Chatrooms.NAME)
 					+" FROM "+ Ry.Groups_Chatrooms.TABLE +" LEFT JOIN "+ Ry.Chatrooms.TABLE +" USING ("+ Ry.Chatrooms.ID +")"
-					+"WHERE "+ Ry.Groups_Chatrooms.ID_GROUPS +"=?");
+					+"WHERE "+ Ry.Groups_Chatrooms.ID_GROUP +"=?");
 			st.setInt(1, groupID);
 			rs = st.executeQuery();
 			
@@ -420,7 +423,7 @@ public class DataAdapter {
 										" LEFT JOIN "+ Ry.Messages.TABLE +" AS msg USING ("+ Ry.Chats.ID_MESSAGE +") "+
 										"LEFT JOIN "+ Ry.Groups_Chatrooms.TABLE +" AS gc USING ("+ Ry.Chats.ID_CHATROOM +") "+
 										"WHERE chats."+Ry.Chats.ID_CHATROOM +" =? "+
-										"AND gc."+Ry.Groups_Chatrooms.ID_GROUPS +" =? "+
+										"AND gc."+Ry.Groups_Chatrooms.ID_GROUP +" =? "+
 										"AND "+ Ry.Chats.TIMESTAMP +" >=FROM_UNIXTIME(?) "+
 										"ORDER BY "+ Ry.Chats.TIMESTAMP);
 
@@ -590,7 +593,7 @@ public class DataAdapter {
 			st = con.createStatement();
 			rs = st.executeQuery("SELECT "+ cols(Ry.PushModes.ID, Ry.PushModes.NAME) +" FROM "+ Ry.PushModes.TABLE);
 
-			List<PushMode> modes = new ArrayList<PushMode>();
+			List<PushMode> modes = new ArrayList<>();
 			
 			while (rs.next()) {
 				modes.add(new PushMode(rs.getInt(1), rs.getString(2)));
@@ -604,22 +607,51 @@ public class DataAdapter {
 		}
 	}
 
-	public List<User> getMembers(int groupID) throws DataException {
+	public List<UserInternal> getMembers(int groupID) throws DataException {
 		PreparedStatement st = null;
 		Connection con = null;
 		ResultSet rs = null;
 
 		try {
 			con = dataSource.getConnection();
-			st = con.prepareStatement("SELECT "+ cols(Ry.Users.ID, Ry.Users.NAME) +" FROM "+ Ry.Users.TABLE +" WHERE "+ Ry.Users.ID_GROUP +"=?");
+			st = con.prepareStatement("SELECT "+ cols(Ry.Users.ID, Ry.Users.NAME, Ry.Users.ID_PUSH_MODE, Ry.Users.PUSH_ID) +" FROM "+ Ry.Users.TABLE +" WHERE "+ Ry.Users.ID_GROUP +"=?");
 			st.setInt(1, groupID);
 			
 			rs = st.executeQuery();
 
-			List<User> users = new ArrayList<User>();
+			List<UserInternal> users = new ArrayList<>();
 			
 			while (rs.next()) {
-				users.add(new User(rs.getInt(1), rs.getString(2)));
+				users.add(new UserInternal(rs.getInt(1), rs.getString(2), rs.getInt(3), rs.getString(4)));
+			}
+
+			return users;
+		} catch (SQLException e) {
+			throw new DataException(e);
+		} finally {
+			close(con, st, rs);
+		}
+	}
+	
+	public List<UserInternal> getChatroomMembers(int roomID) throws DataException {
+		PreparedStatement st = null;
+		Connection con = null;
+		ResultSet rs = null;
+
+		try {
+			con = dataSource.getConnection();
+			st = con.prepareStatement("SELECT "+ cols(Ry.Users.ID, Ry.Users.NAME, Ry.Users.ID_PUSH_MODE, Ry.Users.PUSH_ID) +
+									" FROM "+ Ry.Users.TABLE +
+									" LEFT JOIN "+ Ry.Groups_Chatrooms.TABLE +" USING("+ Ry.Groups_Chatrooms.ID_GROUP +")"+
+									" WHERE "+ Ry.Groups_Chatrooms.ID_CHATROOM +"=?");
+			st.setInt(1, roomID);
+			
+			rs = st.executeQuery();
+
+			List<UserInternal> users = new ArrayList<>();
+			
+			while (rs.next()) {
+				users.add(new UserInternal(rs.getInt(1), rs.getString(2), rs.getInt(3), rs.getString(4)));
 			}
 
 			return users;
@@ -671,6 +703,28 @@ public class DataAdapter {
 				return;
 			else
 				throw new DataException("Failed to add picture to Chat");
+		} catch (SQLException e) {
+			throw new DataException(e);
+		} finally {
+			close(con, st, rs);
+		}
+	}
+
+	public void updatePushIds(HashMap<String, String> changes) throws DataException {
+		PreparedStatement st = null;
+		Connection con = null;
+		ResultSet rs = null;
+		
+		try {
+			con = dataSource.getConnection();
+			st = con.prepareStatement("UPDATE "+ Ry.Users.TABLE +" SET "+ Ry.Users.PUSH_ID +"=? WHERE "+ Ry.Users.PUSH_ID +"=?");
+			
+			for (Entry<String, String> pair: changes.entrySet()) {
+				st.setString(1, pair.getValue());
+				st.setString(2, pair.getKey());
+				
+				st.executeUpdate();
+			}
 		} catch (SQLException e) {
 			throw new DataException(e);
 		} finally {

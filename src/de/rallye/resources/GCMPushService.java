@@ -23,6 +23,7 @@ import com.google.android.gcm.server.Sender;
  * @date 10.12.12
  * 
  */
+@Deprecated
 public class GCMPushService implements IPushService {
 
 	private Logger logger = LogManager

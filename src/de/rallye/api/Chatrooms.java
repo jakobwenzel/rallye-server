@@ -29,6 +29,7 @@ import de.rallye.model.structures.ChatEntry;
 import de.rallye.model.structures.ChatPictureLink;
 import de.rallye.model.structures.Chatroom;
 import de.rallye.model.structures.SimpleChatWithPictureHash;
+import de.rallye.model.structures.User;
 
 @Path("rallye/chatrooms")
 public class Chatrooms {
@@ -78,6 +79,7 @@ public class Chatrooms {
 		try {
 			if (!R.data.hasRightsForChatroom(groupID, roomID)) {
 				logger.warn("group "+ groupID +" has no access rights for chatroom "+ roomID);
+				throw new WebApplicationException(Response.Status.UNAUTHORIZED);
 			}
 			
 			List<ChatEntry> res = R.data.getChats(roomID, timestamp, groupID);
@@ -129,6 +131,27 @@ public class Chatrooms {
 			logger.error("getChats failed", e);
 			throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
 		}
+	}
+	
+	@GET
+	@Path("{roomID}/members")
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<? extends User> getMembers(@PathParam("roomID") int roomID) {
+		logger.entry();
+		
+		try {
+			List<? extends User> res = R.data.getChatroomMembers(roomID);
+			return logger.exit(res);
+		} catch (DataException e) {
+			logger.error("getChatroomMembers failed", e);
+			throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
+		}
+	}
+	
+	@GET
+	@Path("test")
+	public String test() {
+		return R.push.test();
 	}
 	
 }
