@@ -50,12 +50,10 @@ public class PushService {
 	}
 	
 	public static IPushAdapter getPushAdapter(String name, DataAdapter data) {
-		switch (name) {
-		case "gcm":
+		if (name.equals("gcm"))
 			return new GCMPushAdapter(RallyeConfig.GCM_API_KEY, data);
-		default:
+		else
 			return null;
-		}
 	}
 	
 	public void configurationChange() {
@@ -93,7 +91,7 @@ public class PushService {
 	}
 	
 	private void push(List<UserInternal> users, String payload) {
-		HashMap<Integer, List<UserInternal>> ids = new HashMap<>();
+		HashMap<Integer, List<UserInternal>> ids = new HashMap<Integer, List<UserInternal>>();
 		
 		Set<Integer> modes = pushModes.keySet();
 		for (int m: modes) {

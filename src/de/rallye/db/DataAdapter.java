@@ -593,7 +593,7 @@ public class DataAdapter {
 			st = con.createStatement();
 			rs = st.executeQuery("SELECT "+ cols(Ry.PushModes.ID, Ry.PushModes.NAME) +" FROM "+ Ry.PushModes.TABLE);
 
-			List<PushMode> modes = new ArrayList<>();
+			List<PushMode> modes = new ArrayList<PushMode>();
 			
 			while (rs.next()) {
 				modes.add(new PushMode(rs.getInt(1), rs.getString(2)));
@@ -619,7 +619,7 @@ public class DataAdapter {
 			
 			rs = st.executeQuery();
 
-			List<UserInternal> users = new ArrayList<>();
+			List<UserInternal> users = new ArrayList<UserInternal>();
 			
 			while (rs.next()) {
 				users.add(new UserInternal(rs.getInt(1), rs.getString(2), rs.getInt(3), rs.getString(4)));
@@ -648,7 +648,7 @@ public class DataAdapter {
 			
 			rs = st.executeQuery();
 
-			List<UserInternal> users = new ArrayList<>();
+			List<UserInternal> users = new ArrayList<UserInternal>();
 			
 			while (rs.next()) {
 				users.add(new UserInternal(rs.getInt(1), rs.getString(2), rs.getInt(3), rs.getString(4)));

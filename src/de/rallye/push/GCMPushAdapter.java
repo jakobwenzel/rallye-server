@@ -46,7 +46,7 @@ public class GCMPushAdapter implements IPushAdapter {
 		int max = (users.size() > MAX_IDS)? MAX_IDS : users.size();
 		int count = 0;
 		
-		ArrayList<String> partialList = new ArrayList<>(max);
+		ArrayList<String> partialList = new ArrayList<String>(max);
 		for (UserInternal u: users) {
 			partialList.add(u.pushID);
 			count++;
@@ -54,7 +54,7 @@ public class GCMPushAdapter implements IPushAdapter {
 			if (count == max) {
 				pushAsync(partialList, msg);
 				if (max < MAX_IDS) {
-					partialList = new ArrayList<>(max);
+					partialList = new ArrayList<String>(max);
 					count = 0;
 				}
 			}
@@ -66,7 +66,7 @@ public class GCMPushAdapter implements IPushAdapter {
 
 			@Override
 			public void run() {
-				HashMap<String, String> changes = new HashMap<>();
+				HashMap<String, String> changes = new HashMap<String, String>();
 				
 				MulticastResult res = null;
 				try {
