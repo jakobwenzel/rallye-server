@@ -18,7 +18,9 @@ import com.google.android.gcm.server.Sender;
 
 import de.rallye.db.DataAdapter;
 import de.rallye.exceptions.DataException;
+import de.rallye.model.structures.PushEntity;
 import de.rallye.model.structures.UserInternal;
+import de.rallye.model.structures.PushEntity.Type;
 
 public class GCMPushAdapter implements IPushAdapter {
 	
@@ -39,9 +41,10 @@ public class GCMPushAdapter implements IPushAdapter {
 	}
 	
 	@Override
-	public void push(List<UserInternal> users, String payload) {
+	public void push(List<UserInternal> users, String payload, Type type) {
 		
-		Message msg = new Message.Builder().timeToLive(TTL).addData("payload", payload).build();
+		Message msg = new Message.Builder().timeToLive(TTL).addData(PushEntity.TYPE, type.toString())
+				.addData(PushEntity.PAYLOAD, payload).build();
 		
 		int max = (users.size() > MAX_IDS)? MAX_IDS : users.size();
 		int count = 0;

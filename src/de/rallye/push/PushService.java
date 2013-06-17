@@ -11,13 +11,15 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.node.ObjectNode;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import de.rallye.RallyeConfig;
 import de.rallye.db.DataAdapter;
 import de.rallye.exceptions.DataException;
 import de.rallye.model.structures.ChatEntry;
 import de.rallye.model.structures.Chatroom;
+import de.rallye.model.structures.PushEntity.Type;
 import de.rallye.model.structures.PushMode;
 import de.rallye.model.structures.UserInternal;
 import de.rallye.push.IPushAdapter;
@@ -34,11 +36,11 @@ public class PushService {
 	private Map<Integer, IPushAdapter> pushModes = Collections.synchronizedMap(new HashMap<Integer, IPushAdapter>());
 
 	private DataAdapter data;
-	private ObjectMapper mapper;
+//	private ObjectMapper mapper;
 
 	public PushService(DataAdapter data) {
 		this.data = data;
-		this.mapper = new ObjectMapper();
+//		this.mapper = new ObjectMapper();
 		
 		try {
 			for (PushMode p: data.getPushModes()) {
@@ -60,14 +62,14 @@ public class PushService {
 		
 	}
 	
-	public void chatChanged(ChatEntry chat) {
-		
-	}
-	
-	public String test() {
-		String res = toJSON(new ChatEntry(1, "message", 0l, 3, 282, null), 4);
-		logger.info("test", res);
-		return res;
+	public void chatChanged(ChatEntry chat, int roomID) {
+		try {
+			List<UserInternal> users = data.getChatroomMembers(roomID);
+			
+			push(users, toJSON(chat, roomID), Type.messageChanged);
+		} catch (DataException e) {
+			logger.error(e);
+		}
 	}
 	
 	public void chatAdded(ChatEntry chat, int roomID) {
@@ -76,21 +78,31 @@ public class PushService {
 			
 			
 			
-			push(usrs, toJSON(chat, roomID));
+			push(usrs, toJSON(chat, roomID), Type.newMessage);
 		} catch (DataException e) {
 			logger.error(e);
 		}
 	}
 	
 	private String toJSON(ChatEntry chat, int roomID) {
-		ObjectNode o = mapper.createObjectNode();
-		o.put(Chatroom.CHATROOM_ID, roomID);
-		o.putPOJO("chat", chat);
+		JSONObject o = new JSONObject();
+		
+		try {
+			o.put(ChatEntry.CHAT_ID, chat.chatID)
+				.put(ChatEntry.GROUP_ID, chat.groupID)
+				.put(Chatroom.CHATROOM_ID, roomID)
+				.put(ChatEntry.USER_ID, chat.userID)
+				.put(ChatEntry.MESSAGE, chat.message)
+				.put(ChatEntry.PICTURE_ID, chat.pictureID)
+				.put(ChatEntry.TIMESTAMP, chat.timestamp);
+		} catch (JSONException e) {
+			logger.error(e);
+		}
 		
 		return o.toString();
 	}
 	
-	private void push(List<UserInternal> users, String payload) {
+	private void push(List<UserInternal> users, String payload, Type type) {
 		HashMap<Integer, List<UserInternal>> ids = new HashMap<Integer, List<UserInternal>>();
 		
 		Set<Integer> modes = pushModes.keySet();
@@ -115,7 +127,7 @@ public class PushService {
 		}
 		
 		for (Entry<Integer, IPushAdapter> m: pushModes.entrySet()) {
-			m.getValue().push(ids.get(m.getKey()), payload);
+			m.getValue().push(ids.get(m.getKey()), payload, type);
 		}
 	}
 }

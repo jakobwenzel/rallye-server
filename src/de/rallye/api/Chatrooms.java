@@ -148,10 +148,4 @@ public class Chatrooms {
 		}
 	}
 	
-	@GET
-	@Path("test")
-	public String test() {
-		return R.push.test();
-	}
-	
 }
