@@ -256,7 +256,7 @@ public class DataAdapter {
 			int pushModeID = 0;
 			
 			if (info.pushMode != null) {
-				st = con.prepareStatement("SELECT "+ Ry.PushModes.ID +" FROM "+ Ry.PushModes.TABLE +" WHERE "+ Ry.PushModes.NAME +" LIKE '?'");
+				st = con.prepareStatement("SELECT "+ Ry.PushModes.ID +" FROM "+ Ry.PushModes.TABLE +" WHERE "+ Ry.PushModes.NAME +" LIKE ?");
 				st.setString(1, info.pushMode);
 				
 				rs = st.executeQuery();
@@ -273,7 +273,7 @@ public class DataAdapter {
 			
 			if (info.uniqueID != null && info.uniqueID.length() > 3) {
 				st = con.prepareStatement("SELECT "+ cols(Ry.Users.ID, Ry.Users.ID_GROUP, Ry.Users.ID_PUSH_MODE, Ry.Users.NAME, Ry.Users.PASSWORD, Ry.Users.PUSH_ID, Ry.Users.UNIQUE_ID) +
-											" FROM "+ Ry.Users.TABLE +" WHERE "+ Ry.Users.UNIQUE_ID +" LIKE '?'");
+											" FROM "+ Ry.Users.TABLE +" WHERE "+ Ry.Users.UNIQUE_ID +" LIKE ?");
 				st.setString(1, info.uniqueID);
 				rs = st.executeQuery();
 				
@@ -285,7 +285,7 @@ public class DataAdapter {
 			}
 			
 			if (userID > 0) {
-				st = con.prepareStatement("UPDATE "+ Ry.Users.NAME +" SET "+
+				st = con.prepareStatement("UPDATE "+ Ry.Users.TABLE +" SET "+
 						Ry.Users.ID_GROUP +"=?, "+ Ry.Users.ID_PUSH_MODE +"=?, "+ Ry.Users.NAME +"=?, "+ Ry.Users.PASSWORD +"=?, "+ Ry.Users.PUSH_ID +"=? "+
 						"WHERE "+ Ry.Users.ID +"=?");
 				st.setInt(1, groupID);
@@ -535,7 +535,7 @@ public class DataAdapter {
 		try {
 			con = dataSource.getConnection();
 			st = con.prepareStatement("UPDATE "+ Ry.Users.TABLE +" SET "+ Ry.Users.PUSH_ID +"=?, " + Ry.Users.ID_PUSH_MODE +
-										"=(SELECT "+ Ry.PushModes.ID +" FROM "+ Ry.PushModes.TABLE +" WHERE "+ Ry.PushModes.NAME +" LIKE '?')"+
+										"=(SELECT "+ Ry.PushModes.ID +" FROM "+ Ry.PushModes.TABLE +" WHERE "+ Ry.PushModes.NAME +" LIKE ?)"+
 										" WHERE "+ Ry.Users.ID +"=?");
 			
 			st.setString(1, push.pushID);
