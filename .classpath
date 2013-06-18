@@ -20,10 +20,10 @@
 	<classpathentry kind="lib" path="lib/jersey-core-1.17.jar" sourcepath="Resources/jersey-core-1.17-sources.jar"/>
 	<classpathentry kind="lib" path="lib/jersey-grizzly2-1.17.jar"/>
 	<classpathentry kind="lib" path="lib/jersey-json-1.17.jar" sourcepath="Resources/jersey-json-1.17-sources.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/RallyeStructures"/>
 	<classpathentry kind="lib" path="lib/jackson-core-asl-1.9.2.jar"/>
 	<classpathentry kind="lib" path="lib/jackson-jaxrs-1.9.2.jar"/>
 	<classpathentry kind="lib" path="lib/jackson-mapper-asl-1.9.2.jar"/>
 	<classpathentry kind="lib" path="lib/jackson-xc-1.9.2.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/RallyeStructures"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
