@@ -1,5 +1,12 @@
 package de.rallye.api;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 import javax.ws.rs.GET;
@@ -66,5 +73,39 @@ public class System {
 			logger.error("getPushModes failed", e);
 			throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
 		}
+	}
+	
+	@GET
+	@Path("log")
+	@Produces(MediaType.TEXT_HTML)
+	public String getLog() throws FileNotFoundException {
+		
+		File f = new File("log/debug.log");
+		
+		BufferedReader r = new BufferedReader(new FileReader(f));
+		
+		LinkedHashMap<Integer, String> list = new LinkedHashMap<Integer, String>() {
+			protected boolean removeEldestEntry(java.util.Map.Entry<Integer,String> arg0) {
+				return size() > 50;
+			};
+		};
+		
+		int i = 0;
+		String line;
+		
+		
+		try {
+			while ((line = r.readLine()) != null) {
+				list.put(i++, line);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		StringBuilder sb = new StringBuilder("<html><head><title>Log</title></head><body>");
+		for (String l: list.values()) {
+			sb.append(l).append("<br />");
+		}
+		return sb.append("</body></html>").toString();
 	}
 }
