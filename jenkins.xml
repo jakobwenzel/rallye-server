@@ -8,7 +8,8 @@
     <property name="debuglevel" value="source,lines,vars"/>
     <property name="target" value="1.6"/>
     <property name="source" value="1.6"/>
-    <path id="RallyeServ.classpath">
+    <property name="main-class"  value="de.rallye.StadtRallye"/>
+    <path id="classpath">
         <pathelement location="bin"/>
         <pathelement location="lib/gcm-server.jar"/>
         <pathelement location="lib/asm-3.3.1.jar"/>
@@ -34,12 +35,30 @@
         <pathelement location="lib/jackson-xc-1.9.2.jar"/>
         <pathelement location="lib/RallyeStructures.jar"/>
     </path>
+
+
+    <pathconvert property="manifest.classpath" pathsep=" ">
+    <path refid="classpath"/>
+    <mapper>
+        <chainedmapper>
+            <flattenmapper/>
+            <globmapper from="*.jar" to="lib/*.jar"/>
+        </chainedmapper>
+      </mapper>
+    </pathconvert>
+
     <target name="init">
         <mkdir dir="bin"/>
         <mkdir dir="dist"/>
+        <mkdir dir="dist/lib"/>
         <copy includeemptydirs="false" todir="bin">
             <fileset dir="src">
                 <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+
+        <copy includeemptydirs="false" todir="dist/lib">
+            <fileset dir="lib">
             </fileset>
         </copy>
     </target>
@@ -63,9 +82,15 @@
             <exclude name="de/rallye/resources/"/>
             <exclude name="de/rallye/resources/DataHandler.java"/>
             <exclude name="de/rallye/resources/GameControlConfig.java"/>
-            <classpath refid="RallyeServ.classpath"/>
+            <classpath refid="classpath"/>
         </javac>
-        <jar destfile="dist/RallyeServ.jar" basedir="bin" />
+        <jar destfile="dist/RallyeServ.jar" basedir="bin">
+
+            <manifest>
+                <attribute name="Main-Class" value="${main-class}"/>
+                <attribute name="Class-Path" value="${manifest.classpath}"/>
+            </manifest>
+        </jar>
     </target>
     <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects"/>
 </project>
