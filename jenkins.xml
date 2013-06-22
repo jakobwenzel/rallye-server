@@ -56,9 +56,16 @@
         <echo message="${ant.project.name}: ${ant.file}"/>
         <javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}">
             <src path="src"/>
+            <exclude name="de/rallye/api/ClientListener.java"/>
+            <exclude name="de/rallye/control/"/>
+            <exclude name="de/rallye/control/commands/"/>
+            <exclude name="de/rallye/pushService/PushServiceOld.java"/>
+            <exclude name="de/rallye/resources/"/>
+            <exclude name="de/rallye/resources/DataHandler.java"/>
+            <exclude name="de/rallye/resources/GameControlConfig.java"/>
             <classpath refid="RallyeServ.classpath"/>
         </javac>
-        <jar destfile="dist/RallyeServ.jar" basedir="bin">
+        <jar destfile="dist/RallyeServ.jar" basedir="bin" />
     </target>
     <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects"/>
 </project>
