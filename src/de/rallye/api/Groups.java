@@ -79,16 +79,10 @@ public class Groups {
 	@GET
 	@Path("{groupID}/avatar")
 	@Produces("image/jpeg")
-	public BufferedImage getGroupAvatar(@PathParam("groupID") int groupID) {
+	public File getGroupAvatar(@PathParam("groupID") int groupID) {
 		File f = new File("game/"+ groupID +"/avatar.jpg");
 		
-		try {
-			BufferedImage avt = ImageIO.read(f);
-			return avt;
-		} catch (IOException e) {
-			logger.error(e);
-			throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
-		}
+		return f;
 	}
 	
 	@GET

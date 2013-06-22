@@ -42,6 +42,7 @@ public class Pics {
 	@Consumes("image/jpeg")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Picture uploadPictureWithHash(BufferedImage img, @PathParam("hash") String hash, @Context SecurityContext sec) {
+		logger.entry();
 		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
 		
 		Picture pic = savePicture(img, p);
@@ -49,7 +50,7 @@ public class Pics {
 			ChatPictureLink.getLink(R.hashMap, hash, R.data).setPicture(pic.pictureID);
 		}
 		
-		return pic;
+		return logger.exit(pic);
 	}
 	
 	@PUT
@@ -57,7 +58,8 @@ public class Pics {
 	@Consumes("image/jpeg")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Picture uploadPicture(BufferedImage img, @Context SecurityContext sec) {//TODO: keep unedited original including EXIF
-		return savePicture(img, (RallyePrincipal) sec.getUserPrincipal());
+		logger.entry();
+		return logger.exit(savePicture(img, (RallyePrincipal) sec.getUserPrincipal()));
 	}
 	
 	private Picture savePicture(BufferedImage img, RallyePrincipal p) {

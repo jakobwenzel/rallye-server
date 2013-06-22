@@ -6,7 +6,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.ws.rs.GET;
@@ -23,12 +22,14 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import com.sun.jersey.spi.container.ResourceFilters;
 
+import de.rallye.RallyeConfig;
 import de.rallye.RallyeResources;
 import de.rallye.RallyeServer;
 import de.rallye.auth.KnownUserAuth;
 import de.rallye.exceptions.DataException;
 import de.rallye.model.structures.PushMode;
 import de.rallye.model.structures.ServerConfig;
+import de.rallye.model.structures.ServerInfo;
 
 @Path("rallye/system")
 public class System {
@@ -36,6 +37,20 @@ public class System {
 	private static Logger logger = LogManager.getLogger(System.class);
 	
 	private RallyeResources R = RallyeServer.getResources();
+	
+	@GET
+	@Path("picture")
+	@Produces("image/jpeg")
+	public File getPicture() {
+		return new File("game/picture.jpg");
+	}
+	
+	@GET
+	@Path("info")
+	@Produces(MediaType.APPLICATION_JSON)
+	public ServerInfo getDescription() {
+		return RallyeConfig.getServerDescription();
+	}
 
 	@GET
 	@Path("status")
