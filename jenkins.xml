@@ -84,6 +84,10 @@
             <exclude name="de/rallye/resources/GameControlConfig.java"/>
             <classpath refid="classpath"/>
         </javac>
+        <copy includeemptydirs="false" todir="bin">
+            <fileset dir="config">
+            </fileset>
+        </copy>
         <jar destfile="dist/RallyeServ.jar" basedir="bin">
 
             <manifest>
