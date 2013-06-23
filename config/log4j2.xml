@@ -1,27 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration status="all" strict="true" >
+<configuration status="warn" >
     <properties>
         <property name="log" >log/rallye.log</property>
         <property name="debugLog" >log/debug.log</property>
+        <property name="logiohost">rokkenjima</property>
     </properties>
     <filter type="ThresholdFilter" level="trace"/>
 
     <appenders>
-        <appender type="Console" name="STDOUT">
-            <layout type="PatternLayout" pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36}.%method -  %msg%n%throwable{full}" />
-        </appender>
+        <Console name="STDOUT">
+            <PatternLayout pattern="hello %d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36}.%method -  %msg%n%throwable{full}" />
+        </Console>
         
-        <appender type="File" name="LogFile" fileName="${log}">
-            <layout type="PatternLayout" pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36}.%method - %msg%n%throwable{10}" />
-        </appender>
+        <File name="LogFile" fileName="${log}">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36}.%method - %msg%n%throwable{10}" />
+        </File>
         
-        <appender type="File" name="DebugLogFile" fileName="${debugLog}">
-            <layout type="PatternLayout" pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36}.%method - %msg%n%throwable{10}" />
-        </appender>
+        <File name="DebugLogFile" fileName="${debugLog}">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36}.%method - %msg%n%throwable{10}" />
+        </File>
         
-         <appender type="List" name="List">
-		</appender>
-        
+          
+         <!--  <appender name="sc" class="de.rallye.admin.ServerConsoleAppender">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36}.%method - %msg%n%throwable{10}" />-->
+            <Socket name="sc" protocol="TCP" host="${logiohost}" port="28777">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36}.%method - %msg%n%throwable{10}%n">
+                <Replace regex="[^\r\n]*\r\n" replacement="+log|Debug Log|Server|trace|$0"  />
+            </PatternLayout>
+		</Socket>
         <!--<Console name="ConsoleException" target="System_OUT"> 
         	<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36}.%method -  %xEx{full}%n" />
         </Console>
@@ -40,13 +46,13 @@
         
         <logger name ="de.rallye" level="trace" additivity="false" > 
         	<appender-ref ref="STDOUT" />
+        	<appender-ref ref="sc" />
         	<appender-ref ref="LogFile" level="warn" />
             <appender-ref ref="DebugLogFile" level="trace" />
         </logger>
         
         <root level="trace" >
 
-            <appender-ref ref="List" />
             
         </root>
     </loggers>
