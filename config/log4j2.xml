@@ -3,7 +3,7 @@
     <properties>
         <property name="log" >log/rallye.log</property>
         <property name="debugLog" >log/debug.log</property>
-        <property name="logiohost">rokkenjima</property>
+        <property name="logiohost">localhost</property>
     </properties>
     <filter type="ThresholdFilter" level="trace"/>
 
