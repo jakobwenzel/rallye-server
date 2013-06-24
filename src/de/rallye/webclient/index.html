@@ -1,0 +1,41 @@
+<html>
+<head>
+<title>Hello World!!!</title>
+<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+<script type="text/javascript">
+
+function findRoot() {
+
+	var loc = document.location.href;
+	var pos = loc.indexOf('/',8);
+	return loc.substr(0,pos+1);
+
+}
+
+var root = findRoot();
+
+$(function () {
+
+
+
+	$.ajax({
+		url: root+"rallye/system/info",
+		dataType: "json"
+	}).done(function(res) {
+		$("#servername").html("<b>"+res.name+"</b><br>"+res.description);
+	}).fail(function(err) {
+		alert(err);
+		console.log(err);
+	});
+
+
+
+});
+
+</script>
+</head>
+<body>
+<div id="servername">
+</div>
+</body>
+</html>
