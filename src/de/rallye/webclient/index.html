@@ -15,7 +15,7 @@ function findRoot() {
 function get_system_info(callback) {
 	$.ajax({
 		url: root+"rallye/system/info",
-		global: false,
+		dataType: "json"
 	}).done(callback)
 }
 
@@ -26,7 +26,7 @@ function setup_error_handler() {
 		console.log(xhr.status);
 		if (xhr.status==0) {
 			if(thrownError)
-				readable = thrownError.message;
+				readable = thrownError;
 			else readable = xhr.statusText;
 		} else {
 			readable = xhr.status+" "+xhr.statusText;
