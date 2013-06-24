@@ -57,7 +57,8 @@ public class Game {
 			logger.error("getChatrooms failed", e);
 			throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
 		} catch (WebAppExcept e) {
-			throw logger.throwing(e);
+			logger.warn(e);
+			throw e;
 		}
 		
 		return logger.exit(Response.ok().build());
