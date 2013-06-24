@@ -74,11 +74,11 @@ public class PushService {
 	
 	public void chatAdded(ChatEntry chat, int roomID) {
 		try {
-			List<UserInternal> usrs = data.getChatroomMembers(roomID);
+			List<UserInternal> users = data.getChatroomMembers(roomID);
 			
 			
 			
-			push(usrs, toJSON(chat, roomID), Type.newMessage);
+			push(users, toJSON(chat, roomID), Type.newMessage);
 		} catch (DataException e) {
 			logger.error(e);
 		}

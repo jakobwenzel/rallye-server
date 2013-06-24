@@ -30,10 +30,10 @@ public class WebAppExcept extends WebApplicationException {
 	
 	/**
 	 * Construct a new instance using the supplied message and specified HTTP status code
-	 * @param message - message that will be returned to the client
 	 * @param status - the HTTP status code that will be returned to the client
+	 * @param message - message that will be returned to the client
 	 */
-	public WebAppExcept(String message, int status) {
+	public WebAppExcept(int status, String message) {
 		super(Response.status(status).entity(message).build());
 		this.message = message;
 	}
