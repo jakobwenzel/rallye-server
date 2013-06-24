@@ -1,7 +1,7 @@
 <html>
 <head>
-<title>Hello World!!!</title>
-<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+<title>Rallye</title>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
 <script type="text/javascript">
 
 function findRoot() {
@@ -12,22 +12,43 @@ function findRoot() {
 
 }
 
+function get_system_info(callback) {
+	$.ajax({
+		url: root+"rallye/system/info",
+		global: false,
+	}).done(callback)
+}
+
+function setup_error_handler() {
+
+	$(document).bind("ajaxError",function(event, xhr, ajaxOptions, thrownError) {
+		var readable;
+		console.log(xhr.status);
+		if (xhr.status==0) {
+			if(thrownError)
+				readable = thrownError.message;
+			else readable = xhr.statusText;
+		} else {
+			readable = xhr.status+" "+xhr.statusText;
+			if (xhr.statusText!=thrownError)
+				readable+=" "+thrownError;
+		}
+		alert(readable);
+	});
+}
+
 var root = findRoot();
 
 $(function () {
 
 
+	setup_error_handler();
 
-	$.ajax({
-		url: root+"rallye/system/info",
-		dataType: "json"
-	}).done(function(res) {
+
+	get_system_info(function(res) {
 		$("#servername").html("<b>"+res.name+"</b><br>"+res.description);
-	}).fail(function(err) {
-		alert(err);
-		console.log(err);
+		document.title=res.name;
 	});
-
 
 
 });
