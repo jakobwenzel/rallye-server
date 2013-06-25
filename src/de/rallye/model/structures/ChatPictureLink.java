@@ -88,6 +88,7 @@ public class ChatPictureLink {
 		public void propagateLink(ChatPictureLink link, Mode mode) {
 			try {
 				data.editChatAddPicture(link.chatID, link.pictureID);
+				//TODO: Push
 			} catch (DataException e) {
 				logger.error("{}: Linking failed", this, e);
 			}

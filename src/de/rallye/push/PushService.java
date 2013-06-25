@@ -52,7 +52,7 @@ public class PushService {
 	}
 	
 	public static IPushAdapter getPushAdapter(String name, DataAdapter data) {
-		if (name.equals("gcm"))
+		if (name.equalsIgnoreCase("gcm"))
 			return new GCMPushAdapter(RallyeConfig.GCM_API_KEY, data);
 		else
 			return null;
