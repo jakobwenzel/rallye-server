@@ -268,8 +268,9 @@ public class DataAdapter {
 			int pushModeID = 0;
 			
 			if (info.pushMode != null) {
-				st = con.prepareStatement("SELECT "+ Ry.PushModes.ID +" FROM "+ Ry.PushModes.TABLE +" WHERE "+ Ry.PushModes.NAME +" LIKE ?");
+				st = con.prepareStatement("SELECT "+ Ry.PushModes.ID +" FROM "+ Ry.PushModes.TABLE +" WHERE "+ Ry.PushModes.NAME +" LIKE ? OR "+ Ry.PushModes.ID +"=?");
 				st.setString(1, info.pushMode);
+				st.setString(2, info.pushMode);
 				
 				rs = st.executeQuery();
 				

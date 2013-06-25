@@ -127,7 +127,12 @@ public class PushService {
 		}
 		
 		for (Entry<Integer, IPushAdapter> m: pushModes.entrySet()) {
-			m.getValue().push(ids.get(m.getKey()), payload, type);
+			IPushAdapter adapter = m.getValue();
+			if (adapter == null) {
+				logger.error("PushAdapter for mode:{} is null", m.getKey());
+				continue;
+			}
+			adapter.push(ids.get(m.getKey()), payload, type);
 		}
 	}
 }
