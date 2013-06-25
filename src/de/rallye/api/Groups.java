@@ -63,6 +63,7 @@ public class Groups {
 	
 	@GET
 	@Path("{groupID}")
+	@ResourceFilters(KnownUserAuth.class)
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<? extends User> getMembers(@PathParam("groupID") int groupID) {
 		logger.entry();
@@ -87,6 +88,7 @@ public class Groups {
 	
 	@GET
 	@Path("{groupID}/{userID}")
+	@ResourceFilters(KnownUserAuth.class)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getUserInfo(@PathParam("groupID") int groupID, @PathParam("userID") int userID) {
 		throw new NotImplementedException();
@@ -94,6 +96,7 @@ public class Groups {
 	
 	@GET
 	@Path("{groupID}/{userID}/pushSettings")
+	@ResourceFilters(KnownUserAuth.class)
 	@Produces(MediaType.APPLICATION_JSON)
 	public PushConfig getPushSettings(@PathParam("groupID") int groupID, @PathParam("userID") int userID, @Context SecurityContext sec) {
 		logger.entry();
@@ -112,6 +115,7 @@ public class Groups {
 	
 	@POST
 	@Path("{groupID}/{userID}/pushSettings")
+	@ResourceFilters(KnownUserAuth.class)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response setPushConfig(@PathParam("groupID") int groupID, @PathParam("userID") int userID, PushConfig push, @Context SecurityContext sec) {
 		logger.entry();
