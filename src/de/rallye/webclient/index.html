@@ -1,0 +1,279 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+<title>Rallye</title>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+<script type="text/javascript">
+
+function findRoot() {
+
+	var loc = document.location.href;
+	var pos = loc.indexOf('/',8);
+	return loc.substr(0,pos+1);
+
+}
+
+function setup_error_handler() {
+
+	$(document).bind("ajaxError",function(event, xhr, ajaxOptions, thrownError) {
+		var readable;
+		console.log(xhr.status);
+		//Network error?
+		if (xhr.status==0) {
+			if(thrownError)
+				readable = thrownError;
+			else readable = xhr.statusText;
+		//Wrong auth?
+		} else if (xhr.status==401) { 
+		
+			//New login box
+			display_login("Invalid login specified.");
+			
+			//If it was called with authajax, try to do again
+			if (ajaxOptions.__myData)
+				authQueue.push(ajaxOptions);
+			
+			
+			return;
+		
+		//Other error
+		} else {
+			readable = xhr.status+" "+xhr.statusText;
+			if (xhr.statusText!=thrownError)
+				readable+=" "+thrownError;
+		}
+		alert(readable);
+	});
+}
+
+var root = findRoot(); //Root path to server
+var username = window.localStorage["username"]; //Auth username
+var password = window.localStorage["password"]; //Auth password
+
+if (username && password) {
+	console.log(username);
+	console.log(password);
+} 
+
+
+var currentDisplay = null; // Currently displayed element.
+var authQueue = []; //Queue of requests to make when auth finishes.
+
+/**
+ * wrapper for jQuery.ajax, adding auth information
+ */
+function make_auth_request(q) {
+	q.username = username;
+	q.password = password;
+	$.ajax(q)
+		.done(q.__myData.done)
+		.error(q.__myData.fail)
+		.always(q.__myData.always);
+}
+
+function display_login(msg) {
+	if (!msg) msg = "Please log in.";
+	console.log("Displaying login box");
+	$("#main").html('\
+		<form>\
+		<table><tr><td colspan="2">'+msg+'</td></tr>\
+		<tr><td>Username:</td><td><input type="text" name="username" id="username"></td></tr>\
+		<tr><td>Password:</td><td><input type="password" name="password" id="password"></td></tr>\
+		<tr><td colspan="2"><label for="remember"><input type="checkbox" name="remember" id="remember">Remember me</label></td></tr>\
+		<tr><td colspan="2"><input type="submit" value="Login" onclick="submit_login()"></td></tr>\
+		</table>\
+		</form>\
+	');
+
+}
+
+function submit_login() {
+	username = $("#username").val();
+	password = $("#password").val();
+	
+	if (!username || !password) {
+		display_login("Please enter username and password.");
+		return;
+	}
+	
+	var remember = $("#remember").is(':checked');
+	console.log($("#remember"));
+	
+	console.log("new auth: "+username+" "+password);
+
+	if (remember) {
+	 	$("#logout").css("display","");
+		window.localStorage["username"] = username;
+		window.localStorage["password"] = password;
+	}
+	
+	$("#main").html("Logging in...");
+	
+	//Empty global queue
+	queue = authQueue;
+	authQueue = [];
+	
+	//Do the requests
+	queue.forEach(make_auth_request);
+}
+
+/**
+ * Checks if auth info has been supplied, makes an jQuery ajax request if yes, displays auth if not
+ */
+function authajax(obj, done, fail, always) {
+
+	obj.__myData = {
+		done: done,
+		fail: fail,
+		always: always
+	};
+			
+
+	//Is there auth info?
+	if (!username || ! password) {
+	
+		//Are we already displaying auth?
+		if (currentDisplay != "auth") {
+			display_login();	
+		}
+		//Queue request
+		authQueue.push(obj);
+	
+	} else
+		make_auth_request(obj);
+
+}
+
+function kill_auth() {
+	console.log("killing auth");
+	username = null;
+	password = null;
+	window.localStorage.clear();
+	window.location.reload()
+	return false;
+}
+
+
+
+function get_system_info(callback) {
+	$.ajax({
+		url: root+"rallye/system/info",
+		dataType: "json",
+	}).done(callback);
+}
+
+function get_chatrooms(callback) {
+	authajax({
+		url: root+"rallye/chatrooms",
+		dataType: "json"
+	},callback);
+}
+var roomId;
+function load_chatroom(id) {
+	
+	authajax({
+		url: root+"rallye/chatrooms/"+id,
+		dataType: "json"
+	},function (res) {
+		roomId = id;
+		history.pushState(null, "", root+"client/?chatroom="+id);
+		var table="<table>";
+		table+=res.reduce(function(red,chat) {
+			console.log(chat);
+			var line = "<tr><td>"+chat.userID+"</td><td>"+chat.message+"</td></tr>";
+			
+			return red+line;
+		
+		},"");
+		table+='</table>\
+		<form><input type="text" id="message" name="message"><input type="submit" onclick="return submit_message();" value="Send"></form>\
+		';
+		$("#main").html(table);
+	});	
+	
+	
+	return false;
+}
+
+
+function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(location.search);
+    return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
+
+function submit_message() {
+
+	var message = $("#message").val();
+	
+	authajax({
+		url: root+"rallye/chatrooms/"+roomId,
+		method: "PUT",
+		contentType: "application/json",
+		data: JSON.stringify({
+			"message": message
+		})
+	},function(res){
+		alert("sending successful");
+	});
+	
+	return false;
+
+}
+
+var chatrooms;
+$(function () {
+
+
+	setup_error_handler();
+
+
+	get_system_info(function(res) {
+		$("#servername").html("<b>"+res.name+"</b><br>"+res.description);
+		document.title=res.name;
+	});
+
+	get_chatrooms(function(res) {
+		console.log(res);
+
+		chatrooms = res;
+		
+		var roomLinks = res.reduce(function(list,room) {
+		
+			var link = '<a href="#" onclick="return load_chatroom('+room.chatroomID+');">'+room.name+'</a><br>';
+			return list + link;
+		
+		},"");
+		$("#left").html(roomLinks);
+	});
+	
+	var lastRoom = getParameterByName("chatroom");
+	if (lastRoom!=null) load_chatroom(lastRoom);
+
+});
+
+</script>
+<style type="text/css">
+#main {
+}
+#left {
+	border: 1px dashed silver;
+	width: 13em;
+	margin-right: 1em;
+	float: left;
+}
+</style>
+</head>
+<body>
+<div id="servername">
+</div>
+<div id="left">
+hello
+</div>
+<div id="main">
+</div>
+<div id="logout"><a href="#" onclick="return kill_auth();" >Logout</a></div>
+</body>
+</html>

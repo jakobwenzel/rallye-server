@@ -40,15 +40,14 @@ public class RallyeServer {
 	
 	private static RallyeResources resources;
 
-	public RallyeServer(String host, int port, DataAdapter data, ImageRepository imgRepo, PushService push) {
+	public RallyeServer(String host, int port, RallyeResources resources) {
 		logger.entry();
 
 		// create URI
 		URI uri = UriBuilder.fromUri("http://" + host + "/").port(10101).build();
 		
-		Map<String, ChatPictureLink> hashmap = Collections.synchronizedMap(new HashMap<String, ChatPictureLink>());
 		
-		resources = new RallyeResources(data, imgRepo, hashmap, push);
+		this.resources = resources;
 
 		// start http server
 		try {

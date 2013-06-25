@@ -8,14 +8,14 @@ import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
@@ -24,14 +24,13 @@ import de.rallye.exceptions.InputException;
 import de.rallye.model.structures.ChatEntry;
 import de.rallye.model.structures.Chatroom;
 import de.rallye.model.structures.Group;
+import de.rallye.model.structures.Edge;
 import de.rallye.model.structures.LoginInfo;
 import de.rallye.model.structures.Node;
-import de.rallye.model.structures.PrimitiveEdge;
-import de.rallye.model.structures.PushMode;
 import de.rallye.model.structures.PushConfig;
+import de.rallye.model.structures.PushMode;
 import de.rallye.model.structures.ServerConfig;
 import de.rallye.model.structures.SimpleChatEntry;
-import de.rallye.model.structures.User;
 import de.rallye.model.structures.UserAuth;
 import de.rallye.model.structures.UserInternal;
 
@@ -42,8 +41,11 @@ public class DataAdapter {
 	private ComboPooledDataSource dataSource;
 
 	
-	public DataAdapter(ComboPooledDataSource dataSource) {
+	public DataAdapter(ComboPooledDataSource dataSource) throws SQLException {
 		this.dataSource = dataSource;
+		
+		loadNodes();
+		loadEdges();
 	}
 	
 	/**
@@ -109,7 +111,14 @@ public class DataAdapter {
 		}
 	}
 	
-	public List<Node> getNodes() throws DataException {
+	private Map<Integer,Node> nodes;
+	private List<Edge> edges;
+	
+	public Map<Integer,Node> getNodes() {
+		return nodes;
+	}
+	
+	private void loadNodes() throws SQLException {
 		Connection con = null;
 		Statement st = null;
 		ResultSet rs = null;
@@ -119,21 +128,22 @@ public class DataAdapter {
 			st = con.createStatement();
 			rs = st.executeQuery("SELECT "+ cols(Ry.Nodes.ID, Ry.Nodes.NAME, Ry.Nodes.LAT, Ry.Nodes.LON, Ry.Nodes.DESCRIPTION) +" FROM "+ Ry.Nodes.TABLE +" ORDER BY "+ Ry.Nodes.ID);
 
-			ArrayList<Node> nodes = new ArrayList<Node>();
+			nodes = new HashMap<Integer,Node>();
 			
 			while (rs.next()) {
-				nodes.add(new Node(rs.getInt(1), rs.getString(2), rs.getDouble(3), rs.getDouble(4), rs.getString(5)));
+				nodes.put(rs.getInt(1),new Node(rs.getInt(1), rs.getString(2), rs.getDouble(3), rs.getDouble(4), rs.getString(5)));
 			}
 
-			return nodes;
-		} catch (SQLException e) {
-			throw new DataException(e);
 		} finally {
 			close(con, st, rs);
 		}
 	}
 
-	public List<PrimitiveEdge> getEdges() throws DataException {
+	public List<Edge> getEdges() {
+		return edges;
+	}
+	
+	private void loadEdges() throws SQLException{
 		Connection con = null;
 		Statement st = null;
 		ResultSet rs = null;
@@ -143,15 +153,14 @@ public class DataAdapter {
 			st = con.createStatement();
 			rs = st.executeQuery("SELECT "+ cols(Ry.Edges.A, Ry.Edges.B, Ry.Edges.TYPE) +" FROM "+ Ry.Edges.TABLE);
 
-			ArrayList<PrimitiveEdge> edges = new ArrayList<PrimitiveEdge>();
+			edges = new ArrayList<Edge>();
 			
 			while (rs.next()) {
-				edges.add(new PrimitiveEdge(rs.getInt(1), rs.getInt(2), rs.getString(3)));
+				Node a = nodes.get(rs.getInt(1));
+				Node b = nodes.get(rs.getInt(2));
+				edges.add(new Edge(a, b, rs.getString(3)));
 			}
 
-			return edges;
-		} catch (SQLException e) {
-			throw new DataException(e);
 		} finally {
 			close(con, st, rs);
 		}
@@ -189,6 +198,9 @@ public class DataAdapter {
 		
 		try {
 			String[] usr = login[0].split("@");//0: userID, 1:groupID
+			
+			if (usr.length!=2)
+				return null;
 			
 			
 			con = dataSource.getConnection();

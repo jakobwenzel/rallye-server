@@ -25,5 +25,6 @@
 	<classpathentry kind="lib" path="lib/jackson-mapper-asl-1.9.2.jar"/>
 	<classpathentry kind="lib" path="lib/jackson-xc-1.9.2.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/RallyeStructures"/>
+	<classpathentry kind="lib" path="lib/json-simple-1.1.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

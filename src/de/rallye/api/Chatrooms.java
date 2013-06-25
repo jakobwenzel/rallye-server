@@ -126,6 +126,8 @@ public class Chatrooms {
 			} else
 				res = R.data.addChat(chat, roomID, groupID, userID);
 			
+			R.push.chatAdded(res, roomID);
+			
 			return logger.exit(res);
 		} catch (DataException e) {
 			logger.error("getChats failed", e);
