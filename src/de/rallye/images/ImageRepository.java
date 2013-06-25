@@ -1,6 +1,5 @@
 package de.rallye.images;
 
-import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -14,6 +13,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import de.rallye.exceptions.DataException;
+import de.rallye.model.structures.Dimension;
 import de.rallye.model.structures.PictureSize;
 
 public class ImageRepository {
