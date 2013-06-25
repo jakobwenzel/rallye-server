@@ -1,5 +1,7 @@
+<!doctype html>
 <html>
 <head>
+	<meta charset="utf-8">
 <title>Rallye</title>
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
 <script type="text/javascript">
@@ -12,22 +14,30 @@ function findRoot() {
 
 }
 
-function get_system_info(callback) {
-	$.ajax({
-		url: root+"rallye/system/info",
-		dataType: "json"
-	}).done(callback)
-}
-
 function setup_error_handler() {
 
 	$(document).bind("ajaxError",function(event, xhr, ajaxOptions, thrownError) {
 		var readable;
 		console.log(xhr.status);
+		//Network error?
 		if (xhr.status==0) {
 			if(thrownError)
 				readable = thrownError;
 			else readable = xhr.statusText;
+		//Wrong auth?
+		} else if (xhr.status==401) { 
+		
+			//New login box
+			display_login("Invalid login specified.");
+			
+			//If it was called with authajax, try to do again
+			if (ajaxOptions.__myData)
+				authQueue.push(ajaxOptions);
+			
+			
+			return;
+		
+		//Other error
 		} else {
 			readable = xhr.status+" "+xhr.statusText;
 			if (xhr.statusText!=thrownError)
@@ -37,7 +47,127 @@ function setup_error_handler() {
 	});
 }
 
-var root = findRoot();
+var root = findRoot(); //Root path to server
+var username = window.localStorage["username"]; //Auth username
+var password = window.localStorage["password"]; //Auth password
+
+$(function() {
+	if (username && password) {
+	 	$("#logout").css("display","");
+		console.log(username);
+		console.log(password);
+	} 
+});
+
+var currentDisplay = null; // Currently displayed element.
+var authQueue = []; //Queue of requests to make when auth finishes.
+
+/**
+ * wrapper for jQuery.ajax, adding auth information
+ */
+function make_auth_request(q) {
+	q.username = username;
+	q.password = password;
+	$.ajax(q)
+		.done(q.__myData.done)
+		.error(q.__myData.fail)
+		.always(q.__myData.always);
+}
+
+function display_login(msg) {
+	if (!msg) msg = "Please log in.";
+	console.log("Displaying login box");
+	$("#main").html('\
+		<table><tr><td colspan="2">'+msg+'</td></tr>\
+		<tr><td>Username:</td><td><input type="text" name="username" id="username"></td></tr>\
+		<tr><td>Password:</td><td><input type="password" name="password" id="password"></td></tr>\
+		<tr><td colspan="2"><label for="remember"><input type="checkbox" name="remember" id="remember">Remember me</label></td></tr>\
+		<tr><td colspan="2"><input type="submit" value="Login" onclick="submit_login()"></td></tr>\
+		</table>\
+	');
+
+}
+
+function submit_login() {
+	username = $("#username").val();
+	password = $("#password").val();
+	
+	if (!username || !password) {
+		display_login("Please enter username and password.");
+		return;
+	}
+	
+	var remember = $("#remember").is(':checked');
+	console.log($("#remember"));
+	
+	console.log("new auth: "+username+" "+password);
+
+	if (remember) {
+	 	$("#logout").css("display","");
+		window.localStorage["username"] = username;
+		window.localStorage["password"] = password;
+	}
+	
+	$("#main").html("Logging in...");
+	
+	//Empty global queue
+	queue = authQueue;
+	authQueue = [];
+	
+	//Do the requests
+	queue.forEach(make_auth_request);
+}
+
+/**
+ * Checks if auth info has been supplied, makes an jQuery ajax request if yes, displays auth if not
+ */
+function authajax(obj, done, fail, always) {
+
+	obj.__myData = {
+		done: done,
+		fail: fail,
+		always: always
+	};
+			
+
+	//Is there auth info?
+	if (!username || ! password) {
+	
+		//Are we already displaying auth?
+		if (currentDisplay != "auth") {
+			display_login();	
+		}
+		//Queue request
+		authQueue.push(obj);
+	
+	} else
+		make_auth_request(obj);
+
+}
+
+function kill_auth() {
+	console.log("killing auth");
+	username = null;
+	password = null;
+	window.localStorage.clear();
+	return false;
+}
+
+
+
+function get_system_info(callback) {
+	$.ajax({
+		url: root+"rallye/system/info",
+		dataType: "json",
+	}).done(callback);
+}
+
+function get_chatrooms(callback) {
+	authajax({
+		url: root+"rallye/chatrooms",
+		dataType: "json"
+	},callback);
+}
 
 $(function () {
 
@@ -50,13 +180,33 @@ $(function () {
 		document.title=res.name;
 	});
 
+	get_chatrooms(function(res) {
+		console.log(res);
+		alert(res);
+	});
 
 });
 
 </script>
+<style type="text/css">
+#main {
+}
+#left {
+	border: 1px dashed silver;
+	width: 13em;
+	margin-right: 1em;
+	float: left;
+}
+</style>
 </head>
 <body>
 <div id="servername">
 </div>
+<div id="left">
+hello
+</div>
+<div id="main">
+</div>
+<div id="logout" style="display:none"><a href="#" onclick="return kill_auth();" >Logout</a></div>
 </body>
 </html>
