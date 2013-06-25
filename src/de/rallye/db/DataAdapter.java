@@ -199,6 +199,9 @@ public class DataAdapter {
 		try {
 			String[] usr = login[0].split("@");//0: userID, 1:groupID
 			
+			if (usr.length!=2)
+				return null;
+			
 			
 			con = dataSource.getConnection();
 			st = con.prepareStatement("SELECT "+ cols(Ry.Users.ID, Ry.Users.ID_GROUP)
