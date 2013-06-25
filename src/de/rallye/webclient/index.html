@@ -51,13 +51,11 @@ var root = findRoot(); //Root path to server
 var username = window.localStorage["username"]; //Auth username
 var password = window.localStorage["password"]; //Auth password
 
-$(function() {
-	if (username && password) {
-	 	$("#logout").css("display","");
-		console.log(username);
-		console.log(password);
-	} 
-});
+if (username && password) {
+	console.log(username);
+	console.log(password);
+} 
+
 
 var currentDisplay = null; // Currently displayed element.
 var authQueue = []; //Queue of requests to make when auth finishes.
@@ -78,12 +76,14 @@ function display_login(msg) {
 	if (!msg) msg = "Please log in.";
 	console.log("Displaying login box");
 	$("#main").html('\
+		<form>\
 		<table><tr><td colspan="2">'+msg+'</td></tr>\
 		<tr><td>Username:</td><td><input type="text" name="username" id="username"></td></tr>\
 		<tr><td>Password:</td><td><input type="password" name="password" id="password"></td></tr>\
 		<tr><td colspan="2"><label for="remember"><input type="checkbox" name="remember" id="remember">Remember me</label></td></tr>\
 		<tr><td colspan="2"><input type="submit" value="Login" onclick="submit_login()"></td></tr>\
 		</table>\
+		</form>\
 	');
 
 }
@@ -150,6 +150,7 @@ function kill_auth() {
 	username = null;
 	password = null;
 	window.localStorage.clear();
+	window.location.reload()
 	return false;
 }
 
@@ -168,7 +169,53 @@ function get_chatrooms(callback) {
 		dataType: "json"
 	},callback);
 }
+var roomId;
+function load_chatroom(id) {
+	
+	authajax({
+		url: root+"rallye/chatrooms/"+id,
+		dataType: "json"
+	},function (res) {
+		roomId = id;
+		var table="<table>";
+		table+=res.reduce(function(red,chat) {
+			console.log(chat);
+			var line = "<tr><td>"+chat.userID+"</td><td>"+chat.message+"</td></tr>";
+			
+			return red+line;
+		
+		},"");
+		table+='</table>\
+		<form><input type="text" id="message" name="message"><input type="submit" onclick="return submit_message();" value="Send"></form>\
+		';
+		$("#main").html(table);
+	});	
+	
+	
+	return false;
+}
 
+
+function submit_message() {
+
+	var message = $("#message").val();
+	
+	authajax({
+		url: root+"rallye/chatrooms/"+roomId,
+		method: "PUT",
+		contentType: "application/json",
+		data: JSON.stringify({
+			"message": message
+		})
+	},function(res){
+		alert("sending successful");
+	});
+	
+	return false;
+
+}
+
+var chatrooms;
 $(function () {
 
 
@@ -182,7 +229,16 @@ $(function () {
 
 	get_chatrooms(function(res) {
 		console.log(res);
-		alert(res);
+
+		chatrooms = res;
+		
+		var roomLinks = res.reduce(function(list,room) {
+		
+			var link = '<a href="#" onclick="return load_chatroom('+room.chatroomID+');">'+room.name+'</a><br>';
+			return list + link;
+		
+		},"");
+		$("#left").html(roomLinks);
 	});
 
 });
@@ -207,6 +263,6 @@ hello
 </div>
 <div id="main">
 </div>
-<div id="logout" style="display:none"><a href="#" onclick="return kill_auth();" >Logout</a></div>
+<div id="logout"><a href="#" onclick="return kill_auth();" >Logout</a></div>
 </body>
 </html>
