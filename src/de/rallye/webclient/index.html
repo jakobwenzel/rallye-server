@@ -177,6 +177,7 @@ function load_chatroom(id) {
 		dataType: "json"
 	},function (res) {
 		roomId = id;
+		history.pushState(null, "", root+"client/?chatroom="+id);
 		var table="<table>";
 		table+=res.reduce(function(red,chat) {
 			console.log(chat);
@@ -195,6 +196,13 @@ function load_chatroom(id) {
 	return false;
 }
 
+
+function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(location.search);
+    return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
 
 function submit_message() {
 
@@ -240,6 +248,9 @@ $(function () {
 		},"");
 		$("#left").html(roomLinks);
 	});
+	
+	var lastRoom = getParameterByName("chatroom");
+	if (lastRoom!=null) load_chatroom(lastRoom);
 
 });
 
