@@ -25,6 +25,7 @@ import de.rallye.model.structures.ChatEntry;
 import de.rallye.model.structures.Chatroom;
 import de.rallye.model.structures.Group;
 import de.rallye.model.structures.Edge;
+import de.rallye.model.structures.GroupUser;
 import de.rallye.model.structures.LoginInfo;
 import de.rallye.model.structures.Node;
 import de.rallye.model.structures.PushConfig;
@@ -613,6 +614,31 @@ public class DataAdapter {
 			}
 
 			return modes;
+		} catch (SQLException e) {
+			throw new DataException(e);
+		} finally {
+			close(con, st, rs);
+		}
+	}
+	
+	public List<GroupUser> getAllUsers() throws DataException {
+		PreparedStatement st = null;
+		Connection con = null;
+		ResultSet rs = null;
+
+		try {
+			con = dataSource.getConnection();
+			st = con.prepareStatement("SELECT "+ cols(Ry.Users.ID, Ry.Users.ID_GROUP, Ry.Users.NAME) +" FROM "+ Ry.Users.TABLE);
+			
+			rs = st.executeQuery();
+
+			List<GroupUser> users = new ArrayList<GroupUser>();
+			
+			while (rs.next()) {
+				users.add(new GroupUser(rs.getInt(1), rs.getInt(2), rs.getString(3)));
+			}
+
+			return users;
 		} catch (SQLException e) {
 			throw new DataException(e);
 		} finally {
