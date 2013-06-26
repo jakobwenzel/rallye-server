@@ -21,7 +21,7 @@ import de.rallye.auth.KnownUserAuth;
 import de.rallye.exceptions.DataException;
 import de.rallye.model.structures.GroupUser;
 
-@Path("users")
+@Path("rallye/users")
 public class Users {
 	
 	private static Logger logger = LogManager.getLogger(System.class);

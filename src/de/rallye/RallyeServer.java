@@ -19,7 +19,7 @@ import com.sun.jersey.api.core.PackagesResourceConfig;
 import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.api.json.JSONConfiguration;
 
-import de.rallye.push.PushWebsocketApp;
+//import de.rallye.push.PushWebsocketApp;
 
 public class RallyeServer {
 	
@@ -69,9 +69,7 @@ public class RallyeServer {
 		rc.getContainerRequestFilters().add(new GZIPContentEncodingFilter());
 		rc.getContainerResponseFilters().add(new GZIPContentEncodingFilter());
 		
-		//
 		HttpServer serv = MyServerFactory.createHttpServer(uri, rc);
-        //final HttpServer serv = HttpServer.createSimpleServer("localhost",10101);
 		logger.info("Starting Grizzly server at " + uri);
 
 		//Register Websocket Stuff
@@ -81,70 +79,11 @@ public class RallyeServer {
 			listener.registerAddOn(addon);
 		}
 		
-		WebSocketApplication pushApp = new PushWebsocketApp();
-		WebSocketEngine.getEngine().register("/grizzly-websockets-chat", "/chat", pushApp);
+//		WebSocketApplication pushApp = new PushWebsocketApp();
+//		WebSocketEngine.getEngine().register("/grizzly-websockets-chat", "/chat", pushApp);
 
 		serv.start();  
 		return serv;
-	}
-	
-    public static final int PORT = 8080;
-    
-    public static void mainWorking(String[] args) throws Exception {
-        // Server expects to get the path to webapp as command line parameter
-        if (args.length < 1) {
-            System.out.println("Please provide a path to webapp in the command line");
-            System.exit(0);
-        }
-        // create a Grizzly HttpServer to server static resources from 'webapp', on PORT.
-        final HttpServer server = HttpServer.createSimpleServer(args[0], PORT);
-
-        // Register the WebSockets add on with the HttpServer
-        server.getListener("grizzly").registerAddOn(new WebSocketAddOn());
-
-        // initialize websocket chat application
-        final WebSocketApplication chatApplication = new PushWebsocketApp();
-
-        // register the application
-        WebSocketEngine.getEngine().register("/grizzly-websockets-chat", "/chat", chatApplication);
-
-        try {
-            server.start();
-            System.out.println("Press any key to stop the server...");
-            //noinspection ResultOfMethodCallIgnored
-            System.in.read();
-        } finally {
-            // stop the server
-            server.stop();
-        }
-    }
-	
-	public static void mainBroken(String[] args) throws Exception {
-        final HttpServer server = HttpServer.createSimpleServer("localhost", 8080);
-
-        // Register the WebSockets add on with the HttpServer
-        server.getListener("grizzly").registerAddOn(new WebSocketAddOn());
-
-        // initialize websocket chat application
-        final WebSocketApplication chatApplication = new PushWebsocketApp();
-
-        // register the application
-        WebSocketEngine.getEngine().register("/grizzly-websockets-chat", "/chat", chatApplication);
-        
-        try {
-            server.start();
-            System.out.println("Press any key to stop the server...");
-            //noinspection ResultOfMethodCallIgnored
-            System.in.read();
-        } finally {
-            // stop the server
-            server.stop();
-        }
-
-	}
-	
-	public static void main(String[] args) throws Exception{
-		mainBroken(args);
 	}
 
 	/**

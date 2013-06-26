@@ -54,8 +54,8 @@ public class PushService {
 	public static IPushAdapter getPushAdapter(String name, DataAdapter data) {
 		if (name.equalsIgnoreCase("gcm"))
 			return new GCMPushAdapter(RallyeConfig.GCM_API_KEY, data);
-		if (name.equalsIgnoreCase("websocket"))
-			return new WebsocketPushAdapter(data);
+//		if (name.equalsIgnoreCase("websocket"))
+//			return new WebsocketPushAdapter(data);
 		else
 			return null;
 	}
