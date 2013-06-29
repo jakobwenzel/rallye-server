@@ -7,13 +7,15 @@ import java.net.URL;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import com.sun.jersey.multipart.file.DefaultMediaTypePredictor;
 
 import de.rallye.RallyeResources;
 import de.rallye.RallyeServer;
@@ -29,7 +31,7 @@ public class Client {
 
 	@GET
 	@Path("{path}")
-	public File index(@PathParam("path") String path, @Context SecurityContext sec) {
+	public Response index(@PathParam("path") String path, @Context SecurityContext sec) {
 		
 		if (path.contains("/"))
 			throw new WebAppExcept(404, "Not found.");
@@ -40,13 +42,14 @@ public class Client {
 		
 		if (url==null) {
 
-			throw new WebAppExcept(404, "Not found. 42");
+			throw new WebAppExcept(404, "Not found.");
 		}
 		
 		try {
-			return new File(url.toURI());
+			File f = new File(url.toURI());
+			MediaType m = DefaultMediaTypePredictor.CommonMediaTypes.getMediaTypeFromFile(f);
+			return Response.ok(f,m).build();
 		} catch (URISyntaxException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			throw new WebAppExcept(404, "Not found.");
 		}
@@ -54,8 +57,7 @@ public class Client {
 	}
 	
 	@GET
-	@Produces(MediaType.TEXT_HTML)
-	public File index(@Context SecurityContext sec) {
+	public Response index(@Context SecurityContext sec) {
 		
 		return index("index.html",sec);
 		

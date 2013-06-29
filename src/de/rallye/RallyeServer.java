@@ -19,6 +19,8 @@ import com.sun.jersey.api.core.PackagesResourceConfig;
 import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.api.json.JSONConfiguration;
 
+import de.rallye.push.PushWebsocketApp;
+
 //import de.rallye.push.PushWebsocketApp;
 
 public class RallyeServer {
@@ -79,8 +81,7 @@ public class RallyeServer {
 			listener.registerAddOn(addon);
 		}
 		
-//		WebSocketApplication pushApp = new PushWebsocketApp();
-//		WebSocketEngine.getEngine().register("/grizzly-websockets-chat", "/chat", pushApp);
+		WebSocketEngine.getEngine().register("/rallye", "/push", PushWebsocketApp.getInstance());
 
 		serv.start();  
 		return serv;

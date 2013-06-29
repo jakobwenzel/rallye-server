@@ -191,18 +191,21 @@ public class DataAdapter {
 			close(con, st, rs);
 		}
 	}
-	
-	public int[] isKnownUserAuthorized(String[] login) throws SQLException {
+
+	public int[] isKnownUserAuthorized(String username, String password) throws SQLException {
+		if (username == null || password == null)
+			return null;
+		
 		Connection con = null;
 		PreparedStatement st = null;
 		ResultSet rs = null;
 		
 		try {
-			String[] usr = login[0].split("@");//0: userID, 1:groupID
+			String[] usr = username.split("@");//0: userID, 1:groupID
 			
-			if (usr.length!=2)
+			if (usr.length!=2) 
 				return null;
-			
+
 			
 			con = dataSource.getConnection();
 			st = con.prepareStatement("SELECT "+ cols(Ry.Users.ID, Ry.Users.ID_GROUP)
@@ -210,7 +213,7 @@ public class DataAdapter {
 												+" WHERE "+ Ry.Users.ID +"=? AND "+ Ry.Groups.ID +"=? AND usr."+ Ry.Users.PASSWORD +"=?");
 			st.setString(1, usr[0]);
 			st.setString(2, usr[1]);
-			st.setString(3, login[1]);
+			st.setString(3, password);
 			
 			rs = st.executeQuery();
 			
@@ -219,11 +222,16 @@ public class DataAdapter {
 			} else {
 				return null;
 			}
-		} catch (SQLException e) {
-			throw e;
 		} finally {
 			close(con, st, rs);
-		}
+		}		
+	}
+	
+	
+	public int[] isKnownUserAuthorized(String[] login) throws SQLException {
+		if (login.length!=2)
+			return null;
+		return isKnownUserAuthorized(login[0],login[1]);
 	}
 	
 	public int isNewUserAuthorized(String[] login) throws SQLException {

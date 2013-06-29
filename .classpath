@@ -29,5 +29,6 @@
 	<classpathentry kind="lib" path="lib/grizzly-http-server-2.3.3.jar"/>
 	<classpathentry kind="lib" path="lib/grizzly-http-servlet-2.3.3.jar"/>
 	<classpathentry kind="lib" path="lib/servlet-api.jar"/>
+	<classpathentry kind="lib" path="lib/jersey-multipart-1.17.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

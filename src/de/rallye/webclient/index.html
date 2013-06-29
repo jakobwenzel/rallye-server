@@ -4,6 +4,7 @@
 	<meta charset="utf-8">
 <title>Rallye</title>
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+<script type="text/javascript" src="/client/mustache.js"></script>
 <script type="text/javascript">
 
 function findRoot() {
@@ -57,13 +58,64 @@ if (username && password) {
 } 
 
 
+var partials;
+
 var currentDisplay = null; // Currently displayed element.
 var authQueue = []; //Queue of requests to make when auth finishes.
+
+
+var resources = {};
+var resourceQueue = {};
+/**
+ * Get some unchanging resource, only once per page load and return the cached result for subsequent requests
+ */
+function getResource(name, url, callback, transform) {
+	//Already loaded?
+	if (resources[name]) {
+		callback(resources[name]);
+		return;
+	}
+	//Currently loading?
+	if (resourceQueue[name]) {
+		resourceQueue[name].push(callback);
+		return;
+	}
+	//Else start new request.
+	resourceQueue[name] = [callback];
+	authajax({
+		'url':url,
+		'dataType': 'json'		
+	},function(res) {
+
+		if (transform) res = transform(res);
+		
+		resources[name] = res;
+		queue = resourceQueue[name];
+		delete resourceQueue[name];
+		
+		
+		queue.forEach(function(elem) {
+			elem(res);
+		});
+		
+	})
+}
+
+function getUsers(callback) {
+	getResource("users",root+"rallye/users",callback, function (arr) {
+		var res = {};
+		arr.forEach(function (elem) {
+			res[elem.userID] = elem;
+		});
+		return res;
+	});
+}
 
 /**
  * wrapper for jQuery.ajax, adding auth information
  */
 function make_auth_request(q) {
+	console.log("making authed request for "+q.url);
 	q.username = username;
 	q.password = password;
 	$.ajax(q)
@@ -75,20 +127,16 @@ function make_auth_request(q) {
 function display_login(msg) {
 	if (!msg) msg = "Please log in.";
 	console.log("Displaying login box");
-	$("#main").html('\
-		<form>\
-		<table><tr><td colspan="2">'+msg+'</td></tr>\
-		<tr><td>Username:</td><td><input type="text" name="username" id="username"></td></tr>\
-		<tr><td>Password:</td><td><input type="password" name="password" id="password"></td></tr>\
-		<tr><td colspan="2"><label for="remember"><input type="checkbox" name="remember" id="remember">Remember me</label></td></tr>\
-		<tr><td colspan="2"><input type="submit" value="Login" onclick="submit_login()"></td></tr>\
-		</table>\
-		</form>\
-	');
+	
+	var template = $('#templ_logindialog').html();
+	var html = Mustache.to_html(template,msg);
+	
+	$("#main").html(html);
 
 }
 
 function submit_login() {
+	console.log("submitting login");
 	username = $("#username").val();
 	password = $("#password").val();
 	
@@ -110,12 +158,10 @@ function submit_login() {
 	
 	$("#main").html("Logging in...");
 	
-	//Empty global queue
-	queue = authQueue;
-	authQueue = [];
 	
-	//Do the requests
-	queue.forEach(make_auth_request);
+	send_socket_login();
+	
+	return false;
 }
 
 /**
@@ -123,6 +169,7 @@ function submit_login() {
  */
 function authajax(obj, done, fail, always) {
 
+	console.log("making request for "+obj.url);
 	obj.__myData = {
 		done: done,
 		fail: fail,
@@ -132,11 +179,14 @@ function authajax(obj, done, fail, always) {
 
 	//Is there auth info?
 	if (!username || ! password) {
+		console.log("but no auth specified");
 	
 		//Are we already displaying auth?
 		if (currentDisplay != "auth") {
+			console.log("therefore showing login");
 			display_login();	
-		}
+		} else 
+			console.log("already showing login");
 		//Queue request
 		authQueue.push(obj);
 	
@@ -169,28 +219,31 @@ function get_chatrooms(callback) {
 		dataType: "json"
 	},callback);
 }
-var roomId;
+var roomID;
 function load_chatroom(id) {
 	
 	authajax({
 		url: root+"rallye/chatrooms/"+id,
 		dataType: "json"
-	},function (res) {
-		roomId = id;
+	},function (res) {getUsers(function(users) {
+		roomID = id;
 		history.pushState(null, "", root+"client/?chatroom="+id);
-		var table="<table>";
-		table+=res.reduce(function(red,chat) {
-			console.log(chat);
-			var line = "<tr><td>"+chat.userID+"</td><td>"+chat.message+"</td></tr>";
-			
-			return red+line;
 		
-		},"");
-		table+='</table>\
-		<form><input type="text" id="message" name="message"><input type="submit" onclick="return submit_message();" value="Send"></form>\
-		';
-		$("#main").html(table);
-	});	
+
+		var template = $('#templ_chat').html();
+		
+		var content = res.map(function(chat) {
+			var user = users[chat.userID];
+			var name = user?user.name:userID;
+			var line = "<tr><td>"+name+"</td><td>"+chat.message+"</td></tr>";
+			
+			return { name: name, message: chat.message};
+		
+		});
+		var html = Mustache.to_html(template,content,partials);
+
+		$("#main").html(html);
+	});});	
 	
 	
 	return false;
@@ -201,32 +254,114 @@ function getParameterByName(name) {
     name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
     var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
         results = regex.exec(location.search);
-    return results == null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+    return results == null ? null : decodeURIComponent(results[1].replace(/\+/g, " "));
 }
 
 function submit_message() {
-
+	var sendbutton = $("#sendbutton");
+	sendbutton.attr("disabled","disabled");
+	sendbutton.html('<img src="load.gif" />');
 	var message = $("#message").val();
 	
 	authajax({
-		url: root+"rallye/chatrooms/"+roomId,
+		url: root+"rallye/chatrooms/"+roomID,
 		method: "PUT",
 		contentType: "application/json",
 		data: JSON.stringify({
 			"message": message
 		})
-	},function(res){
-		alert("sending successful");
+	},function(res){ //Success
+		$("#message").val("");
+	},function() { //Error
+		
+	}, function() { //Always
+		sendbutton.html("Send");
+		sendbutton.removeAttr("disabled");
+		
 	});
 	
 	return false;
 
 }
 
+var socket_open = false;
+var socket;
+function send_socket_login() {
+	socket.send(JSON.stringify({
+		type: 'login',
+		username: username,
+		password: password
+	}));
+}
+function setup_socket() {
+	
+	var url = root.replace("http","ws") + "rallye/push";
+	
+	socket = new WebSocket(url);
+	
+	socket.onopen = function(){
+		socket_open = true;
+		
+		if (username && password)
+			send_socket_login();
+	}
+	socket.onmessage = function(msg){  
+		var data = JSON.parse(msg.data);
+		console.log(data);
+	    
+	    switch(data.type) {
+	    case "login":
+	    	console.log("login returned: "+data.state);
+	    	if (data.state=="ok") {
+
+	    		//Empty global queue
+	    		queue = authQueue;
+	    		authQueue = [];
+	    		
+	    		//Do the requests
+	    		console.log("requesting stuff from auth queue");
+	    		queue.forEach(make_auth_request);
+	    	}
+	    	if (data.state=="fail") {
+				display_login("Invalid login specified. (socket)");
+	    	} else if (data.state=="error") {
+	    		alert("server is broken.");
+	    	}
+	    	break;
+	    case "newMessage":
+	    	var payload = JSON.parse(data.payload);
+	    	console.log(payload);
+	    	
+	    	if (roomID==payload.chatroomID) {
+	    	
+		    	getUsers(function(users) {
+					var user = users[payload.userID];
+					var name = user?user.name:userID;
+		    		payload["name"]=name;
+	
+		    		var html = Mustache.to_html(partials.line,payload);
+		    		$("#chatentries").append(html);
+		    		
+		    	});
+	    	}
+	    	
+	    	break;
+	    default:
+	    	alert("unrecognized message: "+data.type);
+	    }
+	}   
+	
+}
+
 var chatrooms;
 $(function () {
 
 
+	partials = {
+			'line': $("#templ_chatline").html()
+	};
+
+	
 	setup_error_handler();
 
 
@@ -236,8 +371,6 @@ $(function () {
 	});
 
 	get_chatrooms(function(res) {
-		console.log(res);
-
 		chatrooms = res;
 		
 		var roomLinks = res.reduce(function(list,room) {
@@ -249,8 +382,14 @@ $(function () {
 		$("#left").html(roomLinks);
 	});
 	
+	
+	setup_socket();
+	
 	var lastRoom = getParameterByName("chatroom");
-	if (lastRoom!=null) load_chatroom(lastRoom);
+	if (lastRoom) load_chatroom(lastRoom);
+	
+	
+	getUsers(function(l) {console.log(l)});
 
 });
 
@@ -267,6 +406,30 @@ $(function () {
 </style>
 </head>
 <body>
+
+<script id="templ_logindialog" type="text/template">
+	<form>
+		<table><tr><td colspan="2">{{.}}</td></tr>
+		<tr><td>Username:</td><td><input type="text" name="username" id="username"></td></tr>
+		<tr><td>Password:</td><td><input type="password" name="password" id="password"></td></tr>
+		<tr><td colspan="2"><label for="remember"><input type="checkbox" name="remember" id="remember">Remember me</label></td></tr>
+		<tr><td colspan="2"><input type="submit" value="Login" onclick="submit_login(); return false;"></td></tr>
+		</table>
+	</form>
+</script>
+
+<script id="templ_chat" type="text/template">
+<table id="chatentries">
+	{{#.}} {{>line}} {{/.}}
+</table>
+<form>
+	<input type="text" id="message" name="message">
+	<button type="submit" id="sendbutton" onclick="return submit_message();">Send</button>
+</form>
+</script>
+<script id="templ_chatline" type="text/template">
+<tr><td>{{name}}:</td><td>{{message}}</td></tr>
+</script>
 <div id="servername">
 </div>
 <div id="left">

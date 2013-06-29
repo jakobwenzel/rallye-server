@@ -18,7 +18,7 @@ public class PushWebSocket extends DefaultWebSocket {
     private static final Logger logger = LogManager.getLogger(PushWebSocket.class);
     
     // chat user name
-    private volatile User user;
+    private volatile int user;
 
     public PushWebSocket(ProtocolHandler protocolHandler,
                          HttpRequestPacket request,
@@ -27,18 +27,18 @@ public class PushWebSocket extends DefaultWebSocket {
     }
 
     /**
-     * Get the user name
-     * @return the user name
+     * Get the user id
+     * @return the user id
      */
-    public User getUser() {
+    public int getUser() {
         return user;
     }
 
     /**
-     * Set the user name
-     * @param user the user name
+     * Set the user id
+     * @param user the user id
      */
-    public void setUser(User user) {
+    public void setUser(int user) {
         this.user = user;
     }
 }
