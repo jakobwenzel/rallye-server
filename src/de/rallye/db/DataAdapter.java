@@ -87,8 +87,12 @@ public class DataAdapter {
 		}
 	}
 	
-	public List<Group> getGroups() throws DataException {
+	private List<Group> groups;
+	
+	public synchronized List<Group> getGroups() throws DataException {
 
+		if (groups!=null) return groups;
+		
 		Statement st = null;
 		Connection con = null;
 		ResultSet rs = null;
@@ -98,12 +102,12 @@ public class DataAdapter {
 			st = con.createStatement();
 			rs = st.executeQuery("SELECT "+ cols(Ry.Groups.ID, Ry.Groups.NAME, Ry.Groups.DESCRIPTION) +" FROM "+ Ry.Groups.TABLE);
 
-			List<Group> groups = new ArrayList<Group>();
+			groups = new ArrayList<Group>();
 			
 			while (rs.next()) {
 				groups.add(new Group(rs.getInt(1), rs.getString(2), rs.getString(3)));
 			}
-
+			
 			return groups;
 		} catch (SQLException e) {
 			throw new DataException(e);
@@ -264,6 +268,7 @@ public class DataAdapter {
 	
 	@SuppressWarnings("resource")
 	public UserAuth login(int groupID, LoginInfo info) throws DataException, InputException {
+		invalidateUsers();
 		Connection con = null;
 		PreparedStatement st = null;
 		ResultSet rs = null;
@@ -349,13 +354,15 @@ public class DataAdapter {
 		}
 	}
 	
+	Random rnd = new Random();
 	private String generateNewUserPassword(int groupID) {
-		long pw = System.currentTimeMillis() + groupID + new Random().nextInt();
+		long pw = System.currentTimeMillis() + groupID + rnd.nextInt();
 		
 		return Long.toHexString(pw);
 	}
 	
 	public boolean logout(int groupID, int userID) throws DataException {
+		invalidateUsers();
 		Connection con = null;
 		PreparedStatement st = null;
 		ResultSet rs = null;
@@ -404,7 +411,9 @@ public class DataAdapter {
 		}
 	}
 
-	public List<Chatroom> getChatrooms(int groupID) throws DataException {
+	private List<Chatroom> chatrooms;
+	public synchronized List<Chatroom> getChatrooms(int groupID) throws DataException {
+		if (chatrooms!=null) return chatrooms;
 		Connection con = null;
 		PreparedStatement st = null;
 		ResultSet rs = null;
@@ -417,7 +426,7 @@ public class DataAdapter {
 			st.setInt(1, groupID);
 			rs = st.executeQuery();
 			
-			List<Chatroom> chatrooms = new ArrayList<Chatroom>();
+			chatrooms = new ArrayList<Chatroom>();
 			
 			while (rs.next()) {
 				chatrooms.add(new Chatroom(rs.getInt(1), rs.getString(2)));
@@ -550,6 +559,9 @@ public class DataAdapter {
 	}
 
 	public void setPushConfig(int groupID, int userID, PushConfig push) throws DataException {
+		
+		invalidateUsers();
+		
 		Connection con = null;
 		PreparedStatement st = null;
 		ResultSet rs = null;
@@ -605,7 +617,10 @@ public class DataAdapter {
 		}
 	}
 
-	public List<PushMode> getPushModes() throws DataException {
+	List<PushMode> pushModes;
+	public synchronized List<PushMode> getPushModes() throws DataException {
+		if (pushModes!=null) return pushModes;
+		
 		Statement st = null;
 		Connection con = null;
 		ResultSet rs = null;
@@ -615,13 +630,13 @@ public class DataAdapter {
 			st = con.createStatement();
 			rs = st.executeQuery("SELECT "+ cols(Ry.PushModes.ID, Ry.PushModes.NAME) +" FROM "+ Ry.PushModes.TABLE);
 
-			List<PushMode> modes = new ArrayList<PushMode>();
+			pushModes = new ArrayList<PushMode>();
 			
 			while (rs.next()) {
-				modes.add(new PushMode(rs.getInt(1), rs.getString(2)));
+				pushModes.add(new PushMode(rs.getInt(1), rs.getString(2)));
 			}
 
-			return modes;
+			return pushModes;
 		} catch (SQLException e) {
 			throw new DataException(e);
 		} finally {
@@ -629,7 +644,9 @@ public class DataAdapter {
 		}
 	}
 	
-	public List<GroupUser> getAllUsers() throws DataException {
+	List<GroupUser> allUsers;
+	public synchronized List<GroupUser> getAllUsers() throws DataException {
+		if (allUsers!=null) return allUsers;
 		PreparedStatement st = null;
 		Connection con = null;
 		ResultSet rs = null;
@@ -640,13 +657,13 @@ public class DataAdapter {
 			
 			rs = st.executeQuery();
 
-			List<GroupUser> users = new ArrayList<GroupUser>();
+			allUsers = new ArrayList<GroupUser>();
 			
 			while (rs.next()) {
-				users.add(new GroupUser(rs.getInt(1), rs.getInt(2), rs.getString(3)));
+				allUsers.add(new GroupUser(rs.getInt(1), rs.getInt(2), rs.getString(3)));
 			}
 
-			return users;
+			return allUsers;
 		} catch (SQLException e) {
 			throw new DataException(e);
 		} finally {
@@ -654,7 +671,12 @@ public class DataAdapter {
 		}
 	}
 
-	public List<UserInternal> getMembers(int groupID) throws DataException {
+	Map<Integer,List<UserInternal>> members = new HashMap<Integer,List<UserInternal>>();
+	public synchronized List<UserInternal> getMembers(int groupID) throws DataException {
+		
+		List<UserInternal> cached = members.get(groupID);
+		if (cached!=null) return cached;
+		
 		PreparedStatement st = null;
 		Connection con = null;
 		ResultSet rs = null;
@@ -672,6 +694,7 @@ public class DataAdapter {
 				users.add(new UserInternal(rs.getInt(1), rs.getString(2), rs.getInt(3), rs.getString(4)));
 			}
 
+			members.put(groupID, users);
 			return users;
 		} catch (SQLException e) {
 			throw new DataException(e);
@@ -680,7 +703,18 @@ public class DataAdapter {
 		}
 	}
 	
+	protected void invalidateUsers() {
+		allUsers = null;
+		members.clear();
+		roomMembers.clear();
+	}
+	
+
+	Map<Integer,List<UserInternal>> roomMembers = new HashMap<Integer,List<UserInternal>>();
 	public List<UserInternal> getChatroomMembers(int roomID) throws DataException {
+		List<UserInternal> cached = roomMembers.get(roomID);
+		if (cached!=null) return cached;
+		
 		PreparedStatement st = null;
 		Connection con = null;
 		ResultSet rs = null;
@@ -701,6 +735,7 @@ public class DataAdapter {
 				users.add(new UserInternal(rs.getInt(1), rs.getString(2), rs.getInt(3), rs.getString(4)));
 			}
 
+			roomMembers.put(roomID,users);
 			return users;
 		} catch (SQLException e) {
 			throw new DataException(e);
@@ -758,6 +793,7 @@ public class DataAdapter {
 	}
 
 	public void updatePushIds(HashMap<String, String> changes) throws DataException {
+		invalidateUsers();
 		PreparedStatement st = null;
 		Connection con = null;
 		ResultSet rs = null;
