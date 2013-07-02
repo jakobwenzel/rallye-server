@@ -5,6 +5,9 @@
 <title>Rallye</title>
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
 <script type="text/javascript" src="/client/mustache.js"></script>
+<script type="text/javascript"
+    src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false">
+</script>
 <script type="text/javascript">
 
 function findRoot() {
@@ -219,6 +222,14 @@ function get_chatrooms(callback) {
 		dataType: "json"
 	},callback);
 }
+
+
+function get_nodes(callback) {
+	$.ajax({
+		url: root+"rallye/map/nodes",
+		dataType: "json"
+	}).done(callback);
+}
 var roomID;
 function load_chatroom(id) {
 	
@@ -235,26 +246,69 @@ function load_chatroom(id) {
 		var content = res.map(function(chat) {
 			var user = users[chat.userID];
 			var name = user?user.name:userID;
-			var line = "<tr><td>"+name+"</td><td>"+chat.message+"</td></tr>";
 			
 			return { name: name, message: chat.message};
 		
 		});
 		var html = Mustache.to_html(template,content,partials);
 
-		$("#main").html(html);
+		$("#main").html(html).removeAttr("style");
 	});});	
 	
 	
 	return false;
 }
 
-
+var urlParams;
+function load_querystring() {
+	var match,
+	pl     = /\+/g,  // Regex for replacing addition symbol with a space
+	search = /([^&=]+)=?([^&]*)/g,
+	decode = function (s) { return decodeURIComponent(s.replace(pl, " ")); },
+	query  = window.location.search.substring(1);
+	
+	urlParams = {};
+	while (match = search.exec(query))
+		urlParams[decode(match[1])] = decode(match[2]);
+}
 function getParameterByName(name) {
-    name = name.replace(/[\[]/, "\\\[").replace(/[\]]/, "\\\]");
-    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
-        results = regex.exec(location.search);
-    return results == null ? null : decodeURIComponent(results[1].replace(/\+/g, " "));
+    return urlParams[name];
+}
+
+google.maps.visualRefresh = true;
+function load_map() {
+	console.log("loading map");
+    var mapOptions = {
+	center: new google.maps.LatLng(49.87, 8.65),
+    zoom: 14,
+    mapTypeId: google.maps.MapTypeId.ROADMAP
+  };
+  $("#main").css("right","0px").css("height","600px");
+  $("#map-canvas").css("width","100%").css("height","100%");
+  var map = new google.maps.Map(document.getElementById("main"),
+      mapOptions);
+  
+
+	history.pushState(null, "", root+"client/?map");
+  
+  	get_nodes(function(nodes) {
+  		function addNode() {
+  				var node = nodes.pop();
+      		  new google.maps.Marker({
+      		      position: new google.maps.LatLng(node.position.latitude,node.position.longitude),
+      		      map: map,
+      		    animation: google.maps.Animation.DROP,
+      		      title:node.name
+      		  });
+      		  if (nodes.length>0)
+      			  setTimeout(addNode,10);
+  			
+  		}
+  		addNode();
+  	});
+  
+  
+	return false;
 }
 
 function submit_message() {
@@ -356,6 +410,7 @@ function setup_socket() {
 var chatrooms;
 $(function () {
 
+	load_querystring();
 
 	partials = {
 			'line': $("#templ_chatline").html()
@@ -379,6 +434,7 @@ $(function () {
 			return list + link;
 		
 		},"");
+		roomLinks = roomLinks + '<a href="#" onclick="return load_map();">Map</a>'
 		$("#left").html(roomLinks);
 	});
 	
@@ -387,6 +443,10 @@ $(function () {
 	
 	var lastRoom = getParameterByName("chatroom");
 	if (lastRoom) load_chatroom(lastRoom);
+	
+	var map = getParameterByName("map");
+	if (map!=null)
+		load_map();
 	
 	
 	getUsers(function(l) {console.log(l)});
