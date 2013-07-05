@@ -38,6 +38,7 @@
         <pathelement location="lib/jackson-mapper-asl-1.9.2.jar"/>
         <pathelement location="lib/jackson-xc-1.9.2.jar"/>
         <pathelement location="lib/RallyeStructures.jar"/>
+	<pathelement location="lib/json-simple-1.1.1.jar"/>
     </path>
 
 
