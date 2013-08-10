@@ -13,9 +13,12 @@
         <pathelement location="bin"/>
         <pathelement location="lib/gcm-server.jar"/>
         <pathelement location="lib/asm-3.3.1.jar"/>
-        <pathelement location="lib/grizzly-framework-2.2.16.jar"/>
-        <pathelement location="lib/grizzly-http-2.2.16.jar"/>
-        <pathelement location="lib/grizzly-http-server-2.2.16.jar"/>
+        <pathelement location="lib/grizzly-framework-2.3.3.jar"/>
+        <pathelement location="lib/grizzly-http-2.3.3.jar"/>
+        <pathelement location="lib/grizzly-http-server-2.3.3.jar"/>
+	<pathelement location="lib/grizzly-websockets-2.3.3.jar"/>
+	<pathelement location="lib/grizzly-http-servlet-2.3.3.jar"/>
+	<pathelement location="lib/servlet-api.jar"/>
         <pathelement location="lib/jsr311-api-1.1.1.jar"/>
         <pathelement location="lib/mysql-connector-java-5.1.22-bin.jar"/>
         <pathelement location="lib/jettison-1.1.jar"/>
@@ -29,11 +32,13 @@
         <pathelement location="lib/jersey-core-1.17.jar"/>
         <pathelement location="lib/jersey-grizzly2-1.17.jar"/>
         <pathelement location="lib/jersey-json-1.17.jar"/>
+	<pathelement location="lib/jersey-multipart-1.17.1.jar"/>
         <pathelement location="lib/jackson-core-asl-1.9.2.jar"/>
         <pathelement location="lib/jackson-jaxrs-1.9.2.jar"/>
         <pathelement location="lib/jackson-mapper-asl-1.9.2.jar"/>
         <pathelement location="lib/jackson-xc-1.9.2.jar"/>
         <pathelement location="lib/RallyeStructures.jar"/>
+	<pathelement location="lib/json-simple-1.1.1.jar"/>
     </path>
 
 
