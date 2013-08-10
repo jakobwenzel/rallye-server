@@ -8,7 +8,6 @@ import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -19,19 +18,28 @@ import org.apache.logging.log4j.Logger;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
+import de.rallye.auth.GroupPrincipal;
+import de.rallye.auth.RallyePrincipal;
 import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.InputException;
+import de.rallye.exceptions.UnauthorizedException;
+import de.rallye.model.structures.AdditionalResource;
 import de.rallye.model.structures.ChatEntry;
 import de.rallye.model.structures.Chatroom;
 import de.rallye.model.structures.Group;
 import de.rallye.model.structures.Edge;
 import de.rallye.model.structures.GroupUser;
+import de.rallye.model.structures.LatLng;
 import de.rallye.model.structures.LoginInfo;
 import de.rallye.model.structures.Node;
 import de.rallye.model.structures.PushConfig;
 import de.rallye.model.structures.PushMode;
 import de.rallye.model.structures.ServerConfig;
 import de.rallye.model.structures.SimpleChatEntry;
+import de.rallye.model.structures.SimpleSubmission;
+import de.rallye.model.structures.Submission;
+import de.rallye.model.structures.Task;
+import de.rallye.model.structures.TaskSubmissions;
 import de.rallye.model.structures.UserAuth;
 import de.rallye.model.structures.UserInternal;
 
@@ -109,6 +117,158 @@ public class DataAdapter {
 			}
 			
 			return groups;
+		} catch (SQLException e) {
+			throw new DataException(e);
+		} finally {
+			close(con, st, rs);
+		}
+	}
+	
+	public List<Task> getTasks() throws DataException {
+		Statement st = null;
+		Connection con = null;
+		ResultSet rs = null;
+
+		try {
+			con = dataSource.getConnection();
+			st = con.createStatement();
+			rs = st.executeQuery("SELECT "+ cols(Ry.Tasks.ID, Ry.Tasks.NAME, Ry.Tasks.DESCRIPTION,
+					Ry.Tasks.LATITUDE, Ry.Tasks.LONGITUDE, Ry.Tasks.LOCATION_SPECIFIC,
+					Ry.Tasks.RADIUS, Ry.Tasks.MULTIPLE_SUBMITS, Ry.Tasks.SUBMIT_TYPE, Ry.Tasks.POINTS, Ry.Tasks.ADDITIONAL_RESOURCES) +" FROM "+ Ry.Tasks.TABLE);
+
+			List<Task> tasks = new ArrayList<Task>();
+			
+			while (rs.next()) {
+				
+				LatLng coords = (rs.getDouble(4) != 0 || rs.getDouble(5) != 0)? new LatLng(rs.getDouble(4), rs.getDouble(5)) : null;
+				tasks.add(new Task(rs.getInt(1), rs.getBoolean(6), coords, rs.getDouble(7),
+						rs.getString(2), rs.getString(3), rs.getBoolean(8), rs.getInt(9),
+						rs.getString(10), AdditionalResource.additionalResourcesFromString(rs.getString(11))));
+			}
+			
+			return tasks;
+		} catch (SQLException e) {
+			throw new DataException(e);
+		} finally {
+			close(con, st, rs);
+		}
+	}
+	
+	public List<Submission> getSubmissions(int taskID, int groupID) throws DataException {
+		PreparedStatement st = null;
+		Connection con = null;
+		ResultSet rs = null;
+
+		try {
+			con = dataSource.getConnection();
+			st = con.prepareStatement("SELECT "+ cols(Ry.Submissions.ID, Ry.Submissions.ID_TASK, Ry.Submissions.ID_GROUP,
+					Ry.Submissions.ID_USER, Ry.Submissions.SCORE, Ry.Submissions.SUBMIT_TYPE,
+					Ry.Submissions.INT_SUBMISSION, Ry.Submissions.TEXT_SUBMISSION) +" FROM "+ Ry.Tasks.TABLE
+					+" WHERE "+ Ry.Submissions.ID_TASK +"=? AND "+ Ry.Submissions.ID_GROUP +"=?");
+			
+			st.setInt(1, taskID);
+			st.setInt(2, groupID);
+			
+			rs = st.executeQuery();
+
+			List<Submission> submissions = new ArrayList<Submission>();
+			
+			while (rs.next()) {
+				submissions.add(new Submission(rs.getInt(1), rs.getInt(6), (Integer)rs.getObject(7), rs.getString(8), rs.getString(5)));
+			}
+			
+			return submissions;
+		} catch (SQLException e) {
+			throw new DataException(e);
+		} finally {
+			close(con, st, rs);
+		}
+	}
+	
+	public List<TaskSubmissions> getAllSubmissions(int groupID) throws DataException {
+		PreparedStatement st = null;
+		Connection con = null;
+		ResultSet rs = null;
+
+		try {
+			con = dataSource.getConnection();
+			st = con.prepareStatement("SELECT "+ cols(Ry.Submissions.ID, Ry.Submissions.ID_TASK, Ry.Submissions.ID_GROUP,
+					Ry.Submissions.ID_USER, Ry.Submissions.SCORE, Ry.Submissions.SUBMIT_TYPE,
+					Ry.Submissions.INT_SUBMISSION, Ry.Submissions.TEXT_SUBMISSION) +" FROM "+ Ry.Submissions.TABLE
+					+" WHERE "+ Ry.Submissions.ID_GROUP +"=? ORDER BY "+ Ry.Submissions.ID_TASK +" ASC");
+			
+			st.setInt(1, groupID);
+			
+			rs = st.executeQuery();
+
+			List<TaskSubmissions> taskSubmissions = new ArrayList<TaskSubmissions>();
+			List<Submission> submissions = null;
+			
+			int taskID = -1, lastID = -1;
+			while (rs.next()) {
+				lastID = taskID;
+				taskID = rs.getInt(2);
+				
+				if (taskID != lastID) {
+					submissions = new ArrayList<Submission>();
+					taskSubmissions.add(new TaskSubmissions(taskID, submissions));
+				}
+				
+				submissions.add(new Submission(rs.getInt(1), rs.getInt(6), (Integer)rs.getObject(7), rs.getString(8), rs.getString(5)));
+			}
+			
+			return taskSubmissions;
+		} catch (SQLException e) {
+			throw new DataException(e);
+		} finally {
+			close(con, st, rs);
+		}
+	}
+	
+	public Submission submit(int taskID, int groupID, int userID, SimpleSubmission submission) throws DataException, InputException {
+		Connection con = null;
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		
+		try {
+			con = dataSource.getConnection();
+			
+			st = con.prepareStatement("SELECT * FROM "+ Ry.Tasks.TABLE +" WHERE "+ Ry.Tasks.ID +"=?");
+			st.setInt(1, taskID);
+			rs = st.executeQuery();
+			if (!rs.first())
+				throw new InputException("taskID does not exist");
+			st.close();
+			rs.close();
+			
+			//TODO: sanity check: see if the submission matches submitType and as such is valid
+			
+
+			st = con.prepareStatement("INSERT INTO "+ Ry.Submissions.TABLE +" ("+
+					cols(Ry.Submissions.ID_TASK, Ry.Submissions.ID_GROUP, Ry.Submissions.ID_USER, Ry.Submissions.SUBMIT_TYPE, Ry.Submissions.INT_SUBMISSION, Ry.Submissions.TEXT_SUBMISSION)
+					+") VALUES (?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+			
+			
+			st.setInt(1, taskID);
+			st.setInt(2, groupID);
+			st.setInt(3, userID);
+			st.setInt(4, submission.submitType);
+			if (submission.intSubmission != null) {
+				st.setInt(5, submission.intSubmission);
+			} else {
+				st.setNull(5, java.sql.Types.INTEGER);
+			}
+			st.setString(6, submission.textSubmission);
+			
+			st.execute();
+			
+			rs = st.getGeneratedKeys();
+			rs.next();
+			int submissionID = rs.getInt(1);
+			
+			Submission res = new Submission(submissionID, submission);
+			
+			return res;
 		} catch (SQLException e) {
 			throw new DataException(e);
 		} finally {
@@ -196,49 +356,47 @@ public class DataAdapter {
 		}
 	}
 
-	public int[] isKnownUserAuthorized(String username, String password) throws SQLException {
-		if (username == null || password == null)
-			return null;
+	public RallyePrincipal getKnownUserAuthorization(int groupID, int userID, String password) throws DataException, UnauthorizedException, InputException {
+		if (groupID <= 0 || userID <= 0 || password == null || password.length() <= 0)
+			throw new InputException("Incomplete Login");
 		
 		Connection con = null;
 		PreparedStatement st = null;
 		ResultSet rs = null;
 		
 		try {
-			String[] usr = username.split("@");//0: userID, 1:groupID
-			
-			if (usr.length!=2) 
-				return null;
 
 			
 			con = dataSource.getConnection();
-			st = con.prepareStatement("SELECT "+ cols(Ry.Users.ID, Ry.Users.ID_GROUP)
+			st = con.prepareStatement("SELECT "+ cols(Ry.Users.ID, Ry.Users.ID_GROUP, "usr."+ Ry.Users.NAME, Ry.Groups_Chatrooms.ID_CHATROOM)
 												+" FROM "+ Ry.Users.TABLE +" AS usr LEFT JOIN "+ Ry.Groups.TABLE +" as grp USING("+ Ry.Users.ID_GROUP +")"
+												+" LEFT JOIN "+ Ry.Groups_Chatrooms.TABLE +" USING ("+ Ry.Groups_Chatrooms.ID_GROUP +")"
 												+" WHERE "+ Ry.Users.ID +"=? AND "+ Ry.Groups.ID +"=? AND usr."+ Ry.Users.PASSWORD +"=?");
-			st.setString(1, usr[0]);
-			st.setString(2, usr[1]);
+			st.setInt(1, userID);
+			st.setInt(2, groupID);
 			st.setString(3, password);
 			
 			rs = st.executeQuery();
 			
-			if (rs.next()) {
-				return new int[] { Integer.valueOf(usr[0]), Integer.valueOf(usr[1]) };
+			if (rs.first()) {
+				String name = rs.getString(3);
+				List<String> rights = new ArrayList<String>();
+				do {
+					rights.add("chatroom:"+ rs.getInt(4));
+				} while (rs.next());
+				
+				return new RallyePrincipal(userID, groupID, name, rights);
 			} else {
-				return null;
+				throw new UnauthorizedException();
 			}
+		} catch (SQLException e) {
+			throw new DataException(e);
 		} finally {
 			close(con, st, rs);
 		}		
 	}
 	
-	
-	public int[] isKnownUserAuthorized(String[] login) throws SQLException {
-		if (login.length!=2)
-			return null;
-		return isKnownUserAuthorized(login[0],login[1]);
-	}
-	
-	public int isNewUserAuthorized(String[] login) throws SQLException {
+	public GroupPrincipal getNewUserAuthorization(int groupID, String password) throws DataException, UnauthorizedException {
 		Connection con = null;
 		PreparedStatement st = null;
 		ResultSet rs = null;
@@ -246,21 +404,21 @@ public class DataAdapter {
 		try {
 			
 			con = dataSource.getConnection();
-			st = con.prepareStatement("SELECT "+ cols(Ry.Users.ID_GROUP)
+			st = con.prepareStatement("SELECT "+ cols(Ry.Groups.ID, Ry.Groups.NAME)
 												+" FROM "+ Ry.Groups.TABLE
 												+" WHERE "+ Ry.Groups.ID +"=? AND "+ Ry.Groups.PASSWORD +"=?");
-			st.setString(1, login[0]);
-			st.setString(2, login[1]);
+			st.setInt(1, groupID);
+			st.setString(2, password);
 			
 			rs = st.executeQuery();
 			
-			if (rs.next()) {
-				return Integer.valueOf(login[0]);
+			if (rs.first()) {
+				return new GroupPrincipal(groupID, rs.getString(2));
 			} else {
-				return -1;
+				throw new UnauthorizedException();
 			}
 		} catch (SQLException e) {
-			throw e;
+			throw new DataException(e);
 		} finally {
 			close(con, st, rs);
 		}
@@ -440,7 +598,7 @@ public class DataAdapter {
 		}
 	}
 
-	public List<ChatEntry> getChats(int roomID, long timestamp, int groupID) throws DataException {
+	public List<ChatEntry> getChats(int roomID, long timestamp, int groupID) throws DataException, UnauthorizedException {
 		Connection con = null;
 		PreparedStatement st = null;
 		ResultSet rs = null;
@@ -470,6 +628,21 @@ public class DataAdapter {
 				chats.add(new ChatEntry(rs.getInt(1), rs.getString(2), rs.getLong(3), rs.getInt(5), rs.getInt(4), rs.getInt(6)));
 			}
 
+			if (chats.size() == 0) {
+				rs.close();
+				st.close();
+				st = con.prepareStatement("SELECT count(*) FROM "+ Ry.Groups_Chatrooms.TABLE +
+						" WHERE "+ Ry.Groups_Chatrooms.ID_CHATROOM +" =? "+
+						"AND "+ Ry.Groups_Chatrooms.ID_GROUP +" =?");
+				st.setInt(1, roomID);
+				st.setInt(2, groupID);
+				
+				rs = st.executeQuery();
+				
+				if (!rs.first())
+					throw new UnauthorizedException();
+			}
+			
 			return chats;
 		} catch (SQLException e) {
 			throw new DataException(e);

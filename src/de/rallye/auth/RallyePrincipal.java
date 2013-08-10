@@ -1,37 +1,30 @@
 package de.rallye.auth;
 
-import java.security.Principal;
+
+import java.util.List;
 
 import javax.ws.rs.WebApplicationException;
 
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import de.rallye.exceptions.InputException;
 
-public class RallyePrincipal implements Principal {
+public class RallyePrincipal extends GroupPrincipal {
 	
-	private Logger logger =  LogManager.getLogger(RallyePrincipal.class);
-	
-	private int groupID;
-	private int userID;
+	private final int userID;
+	private final List<String> rights;
 
-	RallyePrincipal(int userID, int groupID) {
+	public RallyePrincipal(int userID, int groupID, String name, List<String> rights) {
+		super(groupID, name);
+		
 		this.userID = userID;
-		this.groupID = groupID;
-	}
-
-	@Override
-	public String getName() {
-		return "RallyePrincipal";
+		this.rights = rights;
+		
+		logger = LogManager.getLogger(RallyePrincipal.class);
 	}
 
 	public int getUserID() {
 		return userID;
-	}
-	
-	public int getGroupID() {
-		return groupID;
 	}
 	
 	public void checkUserMatches(int userID) {
@@ -42,12 +35,8 @@ public class RallyePrincipal implements Principal {
 		}
 	}
 	
-	public void checkGroupMatches(int groupID) {
-		if (this.groupID != groupID) {
-			InputException e = new InputException("Authenticated Group does not match chosen group");
-			logger.error(e);
-			throw new WebApplicationException(e);
-		}
+	public boolean hasRightsForChatroom(int roomID) {
+		return rights.contains("chatroom:"+roomID);
 	}
 	
 	public void checkBothMatch(int userID, int groupID) {

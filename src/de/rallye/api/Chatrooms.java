@@ -25,6 +25,7 @@ import de.rallye.auth.KnownUserAuth;
 import de.rallye.auth.RallyePrincipal;
 import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.InputException;
+import de.rallye.exceptions.UnauthorizedException;
 import de.rallye.model.structures.ChatEntry;
 import de.rallye.model.structures.ChatPictureLink;
 import de.rallye.model.structures.Chatroom;
@@ -77,16 +78,14 @@ public class Chatrooms {
 		logger.entry();
 		
 		try {
-			if (!R.data.hasRightsForChatroom(groupID, roomID)) {
-				logger.warn("group "+ groupID +" has no access rights for chatroom "+ roomID);
-				throw new WebApplicationException(Response.Status.UNAUTHORIZED);
-			}
-			
 			List<ChatEntry> res = R.data.getChats(roomID, timestamp, groupID);
 			return logger.exit(res);
 		} catch (DataException e) {
 			logger.error("getChats failed", e);
 			throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
+		} catch (UnauthorizedException e) {
+			logger.error("group {} has no access rights for chatroom {}", groupID, roomID);
+			throw new WebApplicationException(e, Response.Status.FORBIDDEN);
 		}
 	}
 	
@@ -106,8 +105,9 @@ public class Chatrooms {
 			throw new WebApplicationException(new InputException("Message must not be empty"), Response.Status.BAD_REQUEST);
 		
 		try {
-			if (!R.data.hasRightsForChatroom(groupID, roomID)) {
+			if (!p.hasRightsForChatroom(roomID)) {
 				logger.warn("group "+ groupID +" has no access rights for chatroom "+ roomID);
+				throw new WebApplicationException(Response.Status.FORBIDDEN);
 			}
 			
 			ChatEntry res;

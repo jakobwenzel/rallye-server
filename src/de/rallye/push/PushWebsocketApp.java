@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.ws.rs.WebApplicationException;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonGenerationException;
@@ -24,7 +26,11 @@ import org.glassfish.grizzly.websockets.WebSocket;
 import org.glassfish.grizzly.websockets.WebSocketApplication;
 import org.glassfish.grizzly.websockets.WebSocketListener;
 
+import com.sun.jersey.spi.container.ContainerRequest;
+
 import de.rallye.RallyeServer;
+import de.rallye.auth.KnownUserAuth;
+import de.rallye.auth.RallyePrincipal;
 import de.rallye.model.structures.User;
 import de.rallye.model.structures.UserInternal;
 
@@ -205,24 +211,23 @@ public class PushWebsocketApp extends WebSocketApplication implements
 		void handleMessage(WebSocket socket) {
 			try {
 				logger.debug("Trying to authenticate user");
-				int[] loginRes = RallyeServer.getResources().data.isKnownUserAuthorized(
-						username, password);
-				if (loginRes != null) {
-					int userID = loginRes[0];
-					logger.debug("User authenticated as "+userID);
+				
+				KnownUserAuth auth = new KnownUserAuth();
+				RallyePrincipal p = auth.checkAuthentication(new String[]{username, password});
+			
+				int userID = p.getUserID();
+				logger.debug("User authenticated as "+userID);
 					
-					socket.send("{\"type\":\"login\", \"state\": \"ok\"}");
-					
-					
-					app.sockets.put(userID,socket);
-					((PushWebSocket)socket).setUser(userID);
-					
-					
-				} else {
-					socket.send("{\"type\":\"login\", \"state\": \"fail\", \"message\": \"Unauthorized.\"}");
-					logger.debug("User unauthorized");
-				}
-			} catch (SQLException e) {
+				socket.send("{\"type\":\"login\", \"state\": \"ok\"}");
+				
+				
+				app.sockets.put(userID,socket);
+				((PushWebSocket)socket).setUser(userID);
+						
+			} catch (WebApplicationException e) {
+				socket.send("{\"type\":\"login\", \"state\": \"fail\", \"message\": \"Unauthorized.\"}");
+				logger.debug("User unauthorized");
+			} catch (Exception e) {
 				socket.send("{\"type\":\"login\", \"state\": \"error\", \"message\": \""
 						+ e.getMessage() + "\"}");
 				e.printStackTrace();

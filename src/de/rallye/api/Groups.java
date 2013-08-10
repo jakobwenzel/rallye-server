@@ -1,11 +1,8 @@
 package de.rallye.api;
 
-import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
-import javax.imageio.ImageIO;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -29,6 +26,7 @@ import com.sun.jersey.spi.container.ResourceFilters;
 
 import de.rallye.RallyeResources;
 import de.rallye.RallyeServer;
+import de.rallye.auth.GroupPrincipal;
 import de.rallye.auth.KnownUserAuth;
 import de.rallye.auth.NewUserAuth;
 import de.rallye.auth.RallyePrincipal;
@@ -139,7 +137,7 @@ public class Groups {
 	@Produces(MediaType.APPLICATION_JSON)
 	public UserAuth login(@PathParam("groupID") int groupID, LoginInfo info, @Context SecurityContext sec) {
 		logger.entry();
-		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
+		GroupPrincipal p = (GroupPrincipal) sec.getUserPrincipal();
 		
 		int authGroup = p.getGroupID();
 		

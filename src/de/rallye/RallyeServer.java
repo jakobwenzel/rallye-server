@@ -10,11 +10,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.websockets.WebSocketAddOn;
-import org.glassfish.grizzly.websockets.WebSocketApplication;
 import org.glassfish.grizzly.websockets.WebSocketEngine;
 
 import com.sun.jersey.api.container.filter.GZIPContentEncodingFilter;
-import com.sun.jersey.api.container.grizzly2.GrizzlyServerFactory;
 import com.sun.jersey.api.core.PackagesResourceConfig;
 import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.api.json.JSONConfiguration;
@@ -29,8 +27,8 @@ public class RallyeServer {
 	private final static java.util.logging.Logger COM_LOGGER = java.util.logging.Logger.getLogger("com");
 	private final static java.util.logging.Logger ORG_LOGGER = java.util.logging.Logger.getLogger("org");
 	static {
-		//ORG_LOGGER.setLevel(Level.SEVERE);
-		//COM_LOGGER.setLevel(Level.SEVERE);
+		ORG_LOGGER.setLevel(Level.SEVERE);
+		COM_LOGGER.setLevel(Level.SEVERE);
 	}
 	
 	private static final Logger logger = LogManager.getLogger(RallyeServer.class);
@@ -46,7 +44,7 @@ public class RallyeServer {
 		URI uri = UriBuilder.fromUri("http://" + host + "/").port(10101).build();
 		
 		
-		this.resources = resources;
+		RallyeServer.resources = resources;
 
 		// start http server
 		try {

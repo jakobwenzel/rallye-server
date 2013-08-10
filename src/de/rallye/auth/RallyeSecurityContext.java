@@ -4,12 +4,12 @@ import java.security.Principal;
 
 import javax.ws.rs.core.SecurityContext;
 
-public class RallyeSecurityContext implements SecurityContext {
+public class RallyeSecurityContext<T extends Principal> implements SecurityContext {
 
-	private RallyePrincipal principal;
+	private T principal;
 	
-	public RallyeSecurityContext(int userID, int groupID) {
-		principal = new RallyePrincipal(userID, groupID);
+	public RallyeSecurityContext(T principal) {
+		this.principal = principal;
 	}
 
 	@Override

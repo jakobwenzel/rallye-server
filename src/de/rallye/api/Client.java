@@ -1,8 +1,6 @@
 package de.rallye.api;
 
-import java.io.File;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -17,8 +15,6 @@ import org.apache.logging.log4j.Logger;
 
 import com.sun.jersey.multipart.file.DefaultMediaTypePredictor;
 
-import de.rallye.RallyeResources;
-import de.rallye.RallyeServer;
 import de.rallye.StadtRallye;
 import de.rallye.exceptions.WebAppExcept;
 
@@ -28,7 +24,7 @@ public class Client {
 
 	private Logger logger =  LogManager.getLogger(Client.class);
 
-	private RallyeResources R = RallyeServer.getResources();
+//	private RallyeResources R = RallyeServer.getResources();
 
 	@GET
 	@Path("{path}")

@@ -32,11 +32,13 @@ public class ServerConsole implements Runnable {
 
 		try {
 			socket = new ServerSocket(port);
-			
-			new Thread(this, "Console-Thread").start();
 		} catch (IOException e) {
 			logger.catching(e);
 		}
+	}
+	
+	public void start() {
+		new Thread(this, "Console-Thread").start();
 	}
 	
 	@Override

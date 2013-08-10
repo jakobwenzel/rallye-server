@@ -41,6 +41,5 @@ public class Map {
 		
 		List<Edge> res = R.data.getEdges();
 		return logger.exit(res);
-		
 	}
 }

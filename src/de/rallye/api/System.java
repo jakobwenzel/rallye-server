@@ -27,6 +27,7 @@ import de.rallye.RallyeResources;
 import de.rallye.RallyeServer;
 import de.rallye.auth.KnownUserAuth;
 import de.rallye.exceptions.DataException;
+import de.rallye.model.structures.LatLng;
 import de.rallye.model.structures.PushMode;
 import de.rallye.model.structures.ServerConfig;
 import de.rallye.model.structures.ServerInfo;
@@ -58,6 +59,15 @@ public class System {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getStatus() {
 		throw new NotImplementedException();//TODO
+	}
+	
+	@GET
+	@Path("mapBounds")
+	@Produces(MediaType.APPLICATION_JSON)
+	public List<LatLng> getBounds() {
+		logger.entry();
+		
+		return RallyeConfig.getMapBounds();
 	}
 	
 	@GET
@@ -99,6 +109,7 @@ public class System {
 		
 		BufferedReader r = new BufferedReader(new FileReader(f));
 		
+		@SuppressWarnings("serial")
 		LinkedHashMap<Integer, String> list = new LinkedHashMap<Integer, String>() {
 			protected boolean removeEldestEntry(java.util.Map.Entry<Integer,String> arg0) {
 				return size() > 50;
@@ -114,7 +125,13 @@ public class System {
 				list.put(i++, line);
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			logger.error("Could not read Log", e);
+		}
+		
+		try {
+			r.close();
+		} catch (IOException e) {
+			logger.error("Could not close Log", e);
 		}
 		
 		StringBuilder sb = new StringBuilder("<html><head><title>Log</title></head><body>");

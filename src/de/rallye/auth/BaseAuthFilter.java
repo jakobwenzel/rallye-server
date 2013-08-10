@@ -1,19 +1,18 @@
 package de.rallye.auth;
 
+import java.security.Principal;
+
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerRequestFilter;
 import com.sun.jersey.spi.container.ContainerResponseFilter;
 import com.sun.jersey.spi.container.ResourceFilter;
 
-public abstract class BasicAuthFilter implements ResourceFilter, ContainerRequestFilter {
+public abstract class BaseAuthFilter implements ResourceFilter, ContainerRequestFilter {
 
-	private static Logger logger = LogManager.getLogger(BasicAuthFilter.class);
+//	private static Logger logger = LogManager.getLogger(BasicAuthFilter.class);
 	
     /**
      * Apply the filter : check input request, validate or not with user auth
@@ -50,5 +49,5 @@ public abstract class BasicAuthFilter implements ResourceFilter, ContainerReques
     
     protected abstract Response getUnauthorized(); 
     
-    protected abstract void checkAuthentication(ContainerRequest containerRequest, String[] login);
+    protected abstract Principal checkAuthentication(ContainerRequest containerRequest, String[] login);
 }

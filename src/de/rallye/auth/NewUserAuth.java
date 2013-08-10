@@ -1,7 +1,5 @@
 package de.rallye.auth;
 
-import java.sql.SQLException;
-
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
@@ -11,11 +9,13 @@ import org.apache.logging.log4j.Logger;
 
 import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerRequestFilter;
-import com.sun.jersey.spi.container.ResourceFilter;
 
 import de.rallye.RallyeServer;
+import de.rallye.exceptions.DataException;
+import de.rallye.exceptions.InputException;
+import de.rallye.exceptions.UnauthorizedException;
 
-public class NewUserAuth extends KnownUserAuth implements ResourceFilter {
+public class NewUserAuth extends BaseAuthFilter {
 	
 	private static Logger logger = LogManager.getLogger(NewUserAuth.class);
 	
@@ -25,24 +25,34 @@ public class NewUserAuth extends KnownUserAuth implements ResourceFilter {
 	}
 
 	@Override
-	protected void checkAuthentication(ContainerRequest containerRequest, String[] login) {
+	protected GroupPrincipal checkAuthentication(ContainerRequest containerRequest, String[] login) {
 		// Checking for User
-        int result;
+        GroupPrincipal principal;
+        int groupID;
 		try {
-			result = RallyeServer.getResources().data.isNewUserAuthorized(login);
-		} catch (SQLException e) {
-			logger.error(e);
+			if (login.length != 2)
+				throw new InputException("Login does not contain username and password");
+			
+			groupID = Integer.parseInt(login[0]);
+			
+			principal = RallyeServer.getResources().data.getNewUserAuthorization(groupID, login[1]);
+		} catch (DataException e) {
+			logger.error("Database Error", e);
+			throw new WebApplicationException(e);
+		} catch (InputException e) {
+			logger.error("Invalid login", e);
+			throw new WebApplicationException(e);
+		} catch (UnauthorizedException e) {
+			logger.info("Unauthorized: "+ login[0]);
+            throw new WebApplicationException(Status.UNAUTHORIZED);
+		} catch (Exception e) {
+			logger.error("Unknown Error", e);
 			throw new WebApplicationException(e);
 		}
- 
-        // login refused
-        if(result <= 0){
-        	logger.info("Unauthorized: "+ login[0]);
-            throw new WebApplicationException(Status.UNAUTHORIZED);
-        }
         
-        containerRequest.setSecurityContext(new RallyeSecurityContext(-1, result));
-        logger.info("Authorized: group "+ result);
+        containerRequest.setSecurityContext(new RallyeSecurityContext<GroupPrincipal>(principal));
+        logger.info("Authorized: group {}:{}", groupID, principal.getName());
+        return principal;
 	}
 	
 	@Override

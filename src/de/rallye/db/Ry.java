@@ -1,5 +1,7 @@
 package de.rallye.db;
 
+import com.sun.xml.internal.ws.client.ClientSchemaValidationTube;
+
 public class Ry {
 	
 	public static class PushModes {
@@ -77,6 +79,34 @@ public class Ry {
 		public static final String ID_MESSAGE = Messages.ID;
 		public static final String ID_PICTURE = Pictures.ID;
 		public static final String ID_CHATROOM = Chatrooms.ID;
+	}
+	
+	public static class Tasks {
+		public static final String TABLE = "ry_tasks";
+		public static final String ID = "taskID";
+		public static final String NAME = "taskName";
+		public static final String DESCRIPTION = "description";
+		public static final String LATITUDE = "latitude";
+		public static final String LONGITUDE = "longitude";
+		public static final String LOCATION_SPECIFIC = "locationSpecific";
+		public static final String RADIUS = "radius";
+		public static final String MULTIPLE_SUBMITS = "multipleSubmits";
+		public static final String SUBMIT_TYPE = "submitType";
+		public static final String POINTS = "points";
+//		public static final String ID_PICTURE = Pictures.ID;
+		public static final String ADDITIONAL_RESOURCES = "additionalResources";
+	}
+	
+	public static class Submissions {
+		public static final String TABLE = "ry_submissions";
+		public static final String ID = "submissionID";
+		public static final String ID_TASK = Tasks.ID;
+		public static final String ID_GROUP = Groups.ID;
+		public static final String ID_USER = Users.ID;
+		public static final String SUBMIT_TYPE = "submitType";
+		public static final String SCORE = "score";
+		public static final String INT_SUBMISSION = "intSubmission";
+		public static final String TEXT_SUBMISSION = "textSubmission";
 	}
 	
 	@Deprecated //TODO: specific for Scotland Yard, not modular

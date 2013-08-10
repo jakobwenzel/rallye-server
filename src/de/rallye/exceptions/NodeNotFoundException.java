@@ -1,7 +1,5 @@
 package de.rallye.exceptions;
 
-import javax.ws.rs.WebApplicationException;
-
 public class NodeNotFoundException extends WebAppExcept{
 
 	public NodeNotFoundException() {
