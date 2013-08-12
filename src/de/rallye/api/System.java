@@ -40,6 +40,12 @@ public class System {
 	private RallyeResources R = RallyeServer.getResources();
 	
 	@GET
+	@Path("ping")
+	public String ping() {
+		return "OK";
+	}
+	
+	@GET
 	@Path("picture")
 	@Produces("image/jpeg")
 	public File getPicture() {

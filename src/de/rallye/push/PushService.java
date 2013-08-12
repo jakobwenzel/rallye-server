@@ -78,8 +78,6 @@ public class PushService {
 		try {
 			List<UserInternal> users = data.getChatroomMembers(roomID);
 			
-			
-			
 			push(users, toJSON(chat, roomID), Type.newMessage);
 		} catch (DataException e) {
 			logger.error(e);
@@ -105,6 +103,8 @@ public class PushService {
 	}
 	
 	private void push(List<UserInternal> users, String payload, Type type) {
+		logger.info("Pushing {}:{}", type, payload);
+		
 		HashMap<Integer, List<UserInternal>> ids = new HashMap<Integer, List<UserInternal>>();
 		
 		Set<Integer> modes = pushModes.keySet();
@@ -134,6 +134,7 @@ public class PushService {
 				logger.error("PushAdapter for mode:{} is null", m.getKey());
 				continue;
 			}
+			logger.info("PushMode:{} to {}", m.getKey(), ids.get(m.getKey()));
 			adapter.push(ids.get(m.getKey()), payload, type);
 		}
 	}

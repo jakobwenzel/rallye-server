@@ -569,10 +569,8 @@ public class DataAdapter {
 		}
 	}
 
-	private List<Chatroom> chatrooms;
-	public synchronized List<Chatroom> getChatrooms(int groupID) throws DataException {
-		if (chatrooms!=null) return chatrooms;
-		Connection con = null;
+	public synchronized List<Chatroom> getChatrooms(int groupID) throws DataException { // Somebody (!!!Jakob!!!) implemented caching of available Chatrooms!!!
+		Connection con = null;// And he was smart enough to do it in 1 SINGLE list for ALL groups
 		PreparedStatement st = null;
 		ResultSet rs = null;
 		
@@ -584,7 +582,7 @@ public class DataAdapter {
 			st.setInt(1, groupID);
 			rs = st.executeQuery();
 			
-			chatrooms = new ArrayList<Chatroom>();
+			List<Chatroom> chatrooms = new ArrayList<Chatroom>();
 			
 			while (rs.next()) {
 				chatrooms.add(new Chatroom(rs.getInt(1), rs.getString(2)));
@@ -771,7 +769,7 @@ public class DataAdapter {
 			con = dataSource.getConnection();
 			st = con.prepareStatement("SELECT "+ cols("push."+Ry.PushModes.NAME, "usr."+Ry.Users.PUSH_ID) +
 										" FROM "+ Ry.Users.TABLE +" AS usr LEFT JOIN "+ Ry.PushModes.TABLE +" AS push USING("+ Ry.Users.ID_PUSH_MODE +")"+
-										" WHERE "+ Ry.Users.ID +"=? "+ Ry.Users.ID_GROUP +"=?");
+										" WHERE "+ Ry.Users.ID +"=? AND "+ Ry.Users.ID_GROUP +"=?");
 			
 			st.setInt(1, userID);
 			st.setInt(2, groupID);
@@ -877,6 +875,7 @@ public class DataAdapter {
 	}
 	
 	protected void invalidateUsers() {
+		logger.debug("Invalidating User Tables");
 		allUsers = null;
 		members.clear();
 		roomMembers.clear();
@@ -884,6 +883,7 @@ public class DataAdapter {
 	
 
 	Map<Integer,List<UserInternal>> roomMembers = new HashMap<Integer,List<UserInternal>>();
+	
 	public List<UserInternal> getChatroomMembers(int roomID) throws DataException {
 		List<UserInternal> cached = roomMembers.get(roomID);
 		if (cached!=null) return cached;

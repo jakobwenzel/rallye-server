@@ -42,7 +42,6 @@ public class GCMPushAdapter implements IPushAdapter {
 	
 	@Override
 	public void push(List<UserInternal> users, String payload, Type type) {
-		logger.info("Pushing {}:{} to\n{}", type, payload, users);
 		
 		Message msg = new Message.Builder().timeToLive(TTL).addData(PushEntity.TYPE, type.toString())
 				.addData(PushEntity.PAYLOAD, payload).build();

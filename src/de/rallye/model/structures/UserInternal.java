@@ -14,4 +14,8 @@ public class UserInternal extends User {
 		this.pushID = pushID;
 	}
 
+	@Override
+	public String toString() {
+		return super.toString() +"("+ pushMode +")";
+	}
 }
