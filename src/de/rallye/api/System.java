@@ -148,9 +148,12 @@ public class System {
 	}
 	
 	@GET
-	@Path("app")
+	@Path("rallye.apk")
 	@Produces("application/vnd.android.package-archive")
 	public File getApp() {
-		return new File("rallye.apk");
+		logger.entry();
+		File f = new File("rallye.apk");
+		
+		return logger.exit(f);
 	}
 }
