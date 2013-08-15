@@ -143,6 +143,8 @@ public class Groups {
 		
 		p.checkGroupMatches(groupID);
 		
+		logger.info("New User: {}", info);
+		
 		try {
 			UserAuth login = R.data.login(authGroup, info);
 			return login;

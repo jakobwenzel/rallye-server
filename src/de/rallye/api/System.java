@@ -146,4 +146,11 @@ public class System {
 		}
 		return sb.append("</body></html>").toString();
 	}
+	
+	@GET
+	@Path("app")
+	@Produces("application/vnd.android.package-archive")
+	public File getApp() {
+		return new File("rallye.apk");
+	}
 }

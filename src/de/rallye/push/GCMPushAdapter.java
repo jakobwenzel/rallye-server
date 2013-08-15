@@ -73,6 +73,7 @@ public class GCMPushAdapter implements IPushAdapter {
 				
 				MulticastResult res = null;
 				try {
+					logger.debug("pushing: {} to {}", msg, users);
 					res = sender.send(msg, users, RETRIES);
 				} catch (IOException e) {
 					logger.fatal("Google Cloud Messaging failed", e);
@@ -98,13 +99,15 @@ public class GCMPushAdapter implements IPushAdapter {
 							if (error.equals(Constants.ERROR_NOT_REGISTERED) || error.equals(Constants.ERROR_INVALID_REGISTRATION)) {
 								logger.warn("client has removed app from device");
 								changes.put(users.get(i), null);
-							}
+							} else
+								logger.error(error);
 						}
 					}
 				}
 				
 				if (!changes.isEmpty()) {
 					try {
+						logger.debug("PushIDs changed: {}"+ changes);
 						data.updatePushIds(changes);
 					} catch (DataException e) {
 						logger.error("Failed to update changed pushIDs", e);

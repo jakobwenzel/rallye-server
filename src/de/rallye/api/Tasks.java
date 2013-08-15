@@ -74,16 +74,17 @@ public class Tasks {
 	@GET
 	@Path("all/{groupID}")
 	@Produces(MediaType.APPLICATION_JSON)
-	@ResourceFilters(AdminAuth.class)
+	@ResourceFilters(KnownUserAuth.class)
 	public List<TaskSubmissions> getAllSubmissions(@PathParam("groupID") int groupID, @Context SecurityContext sec) {
 		logger.entry();
 		
-		AdminPrincipal p = (AdminPrincipal) sec.getUserPrincipal();
+		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
 		
-		if (!p.hasRightsForTaskScoring()) {
-			logger.warn("admin {} has no access rights taskScoring", p.getAdminID());
-			throw new WebApplicationException(Response.Status.FORBIDDEN);
-		}
+//		if (!p.hasRightsForTaskScoring()) {
+//			logger.warn("admin {} has no access rights taskScoring", p.getAdminID());
+//			throw new WebApplicationException(Response.Status.FORBIDDEN);
+//		}
+		p.checkGroupMatches(groupID);
 		
 		try {
 			List<TaskSubmissions> res = R.data.getAllSubmissions(groupID);

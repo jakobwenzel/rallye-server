@@ -2,6 +2,9 @@ package de.rallye.images;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -20,13 +23,13 @@ public class ImageRepository {
 	
 	
 	private static final PictureSize THUMB = PictureSize.Thumbnail;
-	private static final PictureSize STD = PictureSize.Standard;
+	private static final PictureSize MINI = PictureSize.Mini;
 	
 	private static final Logger logger = LogManager.getLogger(ImageRepository.class);
 
 	private String repository;
 	private ImageCache thumbCache;
-	private ImageCache stdCache;
+	private ImageCache miniCache;
 	
 	private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 	
@@ -54,10 +57,10 @@ public class ImageRepository {
 	}
 
 	
-	public ImageRepository(String repository, int maxThumbEntries, int maxStdEntries) {
+	public ImageRepository(String repository, int maxThumbEntries, int maxMiniEntries) {
 		this.repository = repository;
 		this.thumbCache = new ImageCache(maxThumbEntries);
-		this.stdCache = new ImageCache(maxStdEntries);
+		this.miniCache = new ImageCache(maxMiniEntries);
 		
 		new File(this.repository).mkdirs();
 	}
@@ -70,8 +73,8 @@ public class ImageRepository {
 		
 		if (size == THUMB)
 			cache = thumbCache;
-		else if (size == STD)
-			cache = stdCache;
+		else if (size == MINI)
+			cache = miniCache;
 		
 		lock.readLock().lock();
 		try {
@@ -81,11 +84,17 @@ public class ImageRepository {
 			}
 			
 			if (!cached) {
-				logger.info("Loading "+ pictureID +" from File");
+				logger.info("Loading {} from File", pictureID);
 				try {
 					File f = getFile(pictureID, size);
-				
-					img = ImageIO.read(f);
+					if (f.exists()) {
+						img = ImageIO.read(f);
+					} else {
+						logger.info("Size {} does not exist, scaling from Original", size);
+						f = getFile(pictureID, PictureSize.Original);
+						BufferedImage org = ImageIO.read(f);
+						img = scalePicture(org, pictureID, size);
+					}
 				} catch (IOException e) {
 					logger.error("Picture does not exist", e);
 				}
@@ -105,6 +114,70 @@ public class ImageRepository {
 		return img;
 	}
 	
+	public void put(int pictureID, File fIn) throws DataException {
+		logger.info("Adding {} to repository", pictureID);
+		
+		
+		lock.writeLock().lock();
+		try {
+			BufferedImage iOut;
+			File fOut;
+			
+			fOut = getFile(pictureID, PictureSize.Original);
+			FileInputStream inStream = new FileInputStream(fIn);
+			FileOutputStream outStream = new FileOutputStream(fOut);
+			
+			byte[] buffer = new byte[ 0xFFFF ];
+		    for ( int len; (len = inStream.read(buffer)) != -1; ) {
+		      outStream.write( buffer, 0, len );
+		    }
+		    outStream.close();
+		    inStream.close();
+		    
+		    BufferedImage iIn = ImageIO.read(fIn);
+		    
+		    logger.info("Original saved ({}x{})", iIn.getWidth(), iIn.getHeight());
+			
+			for (PictureSize s: PictureSize.values()) {
+				if (s == PictureSize.Original)
+					continue;
+				
+				iOut = scalePicture(iIn, pictureID, s);
+				
+				if (s == THUMB)
+					thumbCache.put(pictureID, iOut);
+				else if (s == MINI)
+					miniCache.put(pictureID, iOut);
+			}
+			
+		} catch (FileNotFoundException e) {
+			final String msg = "Could not find file"+ fIn.toString();
+			logger.error(msg, e);
+			throw new DataException(msg, e);
+		} catch (IOException e) {
+			final String msg = "Could not read/write";
+			logger.error(msg, e);
+			throw new DataException(msg, e);
+		} finally {
+			lock.writeLock().unlock();
+		}
+	}
+	
+	private BufferedImage scalePicture(BufferedImage base, int pictureID, PictureSize size) throws IOException {
+		Dimension d = size.getDimension();
+		
+		BufferedImage out = ImageScaler.scaleImage(base, d);
+		
+		File f = getFile(pictureID, size);
+		
+		ImageIO.write(out, "jpg", f);
+		
+		logger.info("Scaled {} to {}", pictureID, size);
+		
+		return out;
+	}
+	
+	@Deprecated
 	public void put(int pictureID, BufferedImage img) throws DataException {
 		logger.info("Adding "+ pictureID +" to repository ("+ img.getWidth() +"x"+ img.getHeight() +")");
 		
@@ -122,8 +195,8 @@ public class ImageRepository {
 				
 				if (s == THUMB)
 					thumbCache.put(pictureID, out);
-				else if (s == STD)
-					stdCache.put(pictureID, out);
+				else if (s == MINI)
+					miniCache.put(pictureID, out);
 				
 				f = getFile(pictureID, s);
 				try {
