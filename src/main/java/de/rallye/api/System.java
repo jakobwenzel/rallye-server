@@ -54,7 +54,7 @@ public class System {
 	@Path("info")
 	@Produces(MediaType.APPLICATION_JSON)
 	public ServerInfo getDescription() {
-		return RallyeConfig.getServerDescription();
+		return R.getConfig().getServerDescription();
 	}
 
 	@GET
@@ -71,7 +71,7 @@ public class System {
 	public List<LatLng> getBounds() {
 		logger.entry();
 		
-		return RallyeConfig.getMapBounds();
+		return R.getConfig().getMapBounds();
 	}
 	
 	@GET

@@ -15,6 +15,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import de.rallye.RallyeConfig;
+import de.rallye.RallyeResources;
 import de.rallye.db.DataAdapter;
 import de.rallye.exceptions.DataException;
 import de.rallye.model.structures.ChatEntry;
@@ -32,6 +33,7 @@ import de.rallye.push.IPushAdapter;
 public class PushService {
 	
 	private final Logger logger = LogManager.getLogger(PushService.class);
+	private static RallyeResources R = RallyeResources.getResources();
 	
 	private Map<Integer, IPushAdapter> pushModes = Collections.synchronizedMap(new HashMap<Integer, IPushAdapter>());
 
@@ -53,7 +55,7 @@ public class PushService {
 	
 	public static IPushAdapter getPushAdapter(String name, DataAdapter data) {
 		if (name.equalsIgnoreCase("gcm"))
-			return new GCMPushAdapter(RallyeConfig.getGcmKey(), data);
+			return new GCMPushAdapter(R.getConfig().getGcmKey(), data);
 		/*if (name.equalsIgnoreCase("websocket"))
 			return PushWebsocketApp.getInstance();*/
 		//TODO: Reenable Websocket.
