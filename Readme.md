@@ -1,4 +1,4 @@
-This is the Server for the Stadtrallye organized by the [Fachschaft IST](http://fs-ist.de)
+This is the Server for the Stadtrallye organized by the [Fachschaft IST](http://www.fs-ist.de)
 
 To run the server you will need to create a config file named `config.json` in one of the following locations:
 x  Current working dir
