@@ -15,13 +15,11 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import de.rallye.annotations.KnownUserAuth;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.sun.jersey.spi.container.ResourceFilters;
-
 import de.rallye.RallyeResources;
-import de.rallye.auth.KnownUserAuth;
 import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.WebAppExcept;
 import de.rallye.model.structures.LatLng;
@@ -64,7 +62,7 @@ public class System {
 
 	@GET
 	@Path("status")
-	@ResourceFilters(KnownUserAuth.class)
+	@KnownUserAuth
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getStatus() {
 		throw new UnsupportedOperationException();//TODO

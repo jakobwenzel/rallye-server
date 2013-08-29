@@ -14,13 +14,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
+import de.rallye.annotations.KnownUserAuth;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.sun.jersey.spi.container.ResourceFilters;
-
 import de.rallye.RallyeResources;
-import de.rallye.auth.KnownUserAuth;
 import de.rallye.auth.RallyePrincipal;
 import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.InputException;
@@ -39,7 +37,7 @@ public class Chatrooms {
 	private RallyeResources R = RallyeResources.getResources();
 
 	@GET
-	@ResourceFilters(KnownUserAuth.class)
+	@KnownUserAuth
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<Chatroom> getChatrooms(@Context SecurityContext sec) {
 		logger.entry();
@@ -56,7 +54,7 @@ public class Chatrooms {
 	}
 	
 	@GET
-	@ResourceFilters(KnownUserAuth.class)
+	@KnownUserAuth
 	@Path("{roomID}/since/{timestamp}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<ChatEntry> getChats(@PathParam("roomID") int roomID, @PathParam("timestamp") long timestamp, @Context SecurityContext sec) {
@@ -65,7 +63,7 @@ public class Chatrooms {
 	}
 	
 	@GET
-	@ResourceFilters(KnownUserAuth.class)
+	@KnownUserAuth
 	@Path("{roomID}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<ChatEntry> getChats(@PathParam("roomID") int roomID, @Context SecurityContext sec) {
@@ -89,7 +87,7 @@ public class Chatrooms {
 	}
 	
 	@PUT
-	@ResourceFilters(KnownUserAuth.class)
+	@KnownUserAuth
 	@Path("{roomID}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)

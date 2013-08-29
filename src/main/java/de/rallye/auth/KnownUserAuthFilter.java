@@ -1,25 +1,24 @@
 package de.rallye.auth;
 
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import de.rallye.annotations.KnownUserAuth;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.spi.LoggerContext;
 import org.apache.logging.log4j.spi.LoggerContextFactory;
-
-import com.sun.jersey.spi.container.ContainerRequest;
-import com.sun.jersey.spi.container.ContainerRequestFilter;
 
 import de.rallye.RallyeResources;
 import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.InputException;
 import de.rallye.exceptions.UnauthorizedException;
 
-public class KnownUserAuth extends BaseAuthFilter implements IManualAuthentication<RallyePrincipal> {
-	//private static Logger test = getTest(KnownUserAuth.class);
-	private static Logger logger = LogManager.getLogger(KnownUserAuth.class);
+@KnownUserAuth
+public class KnownUserAuthFilter extends BaseAuthFilter implements IManualAuthentication<RallyePrincipal> {
+	private static Logger logger = LogManager.getLogger(KnownUserAuthFilter.class);
 	
     public static Logger getTest(Class<?> clazz) {
     	LoggerContextFactory factory = LogManager.getFactory();
@@ -43,7 +42,7 @@ public class KnownUserAuth extends BaseAuthFilter implements IManualAuthenticati
 	}
     
     @Override
-    protected RallyePrincipal checkAuthentication(ContainerRequest containerRequest, String[] login) {
+    protected RallyePrincipal checkAuthentication(ContainerRequestContext containerRequest, String[] login) {
     	// Checking for User
         RallyePrincipal principal;
         int userID, groupID;
@@ -80,9 +79,4 @@ public class KnownUserAuth extends BaseAuthFilter implements IManualAuthenticati
         logger.info("Authorized: {}:{} for group {}", userID, principal.getName(), groupID);
         return principal;
     }
-
-	@Override
-	public ContainerRequestFilter getRequestFilter() {
-		return new KnownUserAuth();
-	}
 }

@@ -14,13 +14,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
+import de.rallye.annotations.KnownUserAuth;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.sun.jersey.spi.container.ResourceFilters;
-
 import de.rallye.RallyeResources;
-import de.rallye.auth.KnownUserAuth;
 import de.rallye.auth.RallyePrincipal;
 import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.InputException;
@@ -56,7 +54,7 @@ public class Tasks {
 	@GET
 	@Path("{taskID}")
 	@Produces(MediaType.APPLICATION_JSON)
-	@ResourceFilters(KnownUserAuth.class)
+	@KnownUserAuth
 	public List<Submission> getSubmissions(@PathParam("taskID") int taskID, @Context SecurityContext sec) {
 		logger.entry();
 		
@@ -74,7 +72,7 @@ public class Tasks {
 	@GET
 	@Path("all/{groupID}")
 	@Produces(MediaType.APPLICATION_JSON)
-	@ResourceFilters(KnownUserAuth.class)
+	@KnownUserAuth
 	public List<TaskSubmissions> getAllSubmissions(@PathParam("groupID") int groupID, @Context SecurityContext sec) {
 		logger.entry();
 		
@@ -99,7 +97,7 @@ public class Tasks {
 	@Path("{taskID}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	@ResourceFilters(KnownUserAuth.class)
+	@KnownUserAuth
 	public Submission submit(SimpleSubmission submission, @PathParam("taskID") int taskID, @Context SecurityContext sec) {
 		logger.entry();
 		

@@ -11,13 +11,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
+import de.rallye.annotations.KnownUserAuth;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.sun.jersey.spi.container.ResourceFilters;
-
 import de.rallye.RallyeResources;
-import de.rallye.auth.KnownUserAuth;
 import de.rallye.auth.RallyePrincipal;
 import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.WebAppExcept;
@@ -35,7 +33,7 @@ public class Game {
 
 
 	@GET
-	@ResourceFilters(KnownUserAuth.class)
+	@KnownUserAuth
 	@Path("state")
 	@Produces(MediaType.APPLICATION_JSON)
 	public GameState getChats(@Context SecurityContext sec) {
@@ -44,7 +42,7 @@ public class Game {
 	
 
 	@POST
-	@ResourceFilters(KnownUserAuth.class)
+	@KnownUserAuth
 	@Path("nextPosition")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response setUpcomingPosition(@Context SecurityContext sec, int nodeID) {

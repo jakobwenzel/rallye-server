@@ -4,21 +4,21 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import de.rallye.annotations.AdminAuth;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import com.sun.jersey.spi.container.ContainerRequest;
-import com.sun.jersey.spi.container.ContainerRequestFilter;
 
 import de.rallye.exceptions.InputException;
 import de.rallye.exceptions.UnauthorizedException;
 
-public class AdminAuth extends BaseAuthFilter {
+@AdminAuth
+public class AdminAuthFilter extends BaseAuthFilter {
 	
-	private final Logger logger = LogManager.getLogger(AdminAuth.class);
+	private final Logger logger = LogManager.getLogger(AdminAuthFilter.class);
 	
 	@Override
 	protected Response getUnauthorized() {
@@ -26,12 +26,7 @@ public class AdminAuth extends BaseAuthFilter {
 	}
 
 	@Override
-	public ContainerRequestFilter getRequestFilter() {
-		return new AdminAuth();
-	}
-
-	@Override
-	public AdminPrincipal checkAuthentication(ContainerRequest containerRequest, String[] login) {
+	public AdminPrincipal checkAuthentication(ContainerRequestContext containerRequest, String[] login) {
 
         AdminPrincipal principal;
 		try {

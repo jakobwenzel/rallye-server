@@ -14,13 +14,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
+import de.rallye.annotations.KnownUserAuth;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.sun.jersey.spi.container.ResourceFilters;
-
 import de.rallye.RallyeResources;
-import de.rallye.auth.KnownUserAuth;
 import de.rallye.auth.RallyePrincipal;
 import de.rallye.exceptions.DataException;
 import de.rallye.model.structures.ChatPictureLink;
@@ -36,7 +34,7 @@ public class Pics {
 	
 	@PUT
 	@Path("{hash}")
-	@ResourceFilters(KnownUserAuth.class)
+	@KnownUserAuth
 	@Consumes("image/jpeg")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Picture uploadPictureWithHash(BufferedImage img, @PathParam("hash") String hash, @Context SecurityContext sec) {
@@ -52,7 +50,7 @@ public class Pics {
 	}
 	
 	@PUT
-	@ResourceFilters(KnownUserAuth.class)
+	@KnownUserAuth
 	@Consumes("image/jpeg")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Picture uploadPicture(BufferedImage img, @Context SecurityContext sec) {//TODO: keep unedited original including EXIF

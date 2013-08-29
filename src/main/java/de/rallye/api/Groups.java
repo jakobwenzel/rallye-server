@@ -17,19 +17,16 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
+import de.rallye.annotations.KnownUserAuth;
+import de.rallye.annotations.NewUserAuth;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.sun.jersey.spi.container.ResourceFilters;
-
 import de.rallye.RallyeResources;
 import de.rallye.auth.GroupPrincipal;
-import de.rallye.auth.KnownUserAuth;
-import de.rallye.auth.NewUserAuth;
 import de.rallye.auth.RallyePrincipal;
 import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.InputException;
-import de.rallye.exceptions.NotImplementedException;
 import de.rallye.model.structures.Group;
 import de.rallye.model.structures.LoginInfo;
 import de.rallye.model.structures.PushConfig;
@@ -59,7 +56,7 @@ public class Groups {
 	
 	@GET
 	@Path("{groupID}")
-	@ResourceFilters(KnownUserAuth.class)
+	@KnownUserAuth
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<? extends User> getMembers(@PathParam("groupID") int groupID) {
 		logger.entry();
@@ -84,7 +81,7 @@ public class Groups {
 	
 	@GET
 	@Path("{groupID}/{userID}")
-	@ResourceFilters(KnownUserAuth.class)
+	@KnownUserAuth
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getUserInfo(@PathParam("groupID") int groupID, @PathParam("userID") int userID) {
 		throw new UnsupportedOperationException();
@@ -92,7 +89,7 @@ public class Groups {
 	
 	@GET
 	@Path("{groupID}/{userID}/pushSettings")
-	@ResourceFilters(KnownUserAuth.class)
+	@KnownUserAuth
 	@Produces(MediaType.APPLICATION_JSON)
 	public PushConfig getPushSettings(@PathParam("groupID") int groupID, @PathParam("userID") int userID, @Context SecurityContext sec) {
 		logger.entry();
@@ -111,7 +108,7 @@ public class Groups {
 	
 	@POST
 	@Path("{groupID}/{userID}/pushSettings")
-	@ResourceFilters(KnownUserAuth.class)
+	@KnownUserAuth
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response setPushConfig(@PathParam("groupID") int groupID, @PathParam("userID") int userID, PushConfig push, @Context SecurityContext sec) {
 		logger.entry();
@@ -130,7 +127,7 @@ public class Groups {
 	
 	@PUT
 	@Path("{groupID}")
-	@ResourceFilters(NewUserAuth.class)
+	@NewUserAuth
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public UserAuth login(@PathParam("groupID") int groupID, LoginInfo info, @Context SecurityContext sec) {
@@ -158,7 +155,7 @@ public class Groups {
 	
 	@DELETE
 	@Path("{groupID}/{userID}")
-	@ResourceFilters(KnownUserAuth.class)
+	@KnownUserAuth
 	public Response logout(@PathParam("groupID") int groupID, @PathParam("userID") int userID, @Context SecurityContext sec) {
 		logger.entry();
 		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();

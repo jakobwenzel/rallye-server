@@ -2,24 +2,29 @@ package de.rallye;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.logging.Level;
 
-import javax.ws.rs.core.UriBuilder;
-
+import de.rallye.auth.EnsureMimeType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.glassfish.grizzly.http.server.HttpServer;
-import org.glassfish.grizzly.websockets.WebSocketAddOn;
-import org.glassfish.grizzly.websockets.WebSocketEngine;
-
-import com.sun.jersey.api.container.filter.GZIPContentEncodingFilter;
-import com.sun.jersey.api.core.PackagesResourceConfig;
-import com.sun.jersey.api.core.ResourceConfig;
-import com.sun.jersey.api.json.JSONConfiguration;
 
 import de.rallye.push.PushWebsocketApp;
+import org.glassfish.grizzly.compression.zip.GZipFilter;
+import org.glassfish.grizzly.http.server.HttpServer;
+import org.glassfish.grizzly.http.server.NetworkListener;
+import org.glassfish.grizzly.http.server.ServerConfiguration;
+import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
+import org.glassfish.grizzly.websockets.WebSocketAddOn;
+import org.glassfish.grizzly.websockets.WebSocketEngine;
+import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpContainer;
+import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
+import org.glassfish.jersey.jackson.JacksonFeature;
+import org.glassfish.jersey.server.ContainerFactory;
+import org.glassfish.jersey.server.ResourceConfig;
 
-//import de.rallye.push.PushWebsocketApp;
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.core.Feature;
+import javax.ws.rs.core.FeatureContext;
+import javax.ws.rs.core.UriBuilder;
 
 public class RallyeServer {
 	
@@ -32,7 +37,7 @@ public class RallyeServer {
 		logger.entry();
 
 		// create URI
-		URI uri = UriBuilder.fromUri("http://" + host + "/").port(10101).build();
+		URI uri = UriBuilder.fromUri("http://" + host + "/").port(port).build();
 		
 		
 
@@ -48,14 +53,12 @@ public class RallyeServer {
 
 	@SuppressWarnings("unchecked")
 	private HttpServer startServer(URI uri) throws IOException {
-		ResourceConfig rc = new PackagesResourceConfig("de.rallye.api");
-		rc.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, true);
-		rc.getFeatures().put(ResourceConfig.PROPERTY_CONTAINER_REQUEST_FILTERS, true);
-		rc.getFeatures().put(ResourceConfig.PROPERTY_CONTAINER_RESPONSE_FILTERS, true);
-		rc.getContainerRequestFilters().add(new GZIPContentEncodingFilter());
-		rc.getContainerResponseFilters().add(new GZIPContentEncodingFilter());
-		
-		HttpServer serv = MyServerFactory.createHttpServer(uri, rc);
+		ResourceConfig rc = new ResourceConfig();
+		rc.packages("de.rallye.api");
+		rc.register(JacksonFeature.class);
+		rc.register(EnsureMimeType.class);
+
+		HttpServer serv = createServer(uri, rc); // Do NOT start the server just yet
 		logger.info("Starting Grizzly server at " + uri);
 
 		//Register Websocket Stuff
@@ -69,6 +72,49 @@ public class RallyeServer {
 
 		serv.start();  
 		return serv;
+	}
+
+	private HttpServer createServer(URI uri, ResourceConfig configuration) {
+		GrizzlyHttpContainer handler = ContainerFactory.createContainer(GrizzlyHttpContainer.class, configuration);
+		boolean secure = false;
+		SSLEngineConfigurator sslEngineConfigurator = null;
+		boolean start = false;
+
+		final String host = (uri.getHost() == null) ? NetworkListener.DEFAULT_NETWORK_HOST
+				: uri.getHost();
+		final int port = (uri.getPort() == -1) ? 80 : uri.getPort();
+		final HttpServer server = new HttpServer();
+		final NetworkListener listener = new NetworkListener("grizzly", host, port);
+		listener.setSecure(secure);
+		if (sslEngineConfigurator != null) {
+			listener.setSSLEngineConfig(sslEngineConfigurator);
+		}
+
+		// insert
+//		listener.setCompression("on");// on || force || off
+//		listener.setCompressableMimeTypes("text/plain,text/html,application/json");
+		// end insert
+
+		server.addListener(listener);
+
+		// Map the path to the processor.
+		final ServerConfiguration config = server.getServerConfiguration();
+		if (handler != null) {
+			config.addHttpHandler(handler, uri.getPath());
+		}
+
+		config.setPassTraceRequest(true);
+
+		if (start) {
+			try {
+				// Start the server.
+				server.start();
+			} catch (IOException ex) {
+				throw new ProcessingException("IOException thrown when trying to start grizzly server", ex);
+			}
+		}
+
+		return server;
 	}
 
 	/**

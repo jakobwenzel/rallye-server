@@ -3,14 +3,11 @@ package de.rallye.auth;
 import java.security.Principal;
 
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.Response;
 
-import com.sun.jersey.spi.container.ContainerRequest;
-import com.sun.jersey.spi.container.ContainerRequestFilter;
-import com.sun.jersey.spi.container.ContainerResponseFilter;
-import com.sun.jersey.spi.container.ResourceFilter;
-
-public abstract class BaseAuthFilter implements ResourceFilter, ContainerRequestFilter {
+public abstract class BaseAuthFilter implements ContainerRequestFilter {
 
 //	private final Logger logger = LogManager.getLogger(BasicAuthFilter.class);
 	
@@ -19,10 +16,10 @@ public abstract class BaseAuthFilter implements ResourceFilter, ContainerRequest
      * @param containerRequest The request from Tomcat server
      */
     @Override
-    public ContainerRequest filter(ContainerRequest containerRequest) throws WebApplicationException {
+    public void filter(ContainerRequestContext containerRequest) throws WebApplicationException {
 //    	logger.entry();
-    	
-        String auth = containerRequest.getHeaderValue("authorization");
+
+        String auth = containerRequest.getHeaderString("authorization");
  
         // No Basic Auth was provided
         if(auth == null){
@@ -39,15 +36,10 @@ public abstract class BaseAuthFilter implements ResourceFilter, ContainerRequest
         checkAuthentication(containerRequest, login);
         
 //        return logger.exit(containerRequest);
-        return containerRequest;
+//        return containerRequest;
     }
-    
-    @Override
-	public ContainerResponseFilter getResponseFilter() {
-		return null;
-	}
     
     protected abstract Response getUnauthorized(); 
     
-    protected abstract Principal checkAuthentication(ContainerRequest containerRequest, String[] login);
+    protected abstract Principal checkAuthentication(ContainerRequestContext containerRequest, String[] login);
 }

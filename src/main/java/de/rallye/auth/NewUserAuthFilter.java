@@ -1,23 +1,23 @@
 package de.rallye.auth;
 
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import de.rallye.annotations.NewUserAuth;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import com.sun.jersey.spi.container.ContainerRequest;
-import com.sun.jersey.spi.container.ContainerRequestFilter;
 
 import de.rallye.RallyeResources;
 import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.InputException;
 import de.rallye.exceptions.UnauthorizedException;
 
-public class NewUserAuth extends BaseAuthFilter {
+@NewUserAuth
+public class NewUserAuthFilter extends BaseAuthFilter {
 	
-	private final Logger logger = LogManager.getLogger(NewUserAuth.class);
+	private final Logger logger = LogManager.getLogger(NewUserAuthFilter.class);
 	
 	@Override
 	protected Response getUnauthorized() {
@@ -25,7 +25,7 @@ public class NewUserAuth extends BaseAuthFilter {
 	}
 
 	@Override
-	protected GroupPrincipal checkAuthentication(ContainerRequest containerRequest, String[] login) {
+	protected GroupPrincipal checkAuthentication(ContainerRequestContext containerRequest, String[] login) {
 		// Checking for User
         GroupPrincipal principal;
         int groupID;
@@ -53,10 +53,5 @@ public class NewUserAuth extends BaseAuthFilter {
         containerRequest.setSecurityContext(new RallyeSecurityContext<GroupPrincipal>(principal));
         logger.info("Authorized: group {}:{}", groupID, principal.getName());
         return principal;
-	}
-	
-	@Override
-	public ContainerRequestFilter getRequestFilter() {
-		return new NewUserAuth();
 	}
 }

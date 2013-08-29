@@ -13,10 +13,10 @@ import javax.ws.rs.core.SecurityContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.sun.jersey.multipart.file.DefaultMediaTypePredictor;
-
 import de.rallye.StadtRallye;
 import de.rallye.exceptions.WebAppExcept;
+import org.glassfish.jersey.media.multipart.file.DefaultMediaTypePredictor;
+import org.glassfish.jersey.message.internal.MediaTypeProvider;
 
 @Path("client")
 public class Client {
@@ -41,7 +41,7 @@ public class Client {
 
 			throw new WebAppExcept("Not found.", 404);
 		}
-		
+
 		MediaType m = DefaultMediaTypePredictor.CommonMediaTypes.getMediaTypeFromFileName(path);
 		return Response.ok(stream,m).build();
 	

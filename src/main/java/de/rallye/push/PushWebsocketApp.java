@@ -2,7 +2,6 @@ package de.rallye.push;
 
 import java.awt.Frame;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,12 +25,8 @@ import org.glassfish.grizzly.websockets.WebSocket;
 import org.glassfish.grizzly.websockets.WebSocketApplication;
 import org.glassfish.grizzly.websockets.WebSocketListener;
 
-import com.sun.jersey.spi.container.ContainerRequest;
-
-import de.rallye.RallyeServer;
-import de.rallye.auth.KnownUserAuth;
+import de.rallye.auth.KnownUserAuthFilter;
 import de.rallye.auth.RallyePrincipal;
-import de.rallye.model.structures.User;
 import de.rallye.model.structures.UserInternal;
 
 public class PushWebsocketApp extends WebSocketApplication implements
@@ -59,8 +54,7 @@ public class PushWebsocketApp extends WebSocketApplication implements
 	 *         {@link PushWebSocket}
 	 */
 	@Override
-	public WebSocket createSocket(ProtocolHandler handler,
-			HttpRequestPacket request, WebSocketListener... listeners) {
+	public WebSocket createSocket(ProtocolHandler handler, HttpRequestPacket request, WebSocketListener... listeners) {
 		return new PushWebSocket(handler, request, listeners);
 	}
 
@@ -71,8 +65,6 @@ public class PushWebsocketApp extends WebSocketApplication implements
 	 *            {@link PushWebSocket}
 	 * @param data
 	 *            {@link Frame}
-	 * 
-	 * @throws IOException
 	 */
 	@Override
 	public void onMessage(WebSocket websocket, String data) {
@@ -212,7 +204,7 @@ public class PushWebsocketApp extends WebSocketApplication implements
 			try {
 				logger.debug("Trying to authenticate user");
 				
-				KnownUserAuth auth = new KnownUserAuth();
+				KnownUserAuthFilter auth = new KnownUserAuthFilter();
 				RallyePrincipal p = auth.checkAuthentication(new String[]{username, password});
 			
 				int userID = p.getUserID();
