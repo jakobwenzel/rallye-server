@@ -9,3 +9,5 @@ build
 *.iml
 .idea
 out
+src/main/resources/git.properties
+config.json

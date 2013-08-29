@@ -35,16 +35,14 @@ public class RallyeServer {
 
 	private HttpServer httpServer = null;
 	
-	private static RallyeResources resources;
 
-	public RallyeServer(String host, int port, RallyeResources resources) {
+	public RallyeServer(String host, int port) {
 		logger.entry();
 
 		// create URI
 		URI uri = UriBuilder.fromUri("http://" + host + "/").port(10101).build();
 		
 		
-		RallyeServer.resources = resources;
 
 		// start http server
 		try {
@@ -54,10 +52,6 @@ public class RallyeServer {
 		}
 		
 		logger.exit();
-	}
-	
-	public static RallyeResources getResources() {
-		return resources;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -92,8 +86,6 @@ public class RallyeServer {
 	 */
 	public void stopServer() {
 		logger.info("Stopping Grizzly server");
-		
-		resources.data.closeConnection();
 		
 		this.httpServer.stop();
 	}

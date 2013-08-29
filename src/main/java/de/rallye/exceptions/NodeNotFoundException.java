@@ -3,7 +3,7 @@ package de.rallye.exceptions;
 public class NodeNotFoundException extends WebAppExcept{
 
 	public NodeNotFoundException() {
-		super(404, "Node not found");
+		super("Node not found", 404);
 	}
 
 	/**

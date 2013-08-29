@@ -22,9 +22,10 @@ import com.sun.jersey.spi.container.ResourceFilters;
 
 import de.rallye.RallyeConfig;
 import de.rallye.RallyeResources;
-import de.rallye.RallyeServer;
 import de.rallye.auth.KnownUserAuth;
 import de.rallye.exceptions.DataException;
+import de.rallye.exceptions.NotImplementedException;
+import de.rallye.exceptions.WebAppExcept;
 import de.rallye.model.structures.LatLng;
 import de.rallye.model.structures.PushMode;
 import de.rallye.model.structures.ServerConfig;
@@ -33,9 +34,9 @@ import de.rallye.model.structures.ServerInfo;
 @Path("rallye/system")
 public class System {
 
-	private static Logger logger = LogManager.getLogger(System.class);
+	private final Logger logger = LogManager.getLogger(System.class);
 	
-	private RallyeResources R = RallyeServer.getResources();
+	private RallyeResources R = RallyeResources.getResources();
 	
 	@GET
 	@Path("ping")
@@ -47,14 +48,17 @@ public class System {
 	@Path("picture")
 	@Produces("image/jpeg")
 	public File getPicture() {
-		return new File("game/picture.jpg");
+		File picture = new File(R.getConfig().getDataDirectory()+"game/picture.jpg");
+		if (picture.exists())
+			return picture;
+		else throw new WebAppExcept("Picture not found", 404);
 	}
 	
 	@GET
 	@Path("info")
 	@Produces(MediaType.APPLICATION_JSON)
 	public ServerInfo getDescription() {
-		return RallyeConfig.getServerDescription();
+		return R.getConfig().getServerDescription();
 	}
 
 	@GET
@@ -71,7 +75,7 @@ public class System {
 	public List<LatLng> getBounds() {
 		logger.entry();
 		
-		return RallyeConfig.getMapBounds();
+		return R.getConfig().getMapBounds();
 	}
 	
 	@GET
@@ -150,8 +154,9 @@ public class System {
 	@Produces("application/vnd.android.package-archive")
 	public File getApp() {
 		logger.entry();
-		File f = new File("rallye.apk");
-		
-		return logger.exit(f);
+		File f = new File(R.getConfig().getDataDirectory()+"rallye.apk");
+		if (f.exists())
+			return logger.exit(f);
+		else throw new WebAppExcept("Apk not found", 404);
 	}
 }

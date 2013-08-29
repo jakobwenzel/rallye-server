@@ -23,13 +23,13 @@ import org.apache.logging.log4j.Logger;
 import com.sun.jersey.spi.container.ResourceFilters;
 
 import de.rallye.RallyeResources;
-import de.rallye.RallyeServer;
 import de.rallye.auth.GroupPrincipal;
 import de.rallye.auth.KnownUserAuth;
 import de.rallye.auth.NewUserAuth;
 import de.rallye.auth.RallyePrincipal;
 import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.InputException;
+import de.rallye.exceptions.NotImplementedException;
 import de.rallye.model.structures.Group;
 import de.rallye.model.structures.LoginInfo;
 import de.rallye.model.structures.PushConfig;
@@ -41,7 +41,7 @@ public class Groups {
 	
 	private Logger logger =  LogManager.getLogger(Groups.class);
 
-	private RallyeResources R = RallyeServer.getResources();
+	private RallyeResources R = RallyeResources.getResources();
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -77,7 +77,7 @@ public class Groups {
 	@Path("{groupID}/avatar")
 	@Produces("image/jpeg")
 	public File getGroupAvatar(@PathParam("groupID") int groupID) {
-		File f = new File("game/"+ groupID +"/avatar.jpg");
+		File f = new File(R.getConfig().getDataDirectory()+"game/"+ groupID +"/avatar.jpg");
 		
 		return f;
 	}

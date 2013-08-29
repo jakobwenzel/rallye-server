@@ -10,14 +10,14 @@ import org.apache.logging.log4j.Logger;
 import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerRequestFilter;
 
-import de.rallye.RallyeServer;
+import de.rallye.RallyeResources;
 import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.InputException;
 import de.rallye.exceptions.UnauthorizedException;
 
 public class NewUserAuth extends BaseAuthFilter {
 	
-	private static Logger logger = LogManager.getLogger(NewUserAuth.class);
+	private final Logger logger = LogManager.getLogger(NewUserAuth.class);
 	
 	@Override
 	protected Response getUnauthorized() {
@@ -35,7 +35,7 @@ public class NewUserAuth extends BaseAuthFilter {
 			
 			groupID = Integer.parseInt(login[0]);
 			
-			principal = RallyeServer.getResources().data.getNewUserAuthorization(groupID, login[1]);
+			principal = RallyeResources.getResources().data.getNewUserAuthorization(groupID, login[1]);
 		} catch (DataException e) {
 			logger.error("Database Error", e);
 			throw new WebApplicationException(e);

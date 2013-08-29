@@ -31,7 +31,7 @@ public class Client {
 	public Response index(@PathParam("path") String path, @Context SecurityContext sec) {
 		
 		if (path.contains("/"))
-			throw new WebAppExcept(404, "Path invalid");
+			throw new WebAppExcept("Path invalid", 404);
 		
 		logger.debug("Trying to load "+RESOURCE_PATH+path);
 		
@@ -39,7 +39,7 @@ public class Client {
 		
 		if (stream==null) {
 
-			throw new WebAppExcept(404, "Not found.");
+			throw new WebAppExcept("Not found.", 404);
 		}
 		
 		MediaType m = DefaultMediaTypePredictor.CommonMediaTypes.getMediaTypeFromFileName(path);

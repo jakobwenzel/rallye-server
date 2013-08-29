@@ -6,18 +6,31 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.spi.LoggerContext;
+import org.apache.logging.log4j.spi.LoggerContextFactory;
 
 import com.sun.jersey.spi.container.ContainerRequest;
 import com.sun.jersey.spi.container.ContainerRequestFilter;
 
-import de.rallye.RallyeServer;
+import de.rallye.RallyeResources;
 import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.InputException;
 import de.rallye.exceptions.UnauthorizedException;
 
 public class KnownUserAuth extends BaseAuthFilter implements IManualAuthentication<RallyePrincipal> {
-	
+	//private static Logger test = getTest(KnownUserAuth.class);
 	private static Logger logger = LogManager.getLogger(KnownUserAuth.class);
+	
+    public static Logger getTest(Class<?> clazz) {
+    	LoggerContextFactory factory = LogManager.getFactory();
+    	String name = LogManager.class.getName();
+    	if (factory==null) {
+    		System.out.println("they fail.");
+    	}
+    	LoggerContext context =  factory.getContext(name, null, false);
+    	String classname = clazz.getName();
+        return context.getLogger(classname);
+    }
 
 	@Override
 	protected Response getUnauthorized() {
@@ -46,7 +59,7 @@ public class KnownUserAuth extends BaseAuthFilter implements IManualAuthenticati
 			userID = Integer.parseInt(usr[0]);
 			groupID = Integer.parseInt(usr[1]);
 			
-			principal = RallyeServer.getResources().data.getKnownUserAuthorization(groupID, userID, login[1]);
+			principal = RallyeResources.getResources().data.getKnownUserAuthorization(groupID, userID, login[1]);
 		} catch (DataException e) {
 			logger.error("Database Error", e);
 			throw new WebApplicationException(e);

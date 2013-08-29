@@ -1,12 +1,14 @@
 package de.rallye;
 
 import java.beans.PropertyVetoException;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codehaus.jackson.annotate.JsonIgnore;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
@@ -19,18 +21,35 @@ public class RallyeConfig {
 	
 	private static final Logger logger = LogManager.getLogger(RallyeConfig.class);
 	
-	private static final String HOST = "0.0.0.0";
-	private static final int PORT = 10101;
-	private static final int CONSOLE_PORT = 10100;
-	private static final String GCM_API_KEY = "AIzaSyBvku0REe1MwJStdJ7Aye6NC7bwcSO-TG0";
-	private static final String NAME = "Ray's RallyeServer";
-	private static final String DESCRIPTION = "Mein eigener Testserver, den ich Schritt für Schritt ausbaue bis alles funktioniert";
-	private static final ServerInfo.Api[] APIS = {new ServerInfo.Api("ist_rallye", 1), new ServerInfo.Api("scotlandYard", 3), new ServerInfo.Api("server", 4)};
-	private static final LatLng[] MAP_BOUNDS = {new LatLng(49.858959, 8.635107), new LatLng(49.8923691, 8.6746798)};
-	private static final LatLng MAP_CENTER = new LatLng(49.877648, 8.651762);
+	//This is the default data.
 	
+	protected String host = "0.0.0.0";
+	protected int port = 10101;
+	protected int consolePort = 10100;
+	protected String gcmApiKey = "";
+	protected String name = "Ray's RallyeServer";
+	protected String description = "Mein eigener Testserver, den ich Schritt für Schritt ausbaue bis alles funktioniert";
+	protected LatLng[] mapBounds = {new LatLng(49.858959, 8.635107), new LatLng(49.8923691, 8.6746798)};
+	protected LatLng mapCenter = new LatLng(49.877648, 8.651762);
+
+	static class DbData {
+		public String connectString;
+		public String username;
+		public String password;
+		public int maxIdleTime = 3600;
+	}
+	protected DbData dbData = new DbData();
 	
-	public static DataAdapter getMySQLDataAdapter() throws SQLException {
+	protected String dataDirectory = "./";
+	protected boolean dataRelative = false;
+	
+	//Unchangeable data
+	protected final ServerInfo.Api[] APIS = {new ServerInfo.Api("ist_rallye", 1), new ServerInfo.Api("scotlandYard", 3), new ServerInfo.Api("server", 4)};
+
+	
+	protected final String build;
+	
+	public DataAdapter getMySQLDataAdapter() throws SQLException {
 		// create dataBase Handler
 		ComboPooledDataSource dataSource = new ComboPooledDataSource();
 		try {
@@ -38,51 +57,86 @@ public class RallyeConfig {
 		} catch (PropertyVetoException e) {
 			logger.catching(e);
 		}
-		dataSource.setJdbcUrl("jdbc:mysql://hajoschja.de/rallye?characterEncoding=utf8");
-		dataSource.setUser("felix");
-		dataSource.setPassword("andro-rallye");
-		dataSource.setMaxIdleTime(3600); // set max idle time to 1 hour
+		dataSource.setJdbcUrl(dbData.connectString);
+		dataSource.setUser(dbData.username);
+		dataSource.setPassword(dbData.password);
+		dataSource.setMaxIdleTime(dbData.maxIdleTime); // set max idle time to 1 hour
 		
 		DataAdapter da = new DataAdapter(dataSource);
 		
 		return da;
 	}
 
+	
+	public RallyeConfig() {
+		GitRepositoryState git;
+		String build;
+		try {
+			git = GitRepositoryState.getGitRepositoryState();
+			build = git.getDescribe()+", "+git.getBuildTime();
+		} catch (IOException e) {
+			build = "No build info";
+		}
+		this.build = build;
+	}
+	
+	private String configFileDir = "";
+	public void setConfigFileDir(String dir) {
+		this.configFileDir = dir;
+	}
+	
+	@JsonIgnore
+	public ImageRepository getImageRepository() {
+		return new ImageRepository(getDataDirectory()+"pics/", 100, 25);
+	}
+	
+	public String getDataDirectory() {
+		if (dataRelative) {
+			return configFileDir+dataDirectory;
+		} else {
+			return dataDirectory;
+		}
+	}
+	
+	public String getRawDataDirectory() {
+		return dataDirectory;
+	}
+	
+	public boolean getDataRelative() {
+		return dataRelative;
+	}
+	
+	public String getHostName() {
+		return host;
+	}
+	
+	public int getRestPort() {
+		return port;
+	}
+	
+	public int getConsolePort() {
+		return consolePort;
+	}
+	
+	public String getGcmKey() {
+		return gcmApiKey;
+	}
 
-	public static ImageRepository getImageRepository() {
-		return new ImageRepository("pics/", 100, 25);
-	}
-	
-	public static String getHostName() {
-		return HOST;
-	}
-	
-	public static int getRestPort() {
-		return PORT;
-	}
-	
-	public static int getConsolePort() {
-		return CONSOLE_PORT;
-	}
-	
-	public static String getGcmKey() {
-		return GCM_API_KEY;
-	}
-
-	public static List<LatLng> getMapBounds() {
+	public List<LatLng> getMapBounds() {
 		List<LatLng> res = new ArrayList<LatLng>();
-		for (LatLng ll : RallyeConfig.MAP_BOUNDS) {
+		for (LatLng ll : mapBounds) {
 			res.add(ll);
 		}
 		return res;
 	}
 	
-	public static LatLng getMapCenter() {
-		return MAP_CENTER;
+	public LatLng getMapCenter() {
+		return mapCenter;
 	}
 	
-	public static ServerInfo getServerDescription() {
-		return new ServerInfo(NAME, DESCRIPTION, APIS, "");
+	@JsonIgnore
+	public ServerInfo getServerDescription() {
+		return new ServerInfo(name, description, APIS, build);
 	}
 
 }
