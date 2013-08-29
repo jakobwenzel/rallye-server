@@ -1,3 +1,6 @@
+
+	import java.text.SimpleDateFormat
+
 buildscript {
 	repositories {
 		mavenCentral()
@@ -17,7 +20,41 @@ apply plugin: 'application'
 apply plugin: 'versions'
 
 mainClassName = "de.rallye.StadtRallye"
-
+task buildInfo {
+	
+    def cmd = "git rev-parse --short HEAD"
+    def proc = cmd.execute()
+    def revision = proc.text.trim()	
+	
+	cmd = 'git status --porcelain'
+	proc = cmd.execute()
+	def output = proc.text.trim()
+	def dirty = false
+	
+	output.eachLine {
+		if (!it.startsWith("??"))
+			dirty = true;
+	}
+	
+	if (dirty) {
+		revision = revision+"-DEV"
+	}
+	
+	
+	/*if (!output.equals("")) {
+		
+		infoFile<<"-DEV"
+	}*/
+	
+	def sdf = new SimpleDateFormat()
+    sdf.applyPattern( "dd.MM.yyyy '@' HH\\:mm\\:ss z" )
+	def time = sdf.format(new Date())
+	
+	File infoFile = file('src/main/resources/git.properties')
+	def content = "git.commit.id.describe="+revision+"\ngit.build.time="+time+"\n"
+	infoFile.write(content)
+	
+}
 task copyToLib(type: Copy) {
     into "$buildDir/libs/lib"
     from configurations.runtime
@@ -31,6 +68,7 @@ jar {
 		}
     }
 	it.dependsOn copyToLib
+	it.dependsOn buildInfo
 }
 
 sourceCompatibility = 1.6
