@@ -80,6 +80,7 @@ public class RallyeConfig {
 		try {
 			RallyeConfig config = mapper.readValue(configFile, RallyeConfig.class);
 			config.setConfigFileDir(configFile.getParent()+File.separator);
+			logger.debug(config.toString());
 			return config;
 		} catch ( IOException e) {
 			logger.error("Falling back to default config", e);
@@ -167,8 +168,12 @@ public class RallyeConfig {
 		return mapCenter;
 	}
 
-	public ServerInfo getServerDescription() {
+	public ServerInfo getServerInfo() {
 		return new ServerInfo(serverName, description, APIS, build);
 	}
 
+	@Override
+	public String toString() {
+		return hostName +":"+ restPort +" (ConsolePort: "+ consolePort +")\n"+ getServerInfo();
+	}
 }

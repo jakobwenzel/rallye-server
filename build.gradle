@@ -81,30 +81,31 @@ dependencies {
 	compile 'com.sun.jersey:jersey-grizzly2:1.17.+'
 	compile 'com.sun.jersey:jersey-json:1.17.+'
 	compile 'com.sun.jersey.contribs:jersey-multipart:1.17.+'
+	compile 'org.glassfish.grizzly:grizzly-http-server:2.3.+' // Force 2.3 instead of 2.2
 	compile 'org.glassfish.grizzly:grizzly-websockets:2.3.+'
 	compile 'javax.websocket:javax.websocket-api:1.+'
-	
+
 	//Jackson
 	compile 'org.codehaus.jackson:jackson-core-asl:1.9.+'
 	compile 'org.codehaus.jackson:jackson-mapper-asl:1.9.+'
 	//compile 'com.fasterxml.jackson.core:jackson-core:2.2.+'
 	//compile 'com.fasterxml.jackson.core:jackson-annotations:2.2.+'
 	//compile 'com.fasterxml.jackson.core:jackson-databind:2.2.+'
-	
+
 	//MySQL
 	compile 'mysql:mysql-connector-java:5.1.+'
 	compile 'com.mchange:c3p0:0.9.2.+'
-	
-	
+
+
 	//Log4j
 	//compile 'org.apache.logging.log4j:log4j-api:2.+'
 	compile 'org.apache.logging.log4j:log4j-core:2.+'
-	
+
 	// Google Cloud Messaging (deprecated)
 	compile 'com.ganyo:gcm-server:1.+'
-	
+
 	// Primitive JSON (used in Push service)
 	compile 'org.json:json:20090211'
-	
+
 	compile project(':common:RallyeStructures')
 }
