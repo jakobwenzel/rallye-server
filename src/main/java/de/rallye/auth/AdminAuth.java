@@ -18,7 +18,7 @@ import de.rallye.exceptions.UnauthorizedException;
 
 public class AdminAuth extends BaseAuthFilter {
 	
-	private static Logger logger = LogManager.getLogger(AdminAuth.class);
+	private final Logger logger = LogManager.getLogger(AdminAuth.class);
 	
 	@Override
 	protected Response getUnauthorized() {

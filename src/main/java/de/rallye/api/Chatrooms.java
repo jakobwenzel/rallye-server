@@ -20,7 +20,6 @@ import org.apache.logging.log4j.Logger;
 import com.sun.jersey.spi.container.ResourceFilters;
 
 import de.rallye.RallyeResources;
-import de.rallye.RallyeServer;
 import de.rallye.auth.KnownUserAuth;
 import de.rallye.auth.RallyePrincipal;
 import de.rallye.exceptions.DataException;
@@ -37,7 +36,7 @@ public class Chatrooms {
 	
 	private Logger logger =  LogManager.getLogger(Chatrooms.class);
 
-	private RallyeResources R = RallyeServer.getResources();
+	private RallyeResources R = RallyeResources.getResources();
 
 	@GET
 	@ResourceFilters(KnownUserAuth.class)

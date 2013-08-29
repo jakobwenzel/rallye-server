@@ -12,7 +12,7 @@ import com.sun.jersey.spi.container.ResourceFilter;
 
 public abstract class BaseAuthFilter implements ResourceFilter, ContainerRequestFilter {
 
-//	private static Logger logger = LogManager.getLogger(BasicAuthFilter.class);
+//	private final Logger logger = LogManager.getLogger(BasicAuthFilter.class);
 	
     /**
      * Apply the filter : check input request, validate or not with user auth

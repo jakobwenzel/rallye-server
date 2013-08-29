@@ -35,7 +35,6 @@ import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Node;
 
 import de.rallye.RallyeResources;
-import de.rallye.RallyeServer;
 import de.rallye.exceptions.DataException;
 import de.rallye.model.structures.UserInternal;
 
@@ -44,7 +43,7 @@ public class Debug {
 
 	private Logger logger = LogManager.getLogger(Debug.class);
 
-	private RallyeResources R = RallyeServer.getResources();
+	private RallyeResources R = RallyeResources.getResources();
 
 	@GET
 	@Path("members/{groupID}")

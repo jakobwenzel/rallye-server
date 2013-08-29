@@ -15,7 +15,6 @@ import org.apache.logging.log4j.Logger;
 import com.sun.jersey.spi.container.ResourceFilters;
 
 import de.rallye.RallyeResources;
-import de.rallye.RallyeServer;
 import de.rallye.auth.KnownUserAuth;
 import de.rallye.exceptions.DataException;
 import de.rallye.model.structures.GroupUser;
@@ -23,9 +22,9 @@ import de.rallye.model.structures.GroupUser;
 @Path("rallye/users")
 public class Users {
 	
-	private static Logger logger = LogManager.getLogger(System.class);
+	private final Logger logger = LogManager.getLogger(System.class);
 	
-	private RallyeResources R = RallyeServer.getResources();
+	private RallyeResources R = RallyeResources.getResources();
 	
 	@GET
 	@ResourceFilters(KnownUserAuth.class)

@@ -12,7 +12,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import de.rallye.RallyeResources;
-import de.rallye.RallyeServer;
 import de.rallye.model.structures.Edge;
 import de.rallye.model.structures.Node;
 
@@ -21,7 +20,7 @@ public class Map {
 	
 	private Logger logger =  LogManager.getLogger(Map.class.getName());
 
-	private RallyeResources R = RallyeServer.getResources();
+	private RallyeResources R = RallyeResources.getResources();
 
 	@GET
 	@Path("nodes")

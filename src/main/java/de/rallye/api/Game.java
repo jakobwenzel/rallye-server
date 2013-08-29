@@ -17,7 +17,6 @@ import org.apache.logging.log4j.Logger;
 import com.sun.jersey.spi.container.ResourceFilters;
 
 import de.rallye.RallyeResources;
-import de.rallye.RallyeServer;
 import de.rallye.auth.KnownUserAuth;
 import de.rallye.auth.RallyePrincipal;
 import de.rallye.exceptions.DataException;
@@ -29,7 +28,7 @@ import de.rallye.model.structures.GameState;
 public class Game {
 	private Logger logger =  LogManager.getLogger(Game.class);
 
-	private RallyeResources R = RallyeServer.getResources();
+	private RallyeResources R = RallyeResources.getResources();
 
 
 	@GET
