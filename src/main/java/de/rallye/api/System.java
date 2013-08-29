@@ -20,11 +20,9 @@ import org.apache.logging.log4j.Logger;
 
 import com.sun.jersey.spi.container.ResourceFilters;
 
-import de.rallye.RallyeConfig;
 import de.rallye.RallyeResources;
 import de.rallye.auth.KnownUserAuth;
 import de.rallye.exceptions.DataException;
-import de.rallye.exceptions.NotImplementedException;
 import de.rallye.exceptions.WebAppExcept;
 import de.rallye.model.structures.LatLng;
 import de.rallye.model.structures.PushMode;
@@ -61,7 +59,7 @@ public class System {
 	@Path("info")
 	@Produces(MediaType.APPLICATION_JSON)
 	public ServerInfo getDescription() {
-		return R.getConfig().getServerDescription();
+		return R.getConfig().getServerInfo();
 	}
 
 	@GET
