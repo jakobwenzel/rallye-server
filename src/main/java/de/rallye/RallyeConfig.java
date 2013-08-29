@@ -95,6 +95,7 @@ public class RallyeConfig {
 		} catch (PropertyVetoException e) {
 			logger.catching(e);
 		}
+
 		dataSource.setJdbcUrl(dbConnectionConfig.connectString);
 		dataSource.setUser(dbConnectionConfig.username);
 		dataSource.setPassword(dbConnectionConfig.password);
@@ -141,8 +142,17 @@ public class RallyeConfig {
 		return consolePort;
 	}
 	
-	public String getGcmKey() {
+	public String getGcmApiKey() {
 		return gcmApiKey;
+	}
+	public DbConnectionConfig getDbConnectionConfig() {
+		return this.dbConnectionConfig;
+	}
+	public String getServerName() {
+		return serverName;
+	}
+	public String getDescription() {
+		return description;
 	}
 
 	public List<LatLng> getMapBounds() {
