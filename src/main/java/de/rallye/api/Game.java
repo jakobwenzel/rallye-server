@@ -26,6 +26,9 @@ import de.rallye.model.structures.GameState;
 
 @Path("rallye/game")
 public class Game {
+	public static final String API_NAME = "scotlandYard";
+	public static final int API_VERSION = 3;
+
 	private Logger logger =  LogManager.getLogger(Game.class);
 
 	private RallyeResources R = RallyeResources.getResources();

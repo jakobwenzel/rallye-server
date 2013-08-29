@@ -3,27 +3,26 @@ package de.rallye;
 import java.io.IOException;
 import java.util.Properties;
 
-import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.annotate.JsonWriteNullProperties;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
 
 @JsonWriteNullProperties(true)
 public class GitRepositoryState {
 
-	public String getDescribe() {
-		return describe;
+	public String getDescription() {
+		return description;
 	}
 
 	public String getBuildTime() {
 		return buildTime;
 	}
-	private final String describe; // =${git.commit.id.describe}
+	private final String description; // =${git.commit.id.description}
 	private final String buildTime; // =${git.build.time}
 
 	public GitRepositoryState(Properties properties) {
-		this.describe = properties.get("git.commit.id.describe").toString();
-		this.buildTime = properties.get("git.build.time").toString();
+		Object desc = properties.get("git.commit.id.description");
+		this.description = (desc == null)? "" : desc.toString();
+		Object time = properties.get("git.build.time");
+		this.buildTime = time.toString();
 	}
 
 	private static GitRepositoryState gitRepositoryState;

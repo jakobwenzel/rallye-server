@@ -34,6 +34,9 @@ import de.rallye.model.structures.ServerInfo;
 @Path("rallye/system")
 public class System {
 
+	public static final int API_VERSION = 4;
+	public static final String API_NAME = "server";
+
 	private final Logger logger = LogManager.getLogger(System.class);
 	
 	private RallyeResources R = RallyeResources.getResources();

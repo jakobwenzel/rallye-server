@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.rallye.exceptions.DataException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -36,17 +37,18 @@ public class RallyeResources {
 	public final RallyeConfig config;
 	public GameState gameState;
 	
-	private RallyeResources() {
+	private RallyeResources() throws DataException {
 		logger.info("Setting up Resources");
 
-		config = loadConfig();
+		config = RallyeConfig.fromFile(findConfigFile());
 
 		DataAdapter data;
 		try {
 			data = config.getMySQLDataAdapter();
 		} catch (SQLException e) {
-			logger.error("Failed to establish DB connection", e);
-			data = null;
+			final String msg = "Failed to establish DB connection";
+			logger.error(msg, e);
+			throw new DataException(msg);
 		}
 		this.data = data;
 
@@ -57,39 +59,12 @@ public class RallyeResources {
 		push = new PushService(this);
 	}
 
-	public GameState getGameState() {
-		return gameState;
-	}
-
 	/**
 	 * Set Up Singleton Pattern
 	 */
-	public static void init() {
+	public static void init() throws DataException {
 		if (resources!=null) return; //We only want to init once
 		resources = new RallyeResources();
-	}
-
-	
-	/**
-	 * Read Config from Config File if present
-	 * @return Found Config File or Default Config
-	 */
-	private RallyeConfig loadConfig() {
-		File configFile = findConfigFile();
-		if (configFile==null) {
-			logger.info("No config file present.");
-			return new RallyeConfig();
-		}
-		logger.info("Loading config file from {}/{}", configFile.getParent(), configFile);
-		ObjectMapper mapper = new ObjectMapper();
-		try {
-			RallyeConfig config = mapper.readValue(configFile, RallyeConfigLoad.class);
-			config.setConfigFileDir(configFile.getParent()+File.separator);
-			return config;
-		} catch ( IOException e) {
-			logger.error("Falling back to default config", e);
-			return new RallyeConfig();
-		}
 	}
 
 	/**
@@ -108,8 +83,8 @@ public class RallyeResources {
 		logger.info("locating config file");
 		
 		//Try current dir
-		File config = new File("./config.json");
-		logger.info("Checking for "+config);
+		File config = new File("config.json");
+		logger.info("Checking locally for '{}'", config);
 		if (config.exists())
 			return config;
 		
@@ -120,7 +95,7 @@ public class RallyeResources {
 			logger.error(e);
 			config = null;
 		}
-		logger.info("Checking for "+config);
+		logger.info("Checking in jar dir for '{}'", config);
 		if (config!=null && config.exists())
 			return config;
 		
@@ -131,14 +106,14 @@ public class RallyeResources {
 			logger.error(e);
 			config = null;
 		}
-		logger.info("Checking for "+config);
+		logger.info("Checking project dir for '{}'", config);
 		if (config!=null && config.exists())
 			return config;
 		
 		//Try homedir
 		String homedir = System.getProperty("user.home");
 		config = new File(homedir+"/.rallyeserv-config.json");
-		logger.info("Checking for "+config);
+		logger.info("Checking home dir for '{}'", config);
 		//logger.info("Homedir location:)
 		if (config.exists())
 			return config;
@@ -191,5 +166,9 @@ public class RallyeResources {
 		if (resources == null)
 			throw new IllegalStateException("Call init() first");
 		return resources;
+	}
+
+	public GameState getGameState() {
+		return gameState;
 	}
 }

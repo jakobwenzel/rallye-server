@@ -31,7 +31,10 @@ import de.rallye.model.structures.TaskSubmissions;
 
 @Path("rallye/tasks")
 public class Tasks {
-	
+
+	public static final int API_VERSION = 4;
+	public static final String API_NAME = "ist_rallye";
+
 	private Logger logger =  LogManager.getLogger(Tasks.class);
 
 	private RallyeResources R = RallyeResources.getResources();
