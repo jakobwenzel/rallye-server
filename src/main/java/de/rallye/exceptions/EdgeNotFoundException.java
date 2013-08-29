@@ -9,6 +9,6 @@ public class EdgeNotFoundException extends WebAppExcept {
 
 	
 	public EdgeNotFoundException() {
-		super(404,"No linking edge found.");
+		super("No linking edge found.", 404);
 	}
 }

@@ -56,9 +56,8 @@ public class PushService {
 	public static IPushAdapter getPushAdapter(String name, DataAdapter data) {
 		if (name.equalsIgnoreCase("gcm"))
 			return new GCMPushAdapter(R.getConfig().getGcmKey(), data);
-		/*if (name.equalsIgnoreCase("websocket"))
-			return PushWebsocketApp.getInstance();*/
-		//TODO: Reenable Websocket.
+		if (name.equalsIgnoreCase("websocket"))
+			return PushWebsocketApp.getInstance();
 		else
 			return null;
 	}

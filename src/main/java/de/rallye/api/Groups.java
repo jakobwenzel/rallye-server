@@ -77,7 +77,7 @@ public class Groups {
 	@Path("{groupID}/avatar")
 	@Produces("image/jpeg")
 	public File getGroupAvatar(@PathParam("groupID") int groupID) {
-		File f = new File("game/"+ groupID +"/avatar.jpg");
+		File f = new File(R.getConfig().getDataDirectory()+"game/"+ groupID +"/avatar.jpg");
 		
 		return f;
 	}

@@ -15,7 +15,6 @@ public class WebAppExcept extends WebApplicationException {
 	 * 
 	 */
 	private static final long serialVersionUID = 7076560597350579427L;
-	private String message = "";
 	private final static int defaultStatus = 500;
 	
 	/**
@@ -24,8 +23,6 @@ public class WebAppExcept extends WebApplicationException {
 	 */
 	public WebAppExcept(String message) {
 		super(Response.status(defaultStatus).entity(message).build());
-		
-		this.message = message;
 	}
 	
 	/**
@@ -33,9 +30,8 @@ public class WebAppExcept extends WebApplicationException {
 	 * @param status - the HTTP status code that will be returned to the client
 	 * @param message - message that will be returned to the client
 	 */
-	public WebAppExcept(int status, String message) {
+	public WebAppExcept(String message, int status) {
 		super(Response.status(status).entity(message).build());
-		this.message = message;
 	}
 	
 	/**
@@ -45,7 +41,6 @@ public class WebAppExcept extends WebApplicationException {
 	 */
 	public WebAppExcept(java.lang.Throwable cause, String message) {
 		super(cause,Response.status(defaultStatus).entity(message).build());
-		this.message = message;
 	}
 	
 	/**
@@ -56,7 +51,6 @@ public class WebAppExcept extends WebApplicationException {
 	 */
 	public WebAppExcept(java.lang.Throwable cause, String message, int status) {
 		super(cause,Response.status(status).entity(message).build());
-		this.message = message;
 	}
 	
 	
@@ -99,11 +93,6 @@ public class WebAppExcept extends WebApplicationException {
 	public WebAppExcept(Throwable cause) {
 		super(cause);
 		// TODO Auto-generated constructor stub
-	}
-
-	@Override
-	public String getMessage() {
-		return message;
 	}
 	
 	

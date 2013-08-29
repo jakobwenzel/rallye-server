@@ -1,9 +1,11 @@
 This is the Server for the Stadtrallye organized by the [Fachschaft IST](http://www.fs-ist.de)
 
 To run the server you will need to create a config file named `config.json` in one of the following locations:
-x  Current working dir
-x  Directory containing the jar
-x  User home dir, here the file must be named `.rallyeserv-config.json`
+
+* Current working dir
+* Directory containing the jar
+* Top Project dir (the directory containing this file, only if a .git directory is found)
+* User home dir, here the file must be named `.rallyeserv-config.json`
 
 Example config file:
 All values that are printed are defaults, values in `<>` must be changed for the server to work.
@@ -14,6 +16,8 @@ All values that are printed are defaults, values in `<>` must be changed for the
 	      "password" : "<PASSWORD>",
 	      "username" : "<USERNAME>"
 	    },
+  	  "dataRelative": false,
+  	  "dataDirectory": "./",
 	  "description" : "<DESCRIPTION>",
 	  "gcmKey" : "<KEY>",
 	  "hostName" : "0.0.0.0",
@@ -31,3 +35,4 @@ All values that are printed are defaults, values in `<>` must be changed for the
 	  "serverName" : "<NAME>"
 	}
 
+If `dataRelative` is set, the used `dataDirectory` will be a concatenation of the location of the config file and the given value.
