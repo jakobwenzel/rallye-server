@@ -103,29 +103,24 @@
 	</dependencies>
 	<build>
 		<finalName>RallyeServMaven</finalName>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>**/*.properties</include>
+					<include>**/*.xml</include>
+				</includes>
+			</resource>
+		</resources>
 		<plugins>
 			<!-- Plugins needed for war packaging <plugin> <groupId>org.apache.maven.plugins</groupId> 
 				<artifactId>maven-war-plugin</artifactId> <configuration> <webXml>WebContent\WEB-INF\web.xml</webXml> 
 				<archiveClasses>true</archiveClasses> </configuration> </plugin> -->
-			<!-- <plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-shade-plugin</artifactId>
-				<version>2.1</version>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>shade</goal>
-						</goals>
-						<configuration>
-							<transformers>
-								<transformer
-									implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" />
-							</transformers>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>-->
+			<!-- <plugin> <groupId>org.apache.maven.plugins</groupId> <artifactId>maven-shade-plugin</artifactId> 
+				<version>2.1</version> <executions> <execution> <phase>package</phase> <goals> 
+				<goal>shade</goal> </goals> <configuration> <transformers> <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer" 
+				/> </transformers> </configuration> </execution> </executions> </plugin> -->
 			<!-- Plugins needed for jar packaging -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -135,7 +130,7 @@
 					<archive>
 						<manifest>
 							<addClasspath>true</addClasspath>
-							 <classpathPrefix>lib/</classpathPrefix>
+							<classpathPrefix>lib/</classpathPrefix>
 							<mainClass>de.rallye.StadtRallye</mainClass>
 						</manifest>
 					</archive>
@@ -144,7 +139,7 @@
 					</descriptorRefs>
 				</configuration>
 			</plugin>
-			 <plugin>
+			<plugin>
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
 					<execution>
@@ -158,6 +153,52 @@
 					</execution>
 				</executions>
 			</plugin>
+			
+			 <plugin>
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
+                <version>2.1.5</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>revision</goal>
+                         </goals>
+                    </execution>
+                </executions>
+
+                <configuration>
+
+
+                    <dotGitDirectory>${project.basedir}/.git</dotGitDirectory>
+                    <skipPoms>true</skipPoms>
+                    <generateGitPropertiesFile>true</generateGitPropertiesFile>
+                    <generateGitPropertiesFilename>src/main/resources/git.properties</generateGitPropertiesFilename>
+
+                    <failOnNoGitDirectory>false</failOnNoGitDirectory>
+
+                    <gitDescribe>
+                        <skip>false</skip>
+                        <always>false</always>
+                        <!--
+                             how many chars should be displayed as the commit object id? 
+                             7 is git's default, 
+                             0 has a special meaning (see end of this README.md), 
+                             and 40 is the maximum value here 
+                        -->
+                        <abbrev>7</abbrev>
+
+                        <!-- when the build is triggered while the repo is in "dirty state", append this suffix -->
+                        <dirty>-DEV</dirty>
+
+                        <!-- 
+                             always print using the "tag-commits_from_tag-g_commit_id-maybe_dirty" format, even if "on" a tag. 
+                             The distance will always be 0 if you're "on" the tag. 
+                        -->
+                        <forceLongFormat>false</forceLongFormat>
+                    </gitDescribe>
+                </configuration>
+
+            </plugin>
 		</plugins>
 	</build>
 </project>

@@ -2,3 +2,4 @@ bin
 .settings
 Thumbs.db
 target
+src/main/resources/git.properties

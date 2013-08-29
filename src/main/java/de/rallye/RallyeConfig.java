@@ -2,6 +2,7 @@ package de.rallye;
 
 import java.awt.image.DataBufferDouble;
 import java.beans.PropertyVetoException;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +45,8 @@ public class RallyeConfig {
 	protected final ServerInfo.Api[] APIS = {new ServerInfo.Api("ist_rallye", 1), new ServerInfo.Api("scotlandYard", 3), new ServerInfo.Api("server", 4)};
 
 	
+	protected final String build;
+	
 	public DataAdapter getMySQLDataAdapter() throws SQLException {
 		// create dataBase Handler
 		ComboPooledDataSource dataSource = new ComboPooledDataSource();
@@ -62,6 +65,19 @@ public class RallyeConfig {
 		return da;
 	}
 
+	
+	public RallyeConfig() {
+		GitRepositoryState git;
+		String build;
+		try {
+			git = GitRepositoryState.getGitRepositoryState();
+			build = git.getDescribe()+", "+git.getBuildTime();
+		} catch (IOException e) {
+			build = "No build info";
+		}
+		this.build = build;
+	}
+	
 	@JsonIgnore
 	public ImageRepository getImageRepository() {
 		return new ImageRepository("pics/", 100, 25);
@@ -97,7 +113,7 @@ public class RallyeConfig {
 	
 	@JsonIgnore
 	public ServerInfo getServerDescription() {
-		return new ServerInfo(NAME, DESCRIPTION, APIS);
+		return new ServerInfo(NAME, DESCRIPTION, APIS, build);
 	}
 
 }
