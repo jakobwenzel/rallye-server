@@ -6,3 +6,6 @@ Thumbs.db
 .gradle
 .settings
 build
+*.iml
+.idea
+out
