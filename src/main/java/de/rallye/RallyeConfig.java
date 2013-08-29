@@ -82,7 +82,7 @@ public class RallyeConfig {
 	}
 	
 	public static ServerInfo getServerDescription() {
-		return new ServerInfo(NAME, DESCRIPTION, APIS);
+		return new ServerInfo(NAME, DESCRIPTION, APIS, "");
 	}
 
 }
