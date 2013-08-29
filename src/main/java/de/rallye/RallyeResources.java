@@ -2,11 +2,7 @@ package de.rallye;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.security.CodeSource;
-import java.security.ProtectionDomain;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -22,56 +18,61 @@ import de.rallye.model.structures.ChatPictureLink;
 import de.rallye.model.structures.GameState;
 import de.rallye.push.PushService;
 
+/**
+ * Singleton
+ * Initialize with {@link #init()} first
+ */
 public class RallyeResources {
 
 	private static Logger logger =  LogManager.getLogger(RallyeResources.class);
+
+	private static RallyeResources resources;
+
+
 	public final DataAdapter data;
 	public final ImageRepository imgRepo;
 	public final Map<String, ChatPictureLink> hashMap = Collections.synchronizedMap(new HashMap<String, ChatPictureLink>());
-	public PushService push;
+	public final PushService push;
 	public final RallyeConfig config;
 	public GameState gameState;
 	
 	private RallyeResources() {
+		logger.info("Setting up Resources");
 
 		config = loadConfig();
-		
+
 		DataAdapter data;
 		try {
 			data = config.getMySQLDataAdapter();
-
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Failed to establish DB connection", e);
 			data = null;
 		}
 		this.data = data;
-		
-		// TODO: instantiate RallyeConfig, read Connection-Details from file
-		imgRepo = config.getImageRepository();
-		// TODO: create a Game Object
 
-		gameState = new GameState(data);  
+		imgRepo = config.getImageRepository();
+
+		gameState = new GameState(data);
+
+		push = new PushService(this);
 	}
 
 	public GameState getGameState() {
-		// TODO Auto-generated method stub
 		return gameState;
 	}
-	
-	private static RallyeResources resources = null;
 
+	/**
+	 * Set Up Singleton Pattern
+	 */
 	public static void init() {
 		if (resources!=null) return; //We only want to init once
 		resources = new RallyeResources();
-		//Push can only be created after the constructor, as it needs the Config object.
-		resources.push = new PushService(resources.data);
 	}
 
 	
 	/**
 	 * Read Config from Config File if present
-	 * @return
+	 * @return Found Config File or Default Config
 	 */
 	private RallyeConfig loadConfig() {
 		File configFile = findConfigFile();
@@ -79,24 +80,21 @@ public class RallyeResources {
 			logger.info("No config file present.");
 			return new RallyeConfig();
 		}
-		logger.info("Loading config file from "+configFile);
+		logger.info("Loading config file from {}/{}", configFile.getParent(), configFile);
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			RallyeConfig config = mapper.readValue(configFile, RallyeConfig.class);
-			
-			logger.info("Config file dir: "+configFile.getParent());
 			config.setConfigFileDir(configFile.getParent()+File.separator);
 			return config;
 		} catch ( IOException e) {
-			logger.error(e);
-			logger.error("Falling back to default config.");
+			logger.error("Falling back to default config", e);
 			return new RallyeConfig();
 		}
 	}
 
 	/**
 	 * Locate a config file.
-	 * The following locations are checked:
+	 * Following locations are checked in order:
 	 *  working dir/config.json
 	 *  jar dir/config.json
 	 *  project dir/config.json
@@ -104,7 +102,7 @@ public class RallyeResources {
 	 *  
 	 *  project dir is the directory containing .git. If the .git subdir does not exist,
 	 *  the project dir will not be checked for a config.
-	 * @return
+	 * @return the first Config found
 	 */
 	private File findConfigFile() {
 		logger.info("locating config file");
@@ -190,7 +188,8 @@ public class RallyeResources {
 	}
 	
 	public static RallyeResources getResources() {
-		// TODO Auto-generated method stub
+		if (resources == null)
+			throw new IllegalStateException("Call init() first");
 		return resources;
 	}
 }

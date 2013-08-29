@@ -10,7 +10,6 @@ import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -23,7 +22,6 @@ import de.rallye.model.structures.Chatroom;
 import de.rallye.model.structures.PushEntity.Type;
 import de.rallye.model.structures.PushMode;
 import de.rallye.model.structures.UserInternal;
-import de.rallye.push.IPushAdapter;
 
 /**
  * Pushmodes must be continuous (no unused pushModes) matching a List
@@ -33,29 +31,28 @@ import de.rallye.push.IPushAdapter;
 public class PushService {
 	
 	private final Logger logger = LogManager.getLogger(PushService.class);
-	private static RallyeResources R = RallyeResources.getResources();
 	
 	private Map<Integer, IPushAdapter> pushModes = Collections.synchronizedMap(new HashMap<Integer, IPushAdapter>());
 
 	private DataAdapter data;
 //	private ObjectMapper mapper;
 
-	public PushService(DataAdapter data) {
-		this.data = data;
+	public PushService(RallyeResources resources) {
+		this.data = resources.data;
 //		this.mapper = new ObjectMapper();
 		
 		try {
 			for (PushMode p: data.getPushModes()) {
-				pushModes.put(p.pushID, PushService.getPushAdapter(p.name, data));
+				pushModes.put(p.pushID, PushService.getPushAdapter(p.name, data, resources.config));
 			}
 		} catch (DataException e) {
 			logger.error(e);
 		}
 	}
 	
-	public static IPushAdapter getPushAdapter(String name, DataAdapter data) {
+	public static IPushAdapter getPushAdapter(String name, DataAdapter data, RallyeConfig config) {
 		if (name.equalsIgnoreCase("gcm"))
-			return new GCMPushAdapter(R.getConfig().getGcmKey(), data);
+			return new GCMPushAdapter(config.getGcmKey(), data);
 		if (name.equalsIgnoreCase("websocket"))
 			return PushWebsocketApp.getInstance();
 		else
