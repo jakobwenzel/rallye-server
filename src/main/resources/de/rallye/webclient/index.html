@@ -114,6 +114,17 @@ function getUsers(callback) {
 	});
 }
 
+
+function getGroups(callback) {
+	getResource("groups",root+"rallye/groups",callback, function (arr) {
+		var res = {};
+		arr.forEach(function (elem) {
+			res[elem.groupID] = elem;
+		});
+		return res;
+	});
+}
+
 /**
  * wrapper for jQuery.ajax, adding auth information
  */
@@ -223,6 +234,25 @@ function get_chatrooms(callback) {
 	},callback);
 }
 
+function leadZero(num) {
+	if (num<10)
+		return '0'+num;
+	return num;
+}
+function formatTime(unixTimestamp) {
+    var dt = new Date(unixTimestamp * 1000);
+
+	var day = leadZero(dt.getDay());
+	var month = leadZero(dt.getMonth());
+	var year = dt.getFullYear();
+	
+    var hours = leadZero(dt.getHours());
+    var minutes = leadZero(dt.getMinutes());
+    var seconds = leadZero(dt.getSeconds());
+
+
+    return day+"."+month+"."+year+" "+hours + ":" + minutes + ":" + seconds;
+}       
 
 function get_nodes(callback) {
 	$.ajax({
@@ -236,7 +266,7 @@ function load_chatroom(id) {
 	authajax({
 		url: root+"rallye/chatrooms/"+id,
 		dataType: "json"
-	},function (res) {getUsers(function(users) {
+	},function (res) {getUsers(function(users) {getGroups(function(groups) {
 		roomID = id;
 		history.pushState(null, "", root+"client/?chatroom="+id);
 		
@@ -245,23 +275,25 @@ function load_chatroom(id) {
 		
 		var content = res.map(function(chat) {
 			var user = users[chat.userID];
-			var name = user?user.name:userID;
+			var name = user?user.name:chat.userID;
+			var group = groups[chat.groupID];
+			var groupName = group?group.name:chat.groupID;
 			var picture = null;
 			var pictureBig = null
 			if (chat.pictureID) {
 				picture = root+"rallye/pics/"+chat.pictureID+"/thumb";
 				pictureBig = root+"rallye/pics/"+chat.pictureID+"/std";
 			}
-			console.log(chat);
+			var ava = root+"rallye/groups/"+chat.groupID+"/avatar";
 			
-			return { name: name, message: chat.message, picture: picture, pictureBig: pictureBig};
+			return { name: name, message: chat.message, picture: picture, pictureBig: pictureBig,
+				avatar: ava, time: formatTime(chat.timestamp), group: groupName};
 		
 		});
-		console.log(content);
 		var html = Mustache.to_html(template,content,partials);
 
 		$("#main").html(html).removeAttr("style");
-	});});	
+	});});});
 	
 	
 	return false;
@@ -358,11 +390,14 @@ function send_socket_login() {
 function setup_socket() {
 	
 	var url = root.replace("http","ws") + "rallye/push";
+	var status = $("#status");
+	status.text("Socket started at "+url);
 	
 	socket = new WebSocket(url);
 	
 	socket.onopen = function(){
 		socket_open = true;
+		status.text("Socket opened");
 		
 		if (username && password)
 			send_socket_login();
@@ -370,6 +405,7 @@ function setup_socket() {
 	socket.onmessage = function(msg){  
 		var data = JSON.parse(msg.data);
 		console.log(data);
+		status.text("Socket working");
 	    
 	    switch(data.type) {
 	    case "login":
@@ -391,20 +427,33 @@ function setup_socket() {
 	    	}
 	    	break;
 	    case "newMessage":
-	    	var payload = JSON.parse(data.payload);
-	    	console.log(payload);
+	    	var chat = JSON.parse(data.payload);
+	    	console.log(chat);
 	    	
-	    	if (roomID==payload.chatroomID) {
+	    	if (roomID==chat.chatroomID) {
 	    	
-		    	getUsers(function(users) {
-					var user = users[payload.userID];
-					var name = user?user.name:userID;
-		    		payload["name"]=name;
-	
-		    		var html = Mustache.to_html(partials.line,payload);
+		    	getUsers(function(users) { getGroups(function(groups) {
+				
+					var user = users[chat.userID];
+					var name = user?user.name:chat.userID;
+					var group = groups[chat.groupID];
+					var groupName = group?group.name:chat.groupID;
+					var picture = null;
+					var pictureBig = null
+					if (chat.pictureID) {
+						picture = root+"rallye/pics/"+chat.pictureID+"/thumb";
+						pictureBig = root+"rallye/pics/"+chat.pictureID+"/std";
+					}
+					var ava = root+"rallye/groups/"+chat.groupID+"/avatar";
+			
+					var content =  { name: name, message: chat.message, picture: picture, pictureBig: pictureBig,
+						avatar: ava, time: formatTime(chat.timestamp), group: groupName};
+				
+				
+		    		var html = Mustache.to_html(partials.line,content);
 		    		$("#chatentries").append(html);
 		    		
-		    	});
+		    	});});
 	    	}
 	    	
 	    	break;
@@ -412,6 +461,11 @@ function setup_socket() {
 	    	alert("unrecognized message: "+data.type);
 	    }
 	}   
+	
+	socket.onclose = function() {
+	
+		status.text("Socket closed");
+	}
 	
 }
 
@@ -429,7 +483,7 @@ $(function () {
 
 
 	get_system_info(function(res) {
-		$("#servername").html("<b>"+res.name+"</b><br>"+res.description);
+		$("#servername").html("<b>"+Mustache.escape(res.name)+"</b><br>"+Mustache.escape(res.description));
 		document.title=res.name;
 	});
 
@@ -463,6 +517,9 @@ $(function () {
 
 </script>
 <style type="text/css">
+body {
+	font-family: sans-serif;
+}
 #main {
 }
 #left {
@@ -470,6 +527,22 @@ $(function () {
 	width: 13em;
 	margin-right: 1em;
 	float: left;
+}
+.thumb img{
+  max-width: 90px;
+  max-height: 90px;
+  width: expression(this.width > 90 ? "90px" : true);
+  height: expression(this.height > 90 ? "90px" : true);
+}
+
+.thumb {
+
+	background-color: rgb(200,200,200);
+
+}
+.chatsmall {
+	color: gray;
+	font-size: 10pt;
 }
 </style>
 </head>
@@ -496,11 +569,14 @@ $(function () {
 </form>
 </script>
 <script id="templ_chatline" type="text/template">
-<tr><td>{{name}}:</td><td>
-{{#picture}}<a href="{{pictureBig}}" target="_blank"><img src="{{picture}}" /></a>{{/picture}}
+<tr><td rowspan="3" class="thumb"><img src="{{avatar}}" /></td><td class="chatsmall">{{name}} ({{group}})</td></tr>
+<tr><td>{{#picture}}<a href="{{pictureBig}}" target="_blank"><img src="{{picture}}" /></a><br>{{/picture}}
 {{message}}</td></tr>
+<tr><td  class="chatsmall">{{time}}</td></tr>
 </script>
 <div id="servername">
+</div>
+<div> Status: <span id="status" />
 </div>
 <div id="left">
 hello

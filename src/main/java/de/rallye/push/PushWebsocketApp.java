@@ -46,6 +46,12 @@ public class PushWebsocketApp extends WebSocketApplication implements
 
 	}
 
+	
+	@Override
+public boolean isApplicationRequest(HttpRequestPacket request) {
+	logger.info("check for uri "+request.getRequestURI());
+    return "/rallye/push".equals(request.getRequestURI());
+}
 	private static PushWebsocketApp instance = new PushWebsocketApp();
 
 	public static PushWebsocketApp getInstance() {
@@ -77,7 +83,7 @@ public class PushWebsocketApp extends WebSocketApplication implements
 	@Override
 	public void onMessage(WebSocket websocket, String data) {
 		try {
-			System.out.println(data);
+			logger.info(data);
 			ClientMessage message = mapper.readValue(data, ClientMessage.class);
 			message.app = this;
 			message.handleMessage(websocket);
@@ -98,6 +104,7 @@ public class PushWebsocketApp extends WebSocketApplication implements
 	@Override
 	public void onConnect(WebSocket socket) {
 
+			logger.info("new websocket connection");
 	}
 
 	/**
@@ -106,6 +113,7 @@ public class PushWebsocketApp extends WebSocketApplication implements
 	@Override
 	public void onClose(WebSocket websocket, DataFrame frame) {
 
+			logger.info("websocket closed");
 	}
 
 	private static String escape(String orig) {
