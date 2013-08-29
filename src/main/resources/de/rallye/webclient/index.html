@@ -246,10 +246,18 @@ function load_chatroom(id) {
 		var content = res.map(function(chat) {
 			var user = users[chat.userID];
 			var name = user?user.name:userID;
+			var picture = null;
+			var pictureBig = null
+			if (chat.pictureID) {
+				picture = root+"rallye/pics/"+chat.pictureID+"/thumb";
+				pictureBig = root+"rallye/pics/"+chat.pictureID+"/std";
+			}
+			console.log(chat);
 			
-			return { name: name, message: chat.message};
+			return { name: name, message: chat.message, picture: picture, pictureBig: pictureBig};
 		
 		});
+		console.log(content);
 		var html = Mustache.to_html(template,content,partials);
 
 		$("#main").html(html).removeAttr("style");
@@ -488,7 +496,9 @@ $(function () {
 </form>
 </script>
 <script id="templ_chatline" type="text/template">
-<tr><td>{{name}}:</td><td>{{message}}</td></tr>
+<tr><td>{{name}}:</td><td>
+{{#picture}}<a href="{{pictureBig}}" target="_blank"><img src="{{picture}}" /></a>{{/picture}}
+{{message}}</td></tr>
 </script>
 <div id="servername">
 </div>
