@@ -1,9 +1,22 @@
+buildscript {
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath 'com.github.ben-manes:gradle-versions-plugin:0.3'
+	}
+}
+
 repositories {
 	mavenCentral()
 }
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
+apply plugin: 'application'
+apply plugin: 'versions'
+
+mainClassName = "de.rallye.StadtRallye"
 
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
