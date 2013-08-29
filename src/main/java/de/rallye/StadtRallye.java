@@ -6,10 +6,15 @@ import de.rallye.admin.ServerConsole;
 import de.rallye.db.DataAdapter;
 import de.rallye.images.ImageRepository;
 import de.rallye.push.PushService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class StadtRallye {
 
+    private static Logger logger = LogManager.getLogger(StadtRallye.class);
+
 	public static void main(String[] args) {
+		logger.info("Starting RallyeServer");
 
 		String host = (args.length > 0 ? args[0] : RallyeConfig.getHostName());
 
@@ -32,8 +37,7 @@ public class StadtRallye {
 			console.start();
 
 		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Failed to establish DB connection", e);
 		}
 	}
 }
