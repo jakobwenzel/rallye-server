@@ -4,6 +4,24 @@ repositories {
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
+apply plugin: 'application'
+
+task copyToLib(type: Copy) {
+    into "$buildDir/libs/lib"
+    from configurations.runtime
+}
+mainClassName = "de.rallye.StadtRallye"
+jar {
+	doFirst {
+	 
+		manifest {
+			attributes "Main-Class" : mainClassName
+			attributes 'Class-Path': configurations.compile.collect { 'lib/'+it.getName() }.join(' ')
+		}
+    }
+	it.dependsOn copyToLib
+ 
+}
 
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
