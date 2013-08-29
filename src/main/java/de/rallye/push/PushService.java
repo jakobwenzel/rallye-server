@@ -52,7 +52,7 @@ public class PushService {
 	
 	public static IPushAdapter getPushAdapter(String name, DataAdapter data, RallyeConfig config) {
 		if (name.equalsIgnoreCase("gcm"))
-			return new GCMPushAdapter(config.getGcmKey(), data);
+			return new GCMPushAdapter(config.getGcmApiKey(), data);
 		if (name.equalsIgnoreCase("websocket"))
 			return PushWebsocketApp.getInstance();
 		else
