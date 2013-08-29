@@ -61,7 +61,7 @@ public class RallyeServer {
 		//Register Websocket Stuff
 		WebSocketAddOn addon = new WebSocketAddOn();
 		for(org.glassfish.grizzly.http.server.NetworkListener listener : serv.getListeners()) {
-			System.out.println("registering on "+listener);
+			logger.info("registering websocket on "+listener);
 			listener.registerAddOn(addon);
 		}
 		
