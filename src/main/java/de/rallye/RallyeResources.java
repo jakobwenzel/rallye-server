@@ -134,24 +134,30 @@ public class RallyeResources {
 		return location;
 	}
 	
-	private String getProjectDir() {
+	public String getProjectDir() {
+		logger.debug("getting project dir");
 		//If we are not runnig from a jar, we are in the classes subdir
 		String location = getClassesDir();
 		if (location.endsWith("classes/")) {
 			location = location.substring(0,location.length()-8);
 		}
-		//We should be in target subdirectory
-		if (!location.endsWith("target/"))
+		//We should be in build/libs subdirectory
+		if (!location.endsWith("build/libs/")) {
 			//If not, we are not running in project dir
+			logger.debug("no build/libs/");
 			return null;
-		//remove target
-		location = location.substring(0,location.length()-7);
+		}
+		//remove build/libs/
+		location = location.substring(0,location.length()-11);
 		//There should be a git config directory around here
 		try {
 			File git = new File(new URL(location+".git").toURI());
-			if (!git.isDirectory()) 
+			if (!git.isDirectory()) {
+				logger.debug("git not found");
 				return null;
+			}
 		} catch (Exception e) {
+				logger.debug(e);
 			return null;
 		}
 		//We are sure this is the correct location
