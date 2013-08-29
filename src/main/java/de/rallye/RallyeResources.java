@@ -82,7 +82,7 @@ public class RallyeResources {
 		logger.info("Loading config file from "+configFile);
 		ObjectMapper mapper = new ObjectMapper();
 		try {
-			RallyeConfig config = mapper.readValue(configFile, RallyeConfigLoad.class);
+			RallyeConfig config = mapper.readValue(configFile, RallyeConfig.class);
 			
 			logger.info("Config file dir: "+configFile.getParent());
 			config.setConfigFileDir(configFile.getParent()+File.separator);

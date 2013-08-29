@@ -23,11 +23,11 @@ public class RallyeConfig {
 	
 	//This is the default data.
 	
-	protected String host = "0.0.0.0";
-	protected int port = 10101;
+	protected String hostName = "0.0.0.0";
+	protected int restPort = 10101;
 	protected int consolePort = 10100;
-	protected String gcmApiKey = "";
-	protected String name = "Ray's RallyeServer";
+	protected String gcmKey = "";
+	protected String serverName = "Ray's RallyeServer";
 	protected String description = "Mein eigener Testserver, den ich Schritt für Schritt ausbaue bis alles funktioniert";
 	protected LatLng[] mapBounds = {new LatLng(49.858959, 8.635107), new LatLng(49.8923691, 8.6746798)};
 	protected LatLng mapCenter = new LatLng(49.877648, 8.651762);
@@ -38,7 +38,7 @@ public class RallyeConfig {
 		public String password;
 		public int maxIdleTime = 3600;
 	}
-	protected DbData dbData = new DbData();
+	protected DbData dbConnection = new DbData();
 	
 	protected String dataDirectory = "./";
 	protected boolean dataRelative = false;
@@ -57,10 +57,10 @@ public class RallyeConfig {
 		} catch (PropertyVetoException e) {
 			logger.catching(e);
 		}
-		dataSource.setJdbcUrl(dbData.connectString);
-		dataSource.setUser(dbData.username);
-		dataSource.setPassword(dbData.password);
-		dataSource.setMaxIdleTime(dbData.maxIdleTime); // set max idle time to 1 hour
+		dataSource.setJdbcUrl(dbConnection.connectString);
+		dataSource.setUser(dbConnection.username);
+		dataSource.setPassword(dbConnection.password);
+		dataSource.setMaxIdleTime(dbConnection.maxIdleTime); // set max idle time to 1 hour
 		
 		DataAdapter da = new DataAdapter(dataSource);
 		
@@ -107,11 +107,11 @@ public class RallyeConfig {
 	}
 	
 	public String getHostName() {
-		return host;
+		return hostName;
 	}
 	
 	public int getRestPort() {
-		return port;
+		return restPort;
 	}
 	
 	public int getConsolePort() {
@@ -119,7 +119,16 @@ public class RallyeConfig {
 	}
 	
 	public String getGcmKey() {
-		return gcmApiKey;
+		return gcmKey;
+	}
+	public DbData getDbConnection() {
+		return this.dbConnection;
+	}
+	public String getServerName() {
+		return serverName;
+	}
+	public String getDescription() {
+		return description;
 	}
 
 	public List<LatLng> getMapBounds() {
@@ -136,7 +145,7 @@ public class RallyeConfig {
 	
 	@JsonIgnore
 	public ServerInfo getServerDescription() {
-		return new ServerInfo(name, description, APIS, build);
+		return new ServerInfo(serverName, description, APIS, build);
 	}
 
 }
