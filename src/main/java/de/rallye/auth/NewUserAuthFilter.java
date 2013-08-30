@@ -2,8 +2,10 @@ package de.rallye.auth;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.container.PreMatching;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.ext.Provider;
 
 import de.rallye.annotations.NewUserAuth;
 import org.apache.logging.log4j.LogManager;
@@ -15,6 +17,7 @@ import de.rallye.exceptions.InputException;
 import de.rallye.exceptions.UnauthorizedException;
 
 @NewUserAuth
+@Provider
 public class NewUserAuthFilter extends BaseAuthFilter {
 	
 	private final Logger logger = LogManager.getLogger(NewUserAuthFilter.class);

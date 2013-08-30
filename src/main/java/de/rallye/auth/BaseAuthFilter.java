@@ -1,5 +1,8 @@
 package de.rallye.auth;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.security.Principal;
 
 import javax.ws.rs.WebApplicationException;
@@ -9,7 +12,7 @@ import javax.ws.rs.core.Response;
 
 public abstract class BaseAuthFilter implements ContainerRequestFilter {
 
-//	private final Logger logger = LogManager.getLogger(BasicAuthFilter.class);
+	private final Logger logger = LogManager.getLogger(BaseAuthFilter.class);
 	
     /**
      * Apply the filter : check input request, validate or not with user auth
@@ -17,7 +20,7 @@ public abstract class BaseAuthFilter implements ContainerRequestFilter {
      */
     @Override
     public void filter(ContainerRequestContext containerRequest) throws WebApplicationException {
-//    	logger.entry();
+    	logger.entry();
 
         String auth = containerRequest.getHeaderString("authorization");
  
@@ -37,6 +40,7 @@ public abstract class BaseAuthFilter implements ContainerRequestFilter {
         
 //        return logger.exit(containerRequest);
 //        return containerRequest;
+		logger.exit();
     }
     
     protected abstract Response getUnauthorized(); 

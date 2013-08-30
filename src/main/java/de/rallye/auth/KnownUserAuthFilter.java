@@ -2,8 +2,10 @@ package de.rallye.auth;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.ext.Provider;
 
 import de.rallye.annotations.KnownUserAuth;
 import org.apache.logging.log4j.LogManager;
@@ -17,6 +19,7 @@ import de.rallye.exceptions.InputException;
 import de.rallye.exceptions.UnauthorizedException;
 
 @KnownUserAuth
+@Provider
 public class KnownUserAuthFilter extends BaseAuthFilter implements IManualAuthentication<RallyePrincipal> {
 	private static Logger logger = LogManager.getLogger(KnownUserAuthFilter.class);
 	
@@ -31,7 +34,6 @@ public class KnownUserAuthFilter extends BaseAuthFilter implements IManualAuthen
         return context.getLogger(classname);
     }
 
-	@Override
 	protected Response getUnauthorized() {
 		return Response.status(Status.UNAUTHORIZED).header("WWW-Authenticate", "Basic realm=\"RallyeAuth\"").build();
 	}
@@ -40,7 +42,7 @@ public class KnownUserAuthFilter extends BaseAuthFilter implements IManualAuthen
 	public RallyePrincipal checkAuthentication(String[] login) {
 		return checkAuthentication(null, login);
 	}
-    
+
     @Override
     protected RallyePrincipal checkAuthentication(ContainerRequestContext containerRequest, String[] login) {
     	// Checking for User

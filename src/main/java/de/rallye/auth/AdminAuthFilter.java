@@ -7,6 +7,7 @@ import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.ext.Provider;
 
 import de.rallye.annotations.AdminAuth;
 import org.apache.logging.log4j.LogManager;
@@ -16,6 +17,7 @@ import de.rallye.exceptions.InputException;
 import de.rallye.exceptions.UnauthorizedException;
 
 @AdminAuth
+@Provider
 public class AdminAuthFilter extends BaseAuthFilter {
 	
 	private final Logger logger = LogManager.getLogger(AdminAuthFilter.class);

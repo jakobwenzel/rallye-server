@@ -12,8 +12,7 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.*;
 
 import de.rallye.annotations.KnownUserAuth;
 import org.apache.logging.log4j.LogManager;
@@ -39,8 +38,11 @@ public class System {
 	
 	@GET
 	@Path("ping")
-	public String ping() {
-		return "OK";
+	public String ping(@Context HttpHeaders headers) {
+		if (headers.getHeaderString("blubbel") != null)
+			return "OK (blubbel sent)";
+		else
+			return "OK (no blubbel)";
 	}
 	
 	@GET
