@@ -14,7 +14,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.map.ObjectMapper;
 
-import de.rallye.db.DataAdapter;
+import de.rallye.db.IDataAdapter;
 import de.rallye.images.ImageRepository;
 import de.rallye.model.structures.ChatPictureLink;
 import de.rallye.model.structures.GameState;
@@ -31,7 +31,7 @@ public class RallyeResources {
 	private static RallyeResources resources;
 
 
-	public final DataAdapter data;
+	public final IDataAdapter data;
 	public final ImageRepository imgRepo;
 	public final Map<String, ChatPictureLink> hashMap = Collections.synchronizedMap(new HashMap<String, ChatPictureLink>());
 	public final PushService push;
@@ -43,7 +43,7 @@ public class RallyeResources {
 
 		config = RallyeConfig.fromStream(configStream);
 		
-		DataAdapter data;
+		IDataAdapter data;
 		try {
 			data = config.getMySQLDataAdapter();
 		} catch (SQLException e) {
@@ -65,7 +65,7 @@ public class RallyeResources {
 		logger.info("Setting up Resources");
 		config = RallyeConfig.fromFile(findConfigFile());
 		
-		DataAdapter data;
+		IDataAdapter data;
 		try {
 			data = config.getMySQLDataAdapter();
 		} catch (SQLException e) {

@@ -15,7 +15,7 @@ import org.json.JSONObject;
 
 import de.rallye.RallyeConfig;
 import de.rallye.RallyeResources;
-import de.rallye.db.DataAdapter;
+import de.rallye.db.IDataAdapter;
 import de.rallye.exceptions.DataException;
 import de.rallye.model.structures.ChatEntry;
 import de.rallye.model.structures.Chatroom;
@@ -34,7 +34,7 @@ public class PushService {
 	
 	private Map<Integer, IPushAdapter> pushModes = Collections.synchronizedMap(new HashMap<Integer, IPushAdapter>());
 
-	private DataAdapter data;
+	private IDataAdapter data;
 //	private ObjectMapper mapper;
 
 	public PushService(RallyeResources resources) {
@@ -50,7 +50,7 @@ public class PushService {
 		}
 	}
 	
-	public static IPushAdapter getPushAdapter(String name, DataAdapter data, RallyeConfig config) {
+	public static IPushAdapter getPushAdapter(String name, IDataAdapter data, RallyeConfig config) {
 		if (name.equalsIgnoreCase("gcm"))
 			return new GCMPushAdapter(config.getGcmApiKey(), data);
 		if (name.equalsIgnoreCase("websocket"))

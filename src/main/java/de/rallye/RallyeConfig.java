@@ -17,6 +17,7 @@ import org.apache.logging.log4j.Logger;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 import de.rallye.db.DataAdapter;
+import de.rallye.db.IDataAdapter;
 import de.rallye.images.ImageRepository;
 import de.rallye.model.structures.LatLng;
 import de.rallye.model.structures.ServerInfo;
@@ -117,7 +118,7 @@ public class RallyeConfig {
 		}
 	}
 	
-	public DataAdapter getMySQLDataAdapter() throws SQLException {
+	public IDataAdapter getMySQLDataAdapter() throws SQLException {
 		// create dataBase Handler
 		ComboPooledDataSource dataSource = new ComboPooledDataSource();
 		try {
@@ -131,7 +132,7 @@ public class RallyeConfig {
 		dataSource.setPassword(dbConnectionConfig.password);
 		dataSource.setMaxIdleTime(dbConnectionConfig.maxIdleTime); // set max idle time to 1 hour
 
-		DataAdapter da = new DataAdapter(dataSource);
+		IDataAdapter da = new DataAdapter(dataSource);
 
 		return da;
 	}

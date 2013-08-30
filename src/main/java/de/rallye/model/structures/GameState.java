@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 
-import de.rallye.db.DataAdapter;
+import de.rallye.db.IDataAdapter;
 import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.EdgeNotFoundException;
 import de.rallye.exceptions.NodeNotFoundException;
@@ -15,7 +15,7 @@ import de.rallye.mapper.GroupPositionsSerializer;
 
 public class GameState {
 
-	protected final DataAdapter data;
+	protected final IDataAdapter data;
 	
 	public int roundNumber = 0;
 	
@@ -25,7 +25,7 @@ public class GameState {
 	@JsonSerialize(using=GroupPositionsSerializer.class)
 	public Map<Integer,Node> upcomingPositions = new HashMap<Integer,Node>();
 
-	public GameState(DataAdapter data) {
+	public GameState(IDataAdapter data) {
 		this.data = data;
 		
 		//TODO: REMOVE!!
