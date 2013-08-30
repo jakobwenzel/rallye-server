@@ -95,7 +95,7 @@ public class Groups {
 		logger.entry();
 		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
 		
-		p.checkBothMatch(userID, groupID);
+		p.ensureBothMatch(userID, groupID);
 		
 		try {
 			PushConfig res = R.data.getPushConfig(groupID, userID);
@@ -114,7 +114,7 @@ public class Groups {
 		logger.entry();
 		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
 		
-		p.checkBothMatch(userID, groupID);
+		p.ensureBothMatch(userID, groupID);
 		
 		try {
 			R.data.setPushConfig(groupID, userID, push);
@@ -136,7 +136,7 @@ public class Groups {
 		
 		int authGroup = p.getGroupID();
 		
-		p.checkGroupMatches(groupID);
+		p.ensureGroupMatches(groupID);
 		
 		logger.info("New User: {}", info);
 		
@@ -160,7 +160,7 @@ public class Groups {
 		logger.entry();
 		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
 		
-		p.checkBothMatch(userID, groupID);
+		p.ensureBothMatch(userID, groupID);
 		
 		try {
 			R.data.logout(groupID, userID);

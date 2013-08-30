@@ -91,8 +91,8 @@ public class RallyeServer {
 		}
 
 		// insert
-//		listener.setCompression("on");// on || force || off
-//		listener.setCompressableMimeTypes("text/plain,text/html,application/json");
+		listener.setCompression("on");// on || force || off
+		listener.setCompressableMimeTypes("text,application/json");
 		// end insert
 
 		server.addListener(listener);

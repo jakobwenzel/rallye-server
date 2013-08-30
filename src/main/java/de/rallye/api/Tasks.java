@@ -82,7 +82,7 @@ public class Tasks {
 //			logger.warn("admin {} has no access rights taskScoring", p.getAdminID());
 //			throw new WebApplicationException(Response.Status.FORBIDDEN);
 //		}
-		p.checkGroupMatches(groupID);
+		p.ensureGroupMatches(groupID);
 		
 		try {
 			List<TaskSubmissions> res = R.data.getAllSubmissions(groupID);

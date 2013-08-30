@@ -4,6 +4,7 @@ package de.rallye.auth;
 import java.util.List;
 
 import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 
 import org.apache.logging.log4j.LogManager;
 
@@ -27,11 +28,11 @@ public class RallyePrincipal extends GroupPrincipal {
 		return userID;
 	}
 	
-	public void checkUserMatches(int userID) {
+	public void ensureUserMatches(int userID) throws WebApplicationException {
 		if (this.userID != userID) {
 			InputException e = new InputException("Authenticated User does not match chosen user");
 			logger.error(e);
-			throw new WebApplicationException(e);
+			throw new WebApplicationException(e, Response.Status.FORBIDDEN);
 		}
 	}
 	
@@ -39,8 +40,8 @@ public class RallyePrincipal extends GroupPrincipal {
 		return rights.contains("chatroom:"+roomID);
 	}
 	
-	public void checkBothMatch(int userID, int groupID) {
-		checkGroupMatches(groupID);
-		checkUserMatches(userID);
+	public void ensureBothMatch(int userID, int groupID) throws WebApplicationException {
+		ensureGroupMatches(groupID);
+		ensureUserMatches(userID);
 	}
 }

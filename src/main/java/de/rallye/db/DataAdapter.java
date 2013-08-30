@@ -163,7 +163,7 @@ public class DataAdapter {
 			con = dataSource.getConnection();
 			st = con.prepareStatement("SELECT "+ cols(Ry.Submissions.ID, Ry.Submissions.ID_TASK, Ry.Submissions.ID_GROUP,
 					Ry.Submissions.ID_USER, Ry.Submissions.SCORE, Ry.Submissions.SUBMIT_TYPE,
-					Ry.Submissions.INT_SUBMISSION, Ry.Submissions.TEXT_SUBMISSION) +" FROM "+ Ry.Tasks.TABLE
+					Ry.Submissions.INT_SUBMISSION, Ry.Submissions.TEXT_SUBMISSION) +" FROM "+ Ry.Submissions.TABLE
 					+" WHERE "+ Ry.Submissions.ID_TASK +"=? AND "+ Ry.Submissions.ID_GROUP +"=?");
 			
 			st.setInt(1, taskID);
