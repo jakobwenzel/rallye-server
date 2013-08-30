@@ -153,11 +153,11 @@ public class System {
 	@GET
 	@Path("rallye.apk")
 	@Produces("application/vnd.android.package-archive")
-	public File getApp() {
+	public File getApp() throws FileNotFoundException{
 		logger.entry();
 		File f = new File(R.getConfig().getDataDirectory()+"rallye.apk");
 		if (f.exists())
 			return logger.exit(f);
-		else throw new WebAppExcept("Apk not found", 404);
+		else throw new FileNotFoundException("Apk not found");// WebAppExcept("Apk not found", 404);
 	}
 }

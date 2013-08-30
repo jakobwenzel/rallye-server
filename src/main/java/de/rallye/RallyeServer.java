@@ -48,7 +48,7 @@ public class RallyeServer {
 
 	@SuppressWarnings("unchecked")
 	private HttpServer startServer(URI uri) throws IOException {
-		ResourceConfig rc = new PackagesResourceConfig("de.rallye.api");
+		ResourceConfig rc = new PackagesResourceConfig("de.rallye.api","de.rallye.exceptions.mappers");
 		rc.getFeatures().put(JSONConfiguration.FEATURE_POJO_MAPPING, true);
 		rc.getFeatures().put(ResourceConfig.PROPERTY_CONTAINER_REQUEST_FILTERS, true);
 		rc.getFeatures().put(ResourceConfig.PROPERTY_CONTAINER_RESPONSE_FILTERS, true);

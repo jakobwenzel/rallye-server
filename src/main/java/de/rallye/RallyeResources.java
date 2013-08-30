@@ -38,14 +38,17 @@ public class RallyeResources {
 	public final RallyeConfig config;
 	public GameState gameState;
 	
-	private RallyeResources(InputStream configStream) throws DataException {
+	private RallyeResources(InputStream configStream, IDataAdapter adapter) throws DataException {
 		logger.info("Setting up Resources");
 
 		config = RallyeConfig.fromStream(configStream);
 		
 		IDataAdapter data;
 		try {
-			data = config.getMySQLDataAdapter();
+			if (adapter!=null)
+				data = adapter;
+			else
+				data = config.getMySQLDataAdapter();
 		} catch (SQLException e) {
 			final String msg = "Failed to establish DB connection";
 			logger.error(msg, e);
@@ -85,13 +88,11 @@ public class RallyeResources {
 	/**
 	 * Set Up Singleton Pattern
 	 */
-	public static void init(InputStream configStream) throws DataException {
-		if (resources!=null) return; //We only want to init once
-		resources = new RallyeResources(configStream);
+	public static void init(InputStream configStream, IDataAdapter adapter) throws DataException {
+		resources = new RallyeResources(configStream, adapter);
 	}
 	
 	public static void init() throws DataException {
-		if (resources!=null) return; //We only want to init once
 		resources = new RallyeResources();
 	}
 

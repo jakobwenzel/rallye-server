@@ -27,11 +27,6 @@ public class GameState {
 
 	public GameState(IDataAdapter data) {
 		this.data = data;
-		
-		//TODO: REMOVE!!
-		Map<Integer, Node> nodes = data.getNodes();
-		positions.put(3, nodes.get(1));
-		positions.put(4, nodes.get(5));
 	}
 
 
