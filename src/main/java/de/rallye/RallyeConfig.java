@@ -79,7 +79,12 @@ public class RallyeConfig {
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			RallyeConfig config = mapper.readValue(configFile, RallyeConfig.class);
-			config.setConfigFileDir(configFile.getParent()+File.separator);
+			File parent = configFile.getParentFile();
+			if (parent!=null)
+				config.setConfigFileDir(parent+File.separator);
+			else
+				config.setConfigFileDir("");
+				
 			logger.debug(config.toString());
 			return config;
 		} catch ( IOException e) {

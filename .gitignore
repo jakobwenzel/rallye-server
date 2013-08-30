@@ -9,6 +9,7 @@ build
 *.iml
 .idea
 out
+log
 src/main/resources/git.properties
 config.json
 data

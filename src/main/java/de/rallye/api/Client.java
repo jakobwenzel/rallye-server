@@ -1,6 +1,13 @@
 package de.rallye.api;
 
 import java.io.InputStream;
+import java.io.FileInputStream;
+import java.io.File;
+
+import java.net.URL;
+
+import java.util.Map;
+import java.util.HashMap;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -13,6 +20,8 @@ import javax.ws.rs.core.SecurityContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import de.rallye.RallyeResources;
+
 import de.rallye.StadtRallye;
 import de.rallye.exceptions.WebAppExcept;
 import org.glassfish.jersey.media.multipart.file.DefaultMediaTypePredictor;
@@ -21,10 +30,21 @@ import org.glassfish.jersey.message.internal.MediaTypeProvider;
 @Path("client")
 public class Client {
 	private static final String RESOURCE_PATH = "webclient/";
+	private RallyeResources R = RallyeResources.getResources();
 
 	private Logger logger =  LogManager.getLogger(Client.class);
+	
+	boolean projectChecked = false;
+	String projectDir;
 
-//	private RallyeResources R = RallyeServer.getResources();
+	
+	private static Map<String,String> mime = new HashMap<String,String>();
+	static {
+		mime.put("js","application/javascript");
+		mime.put("html","text/html");
+		mime.put("htm","text/html");
+		mime.put("gif","image/gif");
+	}
 
 	@GET
 	@Path("{path}")
@@ -35,15 +55,37 @@ public class Client {
 		
 		logger.debug("Trying to load "+RESOURCE_PATH+path);
 		
-		InputStream stream = StadtRallye.class.getResourceAsStream(RESOURCE_PATH+path);
+		//If we are running from project dir, always load files from src directory to avoid recompiles during development
+		if (!projectChecked) {
+			projectDir = R.getProjectDir();
+			projectChecked = true;
+		}
+		
+		InputStream stream;
+		if (projectDir!=null) {
+			logger.debug("serving from project dir");
+			try {
+				stream = new FileInputStream(new File(new URL(projectDir+"src/main/resources/de/rallye/"+RESOURCE_PATH+path).toURI()));
+			} catch(Exception e) {
+				throw new WebAppExcept(e);
+			}
+		} else {
+		
+			logger.debug("serving from jar");
+			stream = StadtRallye.class.getResourceAsStream(RESOURCE_PATH+path);
+		}
 		
 		if (stream==null) {
 
 			throw new WebAppExcept("Not found.", 404);
 		}
 
-		MediaType m = DefaultMediaTypePredictor.CommonMediaTypes.getMediaTypeFromFileName(path);
-		return Response.ok(stream,m).build();
+		String ext = path.substring(path.lastIndexOf('.')+1);
+		String mediaType = mime.get(ext);
+		if (mediaType==null)
+			mediaType="application/octet-stream";
+		
+		return Response.ok(stream,mediaType).build();
 	
 	}
 	
