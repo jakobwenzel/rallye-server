@@ -46,6 +46,8 @@ function setup_error_handler() {
 			readable = xhr.status+" "+xhr.statusText;
 			if (xhr.statusText!=thrownError)
 				readable+=" "+thrownError;
+			
+			readable +=" for "+ajaxOptions.url;
 		}
 		alert(readable);
 	});
