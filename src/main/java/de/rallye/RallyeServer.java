@@ -32,7 +32,7 @@ public class RallyeServer {
 		logger.entry();
 
 		// create URI
-		URI uri = UriBuilder.fromUri("http://" + host + "/").port(10101).build();
+		URI uri = UriBuilder.fromUri("http://" + host + "/").port(port).build();
 		
 		
 

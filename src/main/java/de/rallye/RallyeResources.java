@@ -2,6 +2,7 @@ package de.rallye;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.sql.SQLException;
 import java.util.Collections;
@@ -37,11 +38,33 @@ public class RallyeResources {
 	public final RallyeConfig config;
 	public GameState gameState;
 	
-	private RallyeResources() throws DataException {
+	private RallyeResources(InputStream configStream) throws DataException {
 		logger.info("Setting up Resources");
 
-		config = RallyeConfig.fromFile(findConfigFile());
+		config = RallyeConfig.fromStream(configStream);
+		
+		DataAdapter data;
+		try {
+			data = config.getMySQLDataAdapter();
+		} catch (SQLException e) {
+			final String msg = "Failed to establish DB connection";
+			logger.error(msg, e);
+			throw new DataException(msg);
+		}
+		this.data = data;
 
+		imgRepo = config.getImageRepository();
+
+		gameState = new GameState(data);
+
+		push = new PushService(this);
+	}
+	
+	
+	private RallyeResources() throws DataException {
+		logger.info("Setting up Resources");
+		config = RallyeConfig.fromFile(findConfigFile());
+		
 		DataAdapter data;
 		try {
 			data = config.getMySQLDataAdapter();
@@ -62,6 +85,11 @@ public class RallyeResources {
 	/**
 	 * Set Up Singleton Pattern
 	 */
+	public static void init(InputStream configStream) throws DataException {
+		if (resources!=null) return; //We only want to init once
+		resources = new RallyeResources(configStream);
+	}
+	
 	public static void init() throws DataException {
 		if (resources!=null) return; //We only want to init once
 		resources = new RallyeResources();
