@@ -14,6 +14,7 @@ import de.rallye.db.IDataAdapter;
 import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.InputException;
 import de.rallye.exceptions.UnauthorizedException;
+import de.rallye.exceptions.WebAppExcept;
 
 @KnownUserAuth
 @Provider
@@ -27,8 +28,15 @@ public class KnownUserAuthFilter extends BaseAuthFilter implements IManualAuthen
 		this.data = data;
 	}
 	
+	protected Response getUnauthorized(String message) {
+		if (message!=null)
+			return Response.status(Status.UNAUTHORIZED).entity(message).header("WWW-Authenticate", "Basic realm=\"RallyeAuth\"").build();
+		else
+			return Response.status(Status.UNAUTHORIZED).header("WWW-Authenticate", "Basic realm=\"RallyeAuth\"").build();
+	}
+	
 	protected Response getUnauthorized() {
-		return Response.status(Status.UNAUTHORIZED).header("WWW-Authenticate", "Basic realm=\"RallyeAuth\"").build();
+		return getUnauthorized(null);
 	}
 	
 	@Override
@@ -43,12 +51,12 @@ public class KnownUserAuthFilter extends BaseAuthFilter implements IManualAuthen
         int userID, groupID;
 		try {
 			if (login.length != 2)
-				throw new InputException("Login does not contain username and password");
+				throw new UnauthorizedException("Login does not contain username and password");
 			
 			String[] usr = login[0].split("@");//0: userID, 1:groupID
 			
 			if (usr.length!=2) 
-				throw new InputException("Username does not contain userID and groupID");
+				throw new UnauthorizedException("Username does not contain userID and groupID");
 			
 			userID = Integer.parseInt(usr[0]);
 			groupID = Integer.parseInt(usr[1]);
@@ -62,12 +70,12 @@ public class KnownUserAuthFilter extends BaseAuthFilter implements IManualAuthen
 			throw new WebApplicationException(e);
 		} catch (UnauthorizedException e) {
 			logger.info("Unauthorized: "+ login[0]);
-            throw new WebApplicationException(getUnauthorized());
+            throw new WebApplicationException(getUnauthorized(e.getMessage()));
 		} catch (Exception e) {
 			logger.error("Unknown Error", e);
 			throw new WebApplicationException(e);
 		}
-        
+		
 		if (containerRequest != null)
 			containerRequest.setSecurityContext(new RallyeSecurityContext<RallyePrincipal>(principal));
 		
