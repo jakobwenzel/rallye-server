@@ -459,47 +459,4 @@ function setup_socket() {
 }
 
 var chatrooms;
-$(function () {
 
-	load_querystring();
-
-	partials = {
-			'line': $("#templ_chatline").html()
-	};
-
-	
-	setup_error_handler();
-
-
-	get_system_info(function(res) {
-		$("#servername").html("<b>"+Mustache.escape(res.name)+"</b><br>"+Mustache.escape(res.description));
-		document.title=res.name;
-	});
-
-	get_chatrooms(function(res) {
-		chatrooms = res;
-		
-		var roomLinks = res.reduce(function(list,room) {
-		
-			var link = '<a href="#" onclick="return load_chatroom('+room.chatroomID+');">'+room.name+'</a><br>';
-			return list + link;
-		
-		},"");
-		roomLinks = roomLinks + '<a href="#" onclick="return load_map();">Map</a>'
-		$("#left").html(roomLinks);
-	});
-	
-	
-	setup_socket();
-	
-	var lastRoom = getParameterByName("chatroom");
-	if (lastRoom) load_chatroom(lastRoom);
-	
-	var map = getParameterByName("map");
-	if (map!=null)
-		load_map();
-	
-	
-	getUsers(function(l) {console.log(l)});
-
-});
