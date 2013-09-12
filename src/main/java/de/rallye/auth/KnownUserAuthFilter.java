@@ -1,36 +1,34 @@
 package de.rallye.auth;
 
-import de.rallye.annotations.KnownUserAuth;
-import de.rallye.exceptions.DataException;
-import de.rallye.exceptions.InputException;
-import de.rallye.exceptions.UnauthorizedException;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.spi.LoggerContext;
-import org.apache.logging.log4j.spi.LoggerContextFactory;
-
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.spi.LoggerContext;
+import org.apache.logging.log4j.spi.LoggerContextFactory;
+
+import de.rallye.annotations.KnownUserAuth;
+import de.rallye.db.DataAdapter;
+import de.rallye.exceptions.DataException;
+import de.rallye.exceptions.InputException;
+import de.rallye.exceptions.UnauthorizedException;
+
 @KnownUserAuth
 @Provider
 public class KnownUserAuthFilter extends BaseAuthFilter implements IManualAuthentication<RallyePrincipal> {
 	private static Logger logger = LogManager.getLogger(KnownUserAuthFilter.class);
 	
-    public static Logger getTest(Class<?> clazz) {
-    	LoggerContextFactory factory = LogManager.getFactory();
-    	String name = LogManager.class.getName();
-    	if (factory==null) {
-    		System.out.println("they fail.");
-    	}
-    	LoggerContext context =  factory.getContext(name, null, false);
-    	String classname = clazz.getName();
-        return context.getLogger(classname);
-    }
-
+	public KnownUserAuthFilter() {
+		
+	}
+	public KnownUserAuthFilter(DataAdapter data) {
+		this.data = data;
+	}
+	
 	protected Response getUnauthorized() {
 		return Response.status(Status.UNAUTHORIZED).header("WWW-Authenticate", "Basic realm=\"RallyeAuth\"").build();
 	}
@@ -56,7 +54,7 @@ public class KnownUserAuthFilter extends BaseAuthFilter implements IManualAuthen
 			
 			userID = Integer.parseInt(usr[0]);
 			groupID = Integer.parseInt(usr[1]);
-			
+
 			principal = data.getKnownUserAuthorization(groupID, userID, login[1]);
 		} catch (DataException e) {
 			logger.error("Database Error", e);

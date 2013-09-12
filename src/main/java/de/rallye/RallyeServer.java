@@ -64,7 +64,7 @@ public class RallyeServer {
 			logger.info("registering websocket on "+listener);
 			listener.registerAddOn(addon);
 		}
-		
+		PushWebsocketApp.setData(RallyeBinder.data); //TODO: Remove this ugliness.
 		WebSocketEngine.getEngine().register("/rallye", "/push", PushWebsocketApp.getInstance());
 
 		serv.start();  

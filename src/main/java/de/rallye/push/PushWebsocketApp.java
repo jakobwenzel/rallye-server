@@ -27,6 +27,7 @@ import org.glassfish.grizzly.websockets.WebSocketListener;
 
 import de.rallye.auth.KnownUserAuthFilter;
 import de.rallye.auth.RallyePrincipal;
+import de.rallye.db.DataAdapter;
 import de.rallye.model.structures.UserInternal;
 
 public class PushWebsocketApp extends WebSocketApplication implements
@@ -161,6 +162,8 @@ public boolean isApplicationRequest(HttpRequestPacket request) {
 	}
 
 	ObjectMapper mapper = new ObjectMapper();
+
+	private static DataAdapter data;
 	
 	@Override
 	public void push(List<UserInternal> users, String payload,
@@ -212,7 +215,7 @@ public boolean isApplicationRequest(HttpRequestPacket request) {
 			try {
 				logger.debug("Trying to authenticate user");
 				
-				KnownUserAuthFilter auth = new KnownUserAuthFilter();
+				KnownUserAuthFilter auth = new KnownUserAuthFilter(data);
 				RallyePrincipal p = auth.checkAuthentication(new String[]{username, password});
 			
 				int userID = p.getUserID();
@@ -234,5 +237,9 @@ public boolean isApplicationRequest(HttpRequestPacket request) {
 			}
 			logger.debug("Logging in with " + username + " " + password);
 		}
+	}
+
+	public static void setData(DataAdapter data) {
+		PushWebsocketApp.data = data;		
 	}
 }
