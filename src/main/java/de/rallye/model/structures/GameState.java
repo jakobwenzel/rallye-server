@@ -1,6 +1,13 @@
 package de.rallye.model.structures;
 
 import de.rallye.db.DataAdapter;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+
+import de.rallye.db.IDataAdapter;
 import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.EdgeNotFoundException;
 import de.rallye.exceptions.NodeNotFoundException;
@@ -19,7 +26,7 @@ import java.util.Map;
 @Service
 public class GameState {
 
-	private final DataAdapter data;
+	protected final IDataAdapter data;
 	
 	public int roundNumber = 0;
 	
@@ -30,7 +37,7 @@ public class GameState {
 	public Map<Integer,Node> upcomingPositions = new HashMap<Integer,Node>();
 
 	@Inject
-	public GameState(DataAdapter data) {
+	public GameState(IDataAdapter data) {
 		this.data = data;
 	}
 

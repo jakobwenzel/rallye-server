@@ -27,7 +27,7 @@ import org.glassfish.grizzly.websockets.WebSocketListener;
 
 import de.rallye.auth.KnownUserAuthFilter;
 import de.rallye.auth.RallyePrincipal;
-import de.rallye.db.DataAdapter;
+import de.rallye.db.IDataAdapter;
 import de.rallye.model.structures.UserInternal;
 
 public class PushWebsocketApp extends WebSocketApplication implements
@@ -163,7 +163,7 @@ public boolean isApplicationRequest(HttpRequestPacket request) {
 
 	ObjectMapper mapper = new ObjectMapper();
 
-	private static DataAdapter data;
+	private static IDataAdapter data;
 	
 	@Override
 	public void push(List<UserInternal> users, String payload,
@@ -239,7 +239,7 @@ public boolean isApplicationRequest(HttpRequestPacket request) {
 		}
 	}
 
-	public static void setData(DataAdapter data) {
+	public static void setData(IDataAdapter data) {
 		PushWebsocketApp.data = data;		
 	}
 }

@@ -1,32 +1,46 @@
 package de.rallye.api;
 
+import java.io.File;
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import de.rallye.annotations.KnownUserAuth;
 import de.rallye.annotations.NewUserAuth;
 import de.rallye.auth.GroupPrincipal;
 import de.rallye.auth.RallyePrincipal;
 import de.rallye.config.RallyeConfig;
-import de.rallye.db.DataAdapter;
+import de.rallye.db.IDataAdapter;
 import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.InputException;
-import de.rallye.model.structures.*;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import java.io.File;
-import java.util.List;
+import de.rallye.model.structures.Group;
+import de.rallye.model.structures.LoginInfo;
+import de.rallye.model.structures.PushConfig;
+import de.rallye.model.structures.User;
+import de.rallye.model.structures.UserAuth;
 
 @Path("rallye/groups")
 public class Groups {
 	
 	private Logger logger =  LogManager.getLogger(Groups.class);
 
-	@Inject	DataAdapter data;
+	@Inject	IDataAdapter data;
 	@Inject	RallyeConfig config;
 
 

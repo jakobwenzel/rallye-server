@@ -50,7 +50,7 @@ public class RallyeServer {
 	@SuppressWarnings("unchecked")
 	private HttpServer startServer(URI uri) throws IOException {
 		ResourceConfig rc = new ResourceConfig();
-		rc.packages("de.rallye.api", "de.rallye.annotations", "de.rallye.auth");
+		rc.packages("de.rallye.api", "de.rallye.annotations", "de.rallye.auth","de.rallye.exceptions.mappers");
 		rc.register(JacksonFeature.class);
 		rc.register(EnsureMimeType.class);
 		rc.register(new RallyeBinder());

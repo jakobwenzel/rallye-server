@@ -1,14 +1,12 @@
 package de.rallye.api;
 
-import de.rallye.annotations.KnownUserAuth;
-import de.rallye.config.RallyeConfig;
-import de.rallye.db.DataAdapter;
-import de.rallye.exceptions.DataException;
-import de.rallye.exceptions.WebAppExcept;
-import de.rallye.model.structures.PushMode;
-import de.rallye.model.structures.ServerInfo;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -19,9 +17,17 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.*;
-import java.util.LinkedHashMap;
-import java.util.List;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import de.rallye.annotations.KnownUserAuth;
+import de.rallye.config.RallyeConfig;
+import de.rallye.db.IDataAdapter;
+import de.rallye.exceptions.DataException;
+import de.rallye.exceptions.WebAppExcept;
+import de.rallye.model.structures.PushMode;
+import de.rallye.model.structures.ServerInfo;
 
 @Path("rallye/system")
 public class System {
@@ -32,7 +38,7 @@ public class System {
 	private final Logger logger = LogManager.getLogger(System.class);
 	
 	@Inject	RallyeConfig config;
-	@Inject	DataAdapter data;
+	@Inject	IDataAdapter data;
 	
 	@GET
 	@Path("ping")
@@ -127,11 +133,11 @@ public class System {
 	@GET
 	@Path("rallye.apk")
 	@Produces("application/vnd.android.package-archive")
-	public File getApp() {
+	public File getApp() throws FileNotFoundException{
 		logger.entry();
 		File f = new File(config.getDataDirectory()+"rallye.apk");
 		if (f.exists())
 			return logger.exit(f);
-		else throw new WebAppExcept("Apk not found", 404);
+		else throw new FileNotFoundException("Apk not found");// WebAppExcept("Apk not found", 404);
 	}
 }

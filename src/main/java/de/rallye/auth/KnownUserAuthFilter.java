@@ -8,11 +8,9 @@ import javax.ws.rs.ext.Provider;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.spi.LoggerContext;
-import org.apache.logging.log4j.spi.LoggerContextFactory;
 
 import de.rallye.annotations.KnownUserAuth;
-import de.rallye.db.DataAdapter;
+import de.rallye.db.IDataAdapter;
 import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.InputException;
 import de.rallye.exceptions.UnauthorizedException;
@@ -25,7 +23,7 @@ public class KnownUserAuthFilter extends BaseAuthFilter implements IManualAuthen
 	public KnownUserAuthFilter() {
 		
 	}
-	public KnownUserAuthFilter(DataAdapter data) {
+	public KnownUserAuthFilter(IDataAdapter data) {
 		this.data = data;
 	}
 	

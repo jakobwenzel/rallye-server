@@ -2,6 +2,20 @@ package de.rallye.push;
 
 import de.rallye.config.RallyeConfig;
 import de.rallye.db.DataAdapter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import de.rallye.db.IDataAdapter;
 import de.rallye.exceptions.DataException;
 import de.rallye.model.structures.ChatEntry;
 import de.rallye.model.structures.Chatroom;
@@ -28,11 +42,11 @@ public class PushService {
 	
 	private Map<Integer, IPushAdapter> pushModes = Collections.synchronizedMap(new HashMap<Integer, IPushAdapter>());
 
-	private DataAdapter data;
+	private IDataAdapter data;
 //	private ObjectMapper mapper;
 
 	@Inject
-	public PushService(DataAdapter data, RallyeConfig config) {
+	public PushService(IDataAdapter data, RallyeConfig config) {
 		this.data = data;
 //		this.mapper = new ObjectMapper();
 		
@@ -45,7 +59,7 @@ public class PushService {
 		}
 	}
 	
-	public static IPushAdapter getPushAdapter(String name, DataAdapter data, RallyeConfig config) {
+	public static IPushAdapter getPushAdapter(String name, IDataAdapter data, RallyeConfig config) {
 		if (name.equalsIgnoreCase("gcm"))
 			return new GCMPushAdapter(config.getGcmApiKey(), data);
 		if (name.equalsIgnoreCase("websocket"))

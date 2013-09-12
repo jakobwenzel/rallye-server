@@ -16,7 +16,7 @@ import java.sql.*;
 import java.util.*;
 import java.util.Map.Entry;
 
-public class DataAdapter {
+public class DataAdapter implements IDataAdapter {
 	
 	private static Logger logger = LogManager.getLogger(DataAdapter.class.getName());
 	
@@ -96,6 +96,10 @@ public class DataAdapter {
 	
 	private List<Group> groups;
 	
+	/* (non-Javadoc)
+	 * @see de.rallye.db.IDataAdapter#getGroups()
+	 */
+	@Override
 	public synchronized List<Group> getGroups() throws DataException {
 
 		if (groups!=null) return groups;
@@ -123,6 +127,10 @@ public class DataAdapter {
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see de.rallye.db.IDataAdapter#getTasks()
+	 */
+	@Override
 	public List<Task> getTasks() throws DataException {
 		Statement st = null;
 		Connection con = null;
@@ -153,6 +161,10 @@ public class DataAdapter {
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see de.rallye.db.IDataAdapter#getSubmissions(int, int)
+	 */
+	@Override
 	public List<Submission> getSubmissions(int taskID, int groupID) throws DataException {
 		PreparedStatement st = null;
 		Connection con = null;
@@ -184,6 +196,10 @@ public class DataAdapter {
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see de.rallye.db.IDataAdapter#getAllSubmissions(int)
+	 */
+	@Override
 	public List<TaskSubmissions> getAllSubmissions(int groupID) throws DataException {
 		PreparedStatement st = null;
 		Connection con = null;
@@ -224,6 +240,10 @@ public class DataAdapter {
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see de.rallye.db.IDataAdapter#submit(int, int, int, de.rallye.model.structures.SimpleSubmission)
+	 */
+	@Override
 	public Submission submit(int taskID, int groupID, int userID, SimpleSubmission submission) throws DataException, InputException {
 		Connection con = null;
 		PreparedStatement st = null;
@@ -278,6 +298,10 @@ public class DataAdapter {
 	private Map<Integer,Node> nodes;
 	private List<Edge> edges;
 	
+	/* (non-Javadoc)
+	 * @see de.rallye.db.IDataAdapter#getNodes()
+	 */
+	@Override
 	public Map<Integer,Node> getNodes() {
 		return nodes;
 	}
@@ -303,6 +327,10 @@ public class DataAdapter {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see de.rallye.db.IDataAdapter#getEdges()
+	 */
+	@Override
 	public List<Edge> getEdges() {
 		return edges;
 	}
@@ -330,6 +358,10 @@ public class DataAdapter {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see de.rallye.db.IDataAdapter#getKnownUserAuthorization(int, int, java.lang.String)
+	 */
+	@Override
 	public RallyePrincipal getKnownUserAuthorization(int groupID, int userID, String password) throws DataException, UnauthorizedException, InputException {
 		if (groupID <= 0 || userID <= 0 || password == null || password.length() <= 0)
 			throw new InputException("Incomplete Login");
@@ -370,6 +402,10 @@ public class DataAdapter {
 		}		
 	}
 	
+	/* (non-Javadoc)
+	 * @see de.rallye.db.IDataAdapter#getNewUserAuthorization(int, java.lang.String)
+	 */
+	@Override
 	public GroupPrincipal getNewUserAuthorization(int groupID, String password) throws DataException, UnauthorizedException {
 		Connection con = null;
 		PreparedStatement st = null;
@@ -398,6 +434,10 @@ public class DataAdapter {
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see de.rallye.db.IDataAdapter#login(int, de.rallye.model.structures.LoginInfo)
+	 */
+	@Override
 	@SuppressWarnings("resource")
 	public UserAuth login(int groupID, LoginInfo info) throws DataException, InputException {
 		invalidateUsers();
@@ -493,6 +533,10 @@ public class DataAdapter {
 		return Long.toHexString(pw);
 	}
 	
+	/* (non-Javadoc)
+	 * @see de.rallye.db.IDataAdapter#logout(int, int)
+	 */
+	@Override
 	public boolean logout(int groupID, int userID) throws DataException {
 		invalidateUsers();
 		Connection con = null;
@@ -519,6 +563,10 @@ public class DataAdapter {
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see de.rallye.db.IDataAdapter#hasRightsForChatroom(int, int)
+	 */
+	@Override
 	public boolean hasRightsForChatroom(int groupID, int roomID) throws DataException {
 		Connection con = null;
 		PreparedStatement st = null;
@@ -543,6 +591,10 @@ public class DataAdapter {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see de.rallye.db.IDataAdapter#getChatrooms(int)
+	 */
+	@Override
 	public synchronized List<Chatroom> getChatrooms(int groupID) throws DataException { // Somebody (!!!Jakob!!!) implemented caching of available Chatrooms!!!
 		Connection con = null;// And he was smart enough to do it in 1 SINGLE list for ALL groups
 		PreparedStatement st = null;
@@ -570,6 +622,10 @@ public class DataAdapter {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see de.rallye.db.IDataAdapter#getChats(int, long, int)
+	 */
+	@Override
 	public List<ChatEntry> getChats(int roomID, long timestamp, int groupID) throws DataException, UnauthorizedException {
 		Connection con = null;
 		PreparedStatement st = null;
@@ -623,6 +679,10 @@ public class DataAdapter {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see de.rallye.db.IDataAdapter#addChat(de.rallye.model.structures.SimpleChatEntry, int, int, int)
+	 */
+	@Override
 	public ChatEntry addChat(SimpleChatEntry chat, int roomID, int groupID, int userID) throws DataException {
 		Connection con = null;
 		PreparedStatement st = null;
@@ -703,6 +763,10 @@ public class DataAdapter {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see de.rallye.db.IDataAdapter#setPushConfig(int, int, de.rallye.model.structures.PushConfig)
+	 */
+	@Override
 	public void setPushConfig(int groupID, int userID, PushConfig push) throws DataException {
 		
 		invalidateUsers();
@@ -734,6 +798,10 @@ public class DataAdapter {
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see de.rallye.db.IDataAdapter#getPushConfig(int, int)
+	 */
+	@Override
 	public PushConfig getPushConfig(int groupID, int userID) throws DataException {
 		Connection con = null;
 		PreparedStatement st = null;
@@ -763,6 +831,10 @@ public class DataAdapter {
 	}
 
 	List<PushMode> pushModes;
+	/* (non-Javadoc)
+	 * @see de.rallye.db.IDataAdapter#getPushModes()
+	 */
+	@Override
 	public synchronized List<PushMode> getPushModes() throws DataException {
 		if (pushModes!=null) return pushModes;
 		
@@ -790,6 +862,10 @@ public class DataAdapter {
 	}
 	
 	List<GroupUser> allUsers;
+	/* (non-Javadoc)
+	 * @see de.rallye.db.IDataAdapter#getAllUsers()
+	 */
+	@Override
 	public synchronized List<GroupUser> getAllUsers() throws DataException {
 		if (allUsers!=null) return allUsers;
 		PreparedStatement st = null;
@@ -817,6 +893,10 @@ public class DataAdapter {
 	}
 
 	Map<Integer,List<UserInternal>> members = new HashMap<Integer,List<UserInternal>>();
+	/* (non-Javadoc)
+	 * @see de.rallye.db.IDataAdapter#getMembers(int)
+	 */
+	@Override
 	public synchronized List<UserInternal> getMembers(int groupID) throws DataException {
 		
 		List<UserInternal> cached = members.get(groupID);
@@ -858,6 +938,10 @@ public class DataAdapter {
 
 	Map<Integer,List<UserInternal>> roomMembers = new HashMap<Integer,List<UserInternal>>();
 	
+	/* (non-Javadoc)
+	 * @see de.rallye.db.IDataAdapter#getChatroomMembers(int)
+	 */
+	@Override
 	public List<UserInternal> getChatroomMembers(int roomID) throws DataException {
 		List<UserInternal> cached = roomMembers.get(roomID);
 		if (cached!=null) return cached;
@@ -891,6 +975,10 @@ public class DataAdapter {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see de.rallye.db.IDataAdapter#assignNewPictureID(int)
+	 */
+	@Override
 	public int assignNewPictureID(int userID) throws DataException {
 		PreparedStatement st = null;
 		Connection con = null;
@@ -917,6 +1005,10 @@ public class DataAdapter {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see de.rallye.db.IDataAdapter#editChatAddPicture(int, int)
+	 */
+	@Override
 	public void editChatAddPicture(int chatID, int pictureID) throws DataException {
 		PreparedStatement st = null;
 		Connection con = null;
@@ -939,6 +1031,10 @@ public class DataAdapter {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see de.rallye.db.IDataAdapter#updatePushIds(java.util.HashMap)
+	 */
+	@Override
 	public void updatePushIds(HashMap<String, String> changes) throws DataException {
 		invalidateUsers();
 		PreparedStatement st = null;

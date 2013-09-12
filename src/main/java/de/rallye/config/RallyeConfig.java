@@ -14,6 +14,7 @@ import org.jvnet.hk2.annotations.Service;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 @Service
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -82,6 +83,29 @@ public class RallyeConfig {
 		}
 	}
 
+	public static RallyeConfig fromStream(InputStream stream) {
+		if (stream==null) {
+			logger.warn("No config stream. Using Default Config");
+			return new RallyeConfig();
+		}
+		logger.info("Loading config file from stream");
+		ObjectMapper mapper = new ObjectMapper();
+		try {
+			RallyeConfig config = mapper.readValue(stream, RallyeConfig.class);
+			
+			if (config.isDataRelativeToConfig()) {
+				logger.warn("Data relative to config is not supported for Stream Config. Falling back to default config");
+				return new RallyeConfig();
+			}
+				
+			logger.debug(config.toString());
+			return config;
+		} catch ( IOException e) {
+			logger.error("Falling back to default config", e);
+			return new RallyeConfig();
+		}
+	}
+	
 	private void setGit(GitRepositoryState git) {
 		String build;
 

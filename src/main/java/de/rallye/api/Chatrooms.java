@@ -1,30 +1,42 @@
 package de.rallye.api;
 
-import de.rallye.annotations.KnownUserAuth;
-import de.rallye.auth.RallyePrincipal;
-import de.rallye.db.DataAdapter;
-import de.rallye.exceptions.DataException;
-import de.rallye.exceptions.InputException;
-import de.rallye.exceptions.UnauthorizedException;
-import de.rallye.model.structures.*;
-import de.rallye.push.PushService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import java.util.List;
 
 import javax.inject.Inject;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-import java.util.List;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import de.rallye.annotations.KnownUserAuth;
+import de.rallye.auth.RallyePrincipal;
+import de.rallye.db.IDataAdapter;
+import de.rallye.exceptions.DataException;
+import de.rallye.exceptions.InputException;
+import de.rallye.exceptions.UnauthorizedException;
+import de.rallye.model.structures.ChatEntry;
+import de.rallye.model.structures.ChatPictureLink;
+import de.rallye.model.structures.Chatroom;
+import de.rallye.model.structures.SimpleChatWithPictureHash;
+import de.rallye.model.structures.User;
+import de.rallye.push.PushService;
 
 @Path("rallye/chatrooms")
 public class Chatrooms {
 	
 	private static Logger logger =  LogManager.getLogger(Chatrooms.class);
 
-	@Inject	DataAdapter data;
+	@Inject	IDataAdapter data;
 	@Inject	PushService push;
 	@Inject java.util.Map<String, ChatPictureLink> chatPictureMap;
 

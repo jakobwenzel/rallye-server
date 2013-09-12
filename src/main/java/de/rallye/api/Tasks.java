@@ -1,24 +1,32 @@
 package de.rallye.api;
 
+import java.util.List;
+
+import javax.inject.Inject;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import de.rallye.annotations.KnownUserAuth;
 import de.rallye.auth.RallyePrincipal;
-import de.rallye.db.DataAdapter;
+import de.rallye.db.IDataAdapter;
 import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.InputException;
 import de.rallye.model.structures.SimpleSubmission;
 import de.rallye.model.structures.Submission;
 import de.rallye.model.structures.Task;
 import de.rallye.model.structures.TaskSubmissions;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import javax.inject.Inject;
-import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-import java.util.List;
 
 @Path("rallye/tasks")
 public class Tasks {
@@ -28,7 +36,7 @@ public class Tasks {
 
 	private Logger logger =  LogManager.getLogger(Tasks.class);
 
-	@Inject	DataAdapter data;
+	@Inject	IDataAdapter data;
 	
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)

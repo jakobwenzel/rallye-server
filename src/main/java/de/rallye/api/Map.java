@@ -1,27 +1,29 @@
 package de.rallye.api;
 
-import de.rallye.config.RallyeConfig;
-import de.rallye.db.DataAdapter;
-import de.rallye.model.structures.Edge;
-import de.rallye.model.structures.MapConfig;
-import de.rallye.model.structures.Node;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import java.util.Collection;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
-import java.util.Collection;
-import java.util.List;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import de.rallye.config.RallyeConfig;
+import de.rallye.db.IDataAdapter;
+import de.rallye.model.structures.Edge;
+import de.rallye.model.structures.MapConfig;
+import de.rallye.model.structures.Node;
 
 @Path("rallye/map")
 public class Map {
 	
 	private Logger logger =  LogManager.getLogger(Map.class.getName());
 
-	@Inject	DataAdapter data;
+	@Inject	IDataAdapter data;
 	@Inject	RallyeConfig config;
 
 	@GET

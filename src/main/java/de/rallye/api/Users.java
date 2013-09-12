@@ -1,11 +1,6 @@
 package de.rallye.api;
 
-import de.rallye.annotations.KnownUserAuth;
-import de.rallye.db.DataAdapter;
-import de.rallye.exceptions.DataException;
-import de.rallye.model.structures.GroupUser;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import java.util.List;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -14,14 +9,21 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.util.List;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import de.rallye.annotations.KnownUserAuth;
+import de.rallye.db.IDataAdapter;
+import de.rallye.exceptions.DataException;
+import de.rallye.model.structures.GroupUser;
 
 @Path("rallye/users")
 public class Users {
 	
 	private final Logger logger = LogManager.getLogger(System.class);
 	
-	@Inject	DataAdapter data;
+	@Inject	IDataAdapter data;
 	
 	@GET
 	@KnownUserAuth

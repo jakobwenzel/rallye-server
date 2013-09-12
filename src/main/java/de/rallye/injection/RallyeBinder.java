@@ -1,21 +1,24 @@
 package de.rallye.injection;
 
-import de.rallye.config.GitRepositoryState;
-import de.rallye.config.RallyeConfig;
-import de.rallye.db.DataAdapter;
-import de.rallye.images.ImageRepository;
-import de.rallye.model.structures.ChatPictureLink;
-import de.rallye.model.structures.GameState;
-import de.rallye.push.PushService;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.inject.Singleton;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.glassfish.hk2.api.TypeLiteral;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
-import javax.inject.Singleton;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import de.rallye.config.GitRepositoryState;
+import de.rallye.config.RallyeConfig;
+import de.rallye.db.DataAdapter;
+import de.rallye.db.IDataAdapter;
+import de.rallye.images.ImageRepository;
+import de.rallye.model.structures.ChatPictureLink;
+import de.rallye.model.structures.GameState;
+import de.rallye.push.PushService;
 
 /**
  * HK2 Binder, declaring all dependencies of  injectable Objects
@@ -26,7 +29,7 @@ public class RallyeBinder extends AbstractBinder {
 
 	private static Logger logger = LogManager.getLogger(RallyeBinder.class);
 
-	public static DataAdapter data;
+	public static IDataAdapter data;
 	public static RallyeConfig config;
 
 
@@ -45,7 +48,7 @@ public class RallyeBinder extends AbstractBinder {
 		bind(Collections.synchronizedMap(new HashMap<String, ChatPictureLink>())).to(new ChatPictureMap());
 
 //		bindFactory(DataAdapterFactory.class).to(DataAdapter.class);
-		bind(data).to(DataAdapter.class);
+		bind(data).to(IDataAdapter.class);
 		bind(GameState.class).to(GameState.class).in(Singleton.class);
 		bind(PushService.class).to(PushService.class).in(Singleton.class);
 	}

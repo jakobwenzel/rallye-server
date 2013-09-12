@@ -5,7 +5,7 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import de.rallye.db.DataAdapter;
+import de.rallye.db.IDataAdapter;
 import de.rallye.exceptions.DataException;
 
 public class ChatPictureLink {
@@ -67,7 +67,7 @@ public class ChatPictureLink {
 		}
 	}
 	
-	public static ChatPictureLink getLink(Map<String, ChatPictureLink> hashMap, String hash, DataAdapter data) {
+	public static ChatPictureLink getLink(Map<String, ChatPictureLink> hashMap, String hash, IDataAdapter data) {
 		ChatPictureLink link = hashMap.get(hash);
 		if (link == null) {
 			link = new ChatPictureLink(new LinkCallback(data));
@@ -78,9 +78,9 @@ public class ChatPictureLink {
 	}
 	
 	private static class LinkCallback implements ILinkCallback {
-		private DataAdapter data;
+		private IDataAdapter data;
 		
-		public LinkCallback(DataAdapter data) {
+		public LinkCallback(IDataAdapter data) {
 			this.data = data;
 		}
 

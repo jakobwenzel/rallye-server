@@ -16,7 +16,7 @@ import com.google.android.gcm.server.MulticastResult;
 import com.google.android.gcm.server.Result;
 import com.google.android.gcm.server.Sender;
 
-import de.rallye.db.DataAdapter;
+import de.rallye.db.IDataAdapter;
 import de.rallye.exceptions.DataException;
 import de.rallye.model.structures.PushEntity;
 import de.rallye.model.structures.UserInternal;
@@ -32,10 +32,10 @@ public class GCMPushAdapter implements IPushAdapter {
 	private static final int MAX_IDS = 1000;
 	
 	private Sender sender;
-	private DataAdapter data;
+	private IDataAdapter data;
 	
 	
-	public GCMPushAdapter(String gcmKey, DataAdapter data) {
+	public GCMPushAdapter(String gcmKey, IDataAdapter data) {
 		this.sender = new Sender(gcmKey);
 		this.data = data;
 	}
