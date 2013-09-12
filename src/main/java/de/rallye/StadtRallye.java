@@ -1,11 +1,13 @@
 package de.rallye;
 
 import de.rallye.admin.ServerConsole;
-import de.rallye.exceptions.DataException;
+import de.rallye.config.ConfigTools;
+import de.rallye.config.GitRepositoryState;
+import de.rallye.config.RallyeConfig;
+import de.rallye.db.DataAdapter;
+import de.rallye.injection.RallyeBinder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.logging.Level;
 
 public class StadtRallye {
 
@@ -20,22 +22,19 @@ public class StadtRallye {
 	private static Logger logger = LogManager.getLogger(StadtRallye.class);
 
 	public static void main(String[] args) {
+
 		logger.info("Starting RallyeServer");
 
 		//Init resources
-		try {
-			RallyeResources.init();
-		} catch (DataException e) {
-			logger.error("Resources could not be initialized", e);
-			return;
-		}
-		RallyeResources R = RallyeResources.getResources();
+		RallyeConfig config = RallyeConfig.fromFile(ConfigTools.findConfigFile(), GitRepositoryState.getState());
+		RallyeBinder.config = config;
+		RallyeBinder.data = DataAdapter.getInstance(config);
 		
 		//start server
-		String host = (args.length > 0 ? args[0] : R.getConfig().getHostName());
-		RallyeServer server = new RallyeServer(host, R.getConfig().getRestPort());
+		String host = (args.length > 0 ? args[0] : config.getHostName());
+		RallyeServer server = new RallyeServer(host, config.getRestPort());
 
-		ServerConsole console = new ServerConsole(R.getConfig().getConsolePort(), server);
+		ServerConsole console = new ServerConsole(config.getConsolePort(), server);
 		console.start();
 	}
 }

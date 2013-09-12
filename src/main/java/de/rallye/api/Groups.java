@@ -1,44 +1,34 @@
 package de.rallye.api;
 
-import java.io.File;
-import java.util.List;
+import de.rallye.annotations.KnownUserAuth;
+import de.rallye.annotations.NewUserAuth;
+import de.rallye.auth.GroupPrincipal;
+import de.rallye.auth.RallyePrincipal;
+import de.rallye.config.RallyeConfig;
+import de.rallye.db.DataAdapter;
+import de.rallye.exceptions.DataException;
+import de.rallye.exceptions.InputException;
+import de.rallye.model.structures.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
+import javax.inject.Inject;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-
-import de.rallye.annotations.KnownUserAuth;
-import de.rallye.annotations.NewUserAuth;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import de.rallye.RallyeResources;
-import de.rallye.auth.GroupPrincipal;
-import de.rallye.auth.RallyePrincipal;
-import de.rallye.exceptions.DataException;
-import de.rallye.exceptions.InputException;
-import de.rallye.model.structures.Group;
-import de.rallye.model.structures.LoginInfo;
-import de.rallye.model.structures.PushConfig;
-import de.rallye.model.structures.User;
-import de.rallye.model.structures.UserAuth;
+import java.io.File;
+import java.util.List;
 
 @Path("rallye/groups")
 public class Groups {
 	
 	private Logger logger =  LogManager.getLogger(Groups.class);
 
-	private RallyeResources R = RallyeResources.getResources();
+	@Inject	DataAdapter data;
+	@Inject	RallyeConfig config;
+
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -46,7 +36,7 @@ public class Groups {
 		logger.entry();
 		
 		try {
-			List<Group> res = R.data.getGroups();
+			List<Group> res = data.getGroups();
 			return logger.exit(res);
 		} catch (DataException e) {
 			logger.error("getGroups failed", e);
@@ -62,7 +52,7 @@ public class Groups {
 		logger.entry();
 		
 		try {
-			List<? extends User> res = R.data.getMembers(groupID);
+			List<? extends User> res = data.getMembers(groupID);
 			return logger.exit(res);
 		} catch (DataException e) {
 			logger.error("getGroups failed", e);
@@ -74,7 +64,7 @@ public class Groups {
 	@Path("{groupID}/avatar")
 	@Produces("image/jpeg")
 	public File getGroupAvatar(@PathParam("groupID") int groupID) {
-		File f = new File(R.getConfig().getDataDirectory()+"game/"+ groupID +"/avatar.jpg");
+		File f = new File(config.getDataDirectory()+"game/"+ groupID +"/avatar.jpg");
 		
 		return f;
 	}
@@ -98,7 +88,7 @@ public class Groups {
 		p.ensureBothMatch(userID, groupID);
 		
 		try {
-			PushConfig res = R.data.getPushConfig(groupID, userID);
+			PushConfig res = data.getPushConfig(groupID, userID);
 			return logger.exit(res);
 		} catch (DataException e) {
 			logger.error("logout failed", e);
@@ -117,7 +107,7 @@ public class Groups {
 		p.ensureBothMatch(userID, groupID);
 		
 		try {
-			R.data.setPushConfig(groupID, userID, push);
+			data.setPushConfig(groupID, userID, push);
 			return Response.ok().build();
 		} catch (DataException e) {
 			logger.error("logout failed", e);
@@ -141,7 +131,7 @@ public class Groups {
 		logger.info("New User: {}", info);
 		
 		try {
-			UserAuth login = R.data.login(authGroup, info);
+			UserAuth login = data.login(authGroup, info);
 			return login;
 		} catch (DataException e) {
 			logger.error("login failed", e);
@@ -163,7 +153,7 @@ public class Groups {
 		p.ensureBothMatch(userID, groupID);
 		
 		try {
-			R.data.logout(groupID, userID);
+			data.logout(groupID, userID);
 			return Response.ok().build();
 		} catch (DataException e) {
 			logger.error("logout failed", e);

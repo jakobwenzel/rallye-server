@@ -1,24 +1,25 @@
 package de.rallye.images;
 
+import de.rallye.config.ImageCacheConfig;
+import de.rallye.config.RallyeConfig;
+import de.rallye.exceptions.DataException;
+import de.rallye.model.structures.Dimension;
+import de.rallye.model.structures.PictureSize;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.jvnet.hk2.annotations.Service;
+
+import javax.imageio.ImageIO;
+import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import javax.imageio.ImageIO;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import de.rallye.exceptions.DataException;
-import de.rallye.model.structures.Dimension;
-import de.rallye.model.structures.PictureSize;
-
+@Singleton
+@Service
 public class ImageRepository {
 	
 	
@@ -27,7 +28,7 @@ public class ImageRepository {
 	
 	private static final Logger logger = LogManager.getLogger(ImageRepository.class);
 
-	private String repository;
+	private final String repository;
 	private ImageCache thumbCache;
 	private ImageCache miniCache;
 	
@@ -56,12 +57,13 @@ public class ImageRepository {
 		return new File(repository, pictureID +"_"+ size.toShortString() +".jpg");
 	}
 
-	
-	public ImageRepository(String repository, int maxThumbEntries, int maxMiniEntries) {
-		this.repository = repository;
-		this.thumbCache = new ImageCache(maxThumbEntries);
-		this.miniCache = new ImageCache(maxMiniEntries);
-		
+	@Inject
+	public ImageRepository(RallyeConfig config) {
+		this.repository = config.getImageRepositoryPath();
+		ImageCacheConfig cacheConfig = config.getImageCacheConfig();
+		this.thumbCache = new ImageCache(cacheConfig.maxThumbEntries);
+		this.miniCache = new ImageCache(cacheConfig.maxMiniEntries);
+
 		new File(this.repository).mkdirs();
 	}
 	
@@ -116,7 +118,7 @@ public class ImageRepository {
 	
 	public void put(int pictureID, File fIn) throws DataException {
 		logger.info("Adding {} to repository", pictureID);
-		
+		//TODO: save Meta-Data to DB ? location? provide API for displaying pictures in Map?
 		
 		lock.writeLock().lock();
 		try {
@@ -175,42 +177,6 @@ public class ImageRepository {
 		logger.info("Scaled {} to {}", pictureID, size);
 		
 		return out;
-	}
-	
-	@Deprecated
-	public void put(int pictureID, BufferedImage img) throws DataException {
-		logger.info("Adding "+ pictureID +" to repository ("+ img.getWidth() +"x"+ img.getHeight() +")");
-		
-		
-		lock.writeLock().lock();
-		try {
-			Dimension d;
-			BufferedImage out;
-			File f;//TODO: preserve EXIF + Meta-Data in original (requires getting img as IIOImage instead of BufferedImage)
-			//TODO: save Meta-Data to DB ? location? provide API for displaying pictures in Map?
-			
-			for (PictureSize s: PictureSize.values()) {
-				d = s.getDimension();
-				out = (d != null)? ImageScaler.scaleImage(img, d) : img;
-				
-				if (s == THUMB)
-					thumbCache.put(pictureID, out);
-				else if (s == MINI)
-					miniCache.put(pictureID, out);
-				
-				f = getFile(pictureID, s);
-				try {
-					ImageIO.write(out, "jpg", f);
-				} catch (IOException e) {
-					final String msg = "Unable to write Image to disk";
-					logger.error(msg, e);
-					throw new DataException(msg, e);
-				}
-			}
-			
-		} finally {
-			lock.writeLock().unlock();
-		}
 	}
 	
 	public void remove(int pictureID) {

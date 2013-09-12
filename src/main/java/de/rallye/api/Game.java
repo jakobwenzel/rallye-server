@@ -1,25 +1,19 @@
 package de.rallye.api;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-
 import de.rallye.annotations.KnownUserAuth;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import de.rallye.RallyeResources;
 import de.rallye.auth.RallyePrincipal;
 import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.WebAppExcept;
 import de.rallye.model.structures.GameState;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.inject.Inject;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
 
 
 @Path("rallye/game")
@@ -29,7 +23,7 @@ public class Game {
 
 	private Logger logger =  LogManager.getLogger(Game.class);
 
-	private RallyeResources R = RallyeResources.getResources();
+	@Inject	GameState gameState;
 
 
 	@GET
@@ -37,7 +31,7 @@ public class Game {
 	@Path("state")
 	@Produces(MediaType.APPLICATION_JSON)
 	public GameState getChats(@Context SecurityContext sec) {
-		return R.getGameState();
+		return gameState;
 	}
 	
 
@@ -52,7 +46,7 @@ public class Game {
 		logger.debug(groupId +" goes to "+nodeID);
 		
 		try {
-			R.getGameState().setUpcomingPosition(groupId,nodeID);
+			gameState.setUpcomingPosition(groupId, nodeID);
 		} catch (DataException e) {
 			logger.error("getChatrooms failed", e);
 			throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);

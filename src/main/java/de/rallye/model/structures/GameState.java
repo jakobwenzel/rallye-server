@@ -1,21 +1,25 @@
 package de.rallye.model.structures;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-
 import de.rallye.db.DataAdapter;
 import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.EdgeNotFoundException;
 import de.rallye.exceptions.NodeNotFoundException;
 import de.rallye.exceptions.NodeOccupiedException;
 import de.rallye.mapper.GroupPositionsSerializer;
+import org.codehaus.jackson.map.annotate.JsonSerialize;
+import org.jvnet.hk2.annotations.Service;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
+@Singleton
+@Service
 public class GameState {
 
-	protected final DataAdapter data;
+	private final DataAdapter data;
 	
 	public int roundNumber = 0;
 	
@@ -25,13 +29,9 @@ public class GameState {
 	@JsonSerialize(using=GroupPositionsSerializer.class)
 	public Map<Integer,Node> upcomingPositions = new HashMap<Integer,Node>();
 
+	@Inject
 	public GameState(DataAdapter data) {
 		this.data = data;
-		
-		//TODO: REMOVE!!
-		Map<Integer, Node> nodes = data.getNodes();
-		positions.put(3, nodes.get(1));
-		positions.put(4, nodes.get(5));
 	}
 
 

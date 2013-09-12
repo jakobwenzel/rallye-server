@@ -1,20 +1,6 @@
 package de.rallye.push;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import de.rallye.RallyeConfig;
-import de.rallye.RallyeResources;
+import de.rallye.config.RallyeConfig;
 import de.rallye.db.DataAdapter;
 import de.rallye.exceptions.DataException;
 import de.rallye.model.structures.ChatEntry;
@@ -22,6 +8,14 @@ import de.rallye.model.structures.Chatroom;
 import de.rallye.model.structures.PushEntity.Type;
 import de.rallye.model.structures.PushMode;
 import de.rallye.model.structures.UserInternal;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import javax.inject.Inject;
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * Pushmodes must be continuous (no unused pushModes) matching a List
@@ -37,13 +31,14 @@ public class PushService {
 	private DataAdapter data;
 //	private ObjectMapper mapper;
 
-	public PushService(RallyeResources resources) {
-		this.data = resources.data;
+	@Inject
+	public PushService(DataAdapter data, RallyeConfig config) {
+		this.data = data;
 //		this.mapper = new ObjectMapper();
 		
 		try {
 			for (PushMode p: data.getPushModes()) {
-				pushModes.put(p.pushID, PushService.getPushAdapter(p.name, data, resources.config));
+				pushModes.put(p.pushID, PushService.getPushAdapter(p.name, data, config));
 			}
 		} catch (DataException e) {
 			logger.error(e);

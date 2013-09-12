@@ -1,22 +1,19 @@
 package de.rallye.auth;
 
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.container.ContainerRequestContext;
-import javax.ws.rs.container.ContainerRequestFilter;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.ext.Provider;
-
 import de.rallye.annotations.KnownUserAuth;
+import de.rallye.exceptions.DataException;
+import de.rallye.exceptions.InputException;
+import de.rallye.exceptions.UnauthorizedException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.spi.LoggerContext;
 import org.apache.logging.log4j.spi.LoggerContextFactory;
 
-import de.rallye.RallyeResources;
-import de.rallye.exceptions.DataException;
-import de.rallye.exceptions.InputException;
-import de.rallye.exceptions.UnauthorizedException;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.ext.Provider;
 
 @KnownUserAuth
 @Provider
@@ -60,7 +57,7 @@ public class KnownUserAuthFilter extends BaseAuthFilter implements IManualAuthen
 			userID = Integer.parseInt(usr[0]);
 			groupID = Integer.parseInt(usr[1]);
 			
-			principal = RallyeResources.getResources().data.getKnownUserAuthorization(groupID, userID, login[1]);
+			principal = data.getKnownUserAuthorization(groupID, userID, login[1]);
 		} catch (DataException e) {
 			logger.error("Database Error", e);
 			throw new WebApplicationException(e);

@@ -1,26 +1,19 @@
 package de.rallye.api;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.StringWriter;
-import java.util.Iterator;
-import java.util.List;
+import de.rallye.db.DataAdapter;
+import de.rallye.exceptions.DataException;
+import de.rallye.model.structures.UserInternal;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.w3c.dom.Node;
 
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageReader;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.stream.ImageInputStream;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
+import javax.inject.Inject;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response.Status;
 import javax.xml.transform.OutputKeys;
@@ -29,28 +22,23 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.w3c.dom.Node;
-
-import de.rallye.RallyeResources;
-import de.rallye.exceptions.DataException;
-import de.rallye.model.structures.UserInternal;
+import java.io.*;
+import java.util.Iterator;
+import java.util.List;
 
 @Path("rallye/debug")
 public class Debug {
 
 	private Logger logger = LogManager.getLogger(Debug.class);
 
-	private RallyeResources R = RallyeResources.getResources();
+	@Inject	DataAdapter data;
 
 	@GET
 	@Path("members/{groupID}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<UserInternal> getMembers(@PathParam("groupID") int groupID) {
 		try {
-			return R.data.getMembers(groupID);
+			return data.getMembers(groupID);
 		} catch (DataException e) {
 			logger.error("Failed to get members", e);
 			throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
@@ -62,7 +50,7 @@ public class Debug {
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<UserInternal> getChatroomMembers(@PathParam("roomID") int roomID) {
 		try {
-			return R.data.getChatroomMembers(roomID);
+			return data.getChatroomMembers(roomID);
 		} catch (DataException e) {
 			logger.error("Failed to get chatroom members", e);
 			throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);

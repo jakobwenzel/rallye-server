@@ -1,31 +1,24 @@
 package de.rallye.api;
 
-import java.util.List;
-
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-
 import de.rallye.annotations.KnownUserAuth;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import de.rallye.RallyeResources;
 import de.rallye.auth.RallyePrincipal;
+import de.rallye.db.DataAdapter;
 import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.InputException;
 import de.rallye.model.structures.SimpleSubmission;
 import de.rallye.model.structures.Submission;
 import de.rallye.model.structures.Task;
 import de.rallye.model.structures.TaskSubmissions;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.inject.Inject;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import java.util.List;
 
 @Path("rallye/tasks")
 public class Tasks {
@@ -35,7 +28,7 @@ public class Tasks {
 
 	private Logger logger =  LogManager.getLogger(Tasks.class);
 
-	private RallyeResources R = RallyeResources.getResources();
+	@Inject	DataAdapter data;
 	
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -43,7 +36,7 @@ public class Tasks {
 		logger.entry();
 		
 		try {
-			List<Task> res = R.data.getTasks();
+			List<Task> res = data.getTasks();
 			return logger.exit(res);
 		} catch (DataException e) {
 			logger.error("getTasks failed", e);
@@ -61,7 +54,7 @@ public class Tasks {
 		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
 		
 		try {
-			List<Submission> res = R.data.getSubmissions(taskID, p.getGroupID());
+			List<Submission> res = data.getSubmissions(taskID, p.getGroupID());
 			return logger.exit(res);
 		} catch (DataException e) {
 			logger.error("getSubmissions failed", e);
@@ -85,7 +78,7 @@ public class Tasks {
 		p.ensureGroupMatches(groupID);
 		
 		try {
-			List<TaskSubmissions> res = R.data.getAllSubmissions(groupID);
+			List<TaskSubmissions> res = data.getAllSubmissions(groupID);
 			return logger.exit(res);
 		} catch (DataException e) {
 			logger.error("getAllSubmissions failed", e);
@@ -104,7 +97,7 @@ public class Tasks {
 		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
 		
 		try {
-			Submission res = R.data.submit(taskID, p.getGroupID(), p.getUserID(), submission);
+			Submission res = data.submit(taskID, p.getGroupID(), p.getUserID(), submission);
 			return logger.exit(res);
 		} catch (DataException e) {
 			logger.error("submit failed", e);

@@ -1,14 +1,11 @@
 package de.rallye;
 
-import java.io.IOException;
-import java.net.URI;
-
 import de.rallye.auth.EnsureMimeType;
+import de.rallye.injection.RallyeBinder;
+import de.rallye.push.PushWebsocketApp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import de.rallye.push.PushWebsocketApp;
-import org.glassfish.grizzly.compression.zip.GZipFilter;
+import org.glassfish.grizzly.http.CompressionConfig;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.http.server.NetworkListener;
 import org.glassfish.grizzly.http.server.ServerConfiguration;
@@ -16,15 +13,14 @@ import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.grizzly.websockets.WebSocketAddOn;
 import org.glassfish.grizzly.websockets.WebSocketEngine;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpContainer;
-import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpServerFactory;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.server.ContainerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
 import javax.ws.rs.ProcessingException;
-import javax.ws.rs.core.Feature;
-import javax.ws.rs.core.FeatureContext;
 import javax.ws.rs.core.UriBuilder;
+import java.io.IOException;
+import java.net.URI;
 
 public class RallyeServer {
 	
@@ -57,6 +53,7 @@ public class RallyeServer {
 		rc.packages("de.rallye.api", "de.rallye.annotations", "de.rallye.auth");
 		rc.register(JacksonFeature.class);
 		rc.register(EnsureMimeType.class);
+		rc.register(new RallyeBinder());
 
 		HttpServer serv = createServer(uri, rc); // Do NOT start the server just yet
 		logger.info("Starting Grizzly server at " + uri);
@@ -91,8 +88,9 @@ public class RallyeServer {
 		}
 
 		// insert
-		listener.setCompression("on");// on || force || off
-		listener.setCompressableMimeTypes("text,application/json");
+		CompressionConfig cg = listener.getCompressionConfig();
+		cg.setCompressionMode(CompressionConfig.CompressionMode.OFF);
+		cg.setCompressableMimeTypes("text","application/json");
 		// end insert
 
 		server.addListener(listener);
@@ -117,15 +115,10 @@ public class RallyeServer {
 		return server;
 	}
 
-	/**
-	 * 
-	 * 
-	 * @author Felix H�bner
-	 */
 	public void stopServer() {
 		logger.info("Stopping Grizzly server");
 		
-		this.httpServer.stop();
+		this.httpServer.shutdown();
 	}
 
 }

@@ -1,47 +1,20 @@
 package de.rallye.db;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Savepoint;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Random;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import com.mchange.v2.c3p0.ComboPooledDataSource;
-
 import de.rallye.auth.GroupPrincipal;
 import de.rallye.auth.RallyePrincipal;
+import de.rallye.config.RallyeConfig;
 import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.InputException;
 import de.rallye.exceptions.UnauthorizedException;
-import de.rallye.model.structures.AdditionalResource;
-import de.rallye.model.structures.ChatEntry;
-import de.rallye.model.structures.Chatroom;
-import de.rallye.model.structures.Group;
-import de.rallye.model.structures.Edge;
-import de.rallye.model.structures.GroupUser;
-import de.rallye.model.structures.LatLng;
-import de.rallye.model.structures.LoginInfo;
-import de.rallye.model.structures.Node;
-import de.rallye.model.structures.PushConfig;
-import de.rallye.model.structures.PushMode;
-import de.rallye.model.structures.ServerConfig;
-import de.rallye.model.structures.SimpleChatEntry;
-import de.rallye.model.structures.SimpleSubmission;
-import de.rallye.model.structures.Submission;
-import de.rallye.model.structures.Task;
-import de.rallye.model.structures.TaskSubmissions;
-import de.rallye.model.structures.UserAuth;
-import de.rallye.model.structures.UserInternal;
+import de.rallye.model.structures.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.beans.PropertyVetoException;
+import java.sql.*;
+import java.util.*;
+import java.util.Map.Entry;
 
 public class DataAdapter {
 	
@@ -55,6 +28,32 @@ public class DataAdapter {
 		
 		loadNodes();
 		loadEdges();
+	}
+
+	public static DataAdapter getInstance(RallyeConfig config) {
+		// create dataBase Handler
+		ComboPooledDataSource dataSource = new ComboPooledDataSource();
+		try {
+			dataSource.setDriverClass("com.mysql.jdbc.Driver");
+		} catch (PropertyVetoException e) {
+			logger.error("MySQL Driver not found", e);
+			return null;
+		}
+		RallyeConfig.DbConnectionConfig dbc = config.getDbConnectionConfig();
+
+		dataSource.setJdbcUrl(dbc.connectString);
+		dataSource.setUser(dbc.username);
+		dataSource.setPassword(dbc.password);
+		dataSource.setMaxIdleTime(dbc.maxIdleTime); // set max idle time to 1 hour
+
+		DataAdapter da = null;
+		try {
+			da = new DataAdapter(dataSource);
+		} catch (SQLException e) {
+			logger.error("Could not establish DB connection", e);
+		}
+
+		return da;
 	}
 	
 	/**
@@ -326,31 +325,6 @@ public class DataAdapter {
 				edges.add(new Edge(a, b, rs.getString(3)));
 			}
 
-		} finally {
-			close(con, st, rs);
-		}
-	}
-	
-	public ServerConfig getServerConfig() throws DataException {
-		Connection con = null;
-		Statement st = null;
-		ResultSet rs = null;
-		
-		try {
-			con = dataSource.getConnection();
-			st = con.createStatement();
-			rs = st.executeQuery("SELECT "+
-					cols(Ry.Config.NAME, Ry.Config.LAT, Ry.Config.LON,
-							Ry.Config.ROUNDS, Ry.Config.ROUND_TIME, "UNIX_TIMESTAMP("+ Ry.Config.START_TIME +")") +" FROM "+ Ry.Config.TABLE);
-			
-			rs.next();
-			
-			ServerConfig res = new ServerConfig(rs.getString(1), rs.getDouble(2), rs.getDouble(3),
-					rs.getInt(4), rs.getInt(5), rs.getLong(6));
-			
-			return res;
-		} catch (SQLException e) {
-			throw new DataException(e);
 		} finally {
 			close(con, st, rs);
 		}

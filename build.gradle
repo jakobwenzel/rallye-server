@@ -82,26 +82,16 @@ dependencies {
 	
 	compile 'org.glassfish.grizzly:grizzly-websockets:2.3.+'
 
-
-	//Jersey
-	//compile 'com.sun.jersey:jersey-core:1.17.+'
-	//compile 'com.sun.jersey:jersey-server:1.17.+'
-	//compile 'com.sun.jersey:jersey-grizzly2:1.17.+'
-	//compile 'com.sun.jersey:jersey-json:1.17.+'
-	//compile 'com.sun.jersey.contribs:jersey-multipart:1.17.+'
-	//compile 'org.glassfish.grizzly:grizzly-http-server:2.3.+' // Force 2.3 instead of 2.2
-	//compile 'org.glassfish.grizzly:grizzly-websockets:2.3.+'
-	//compile 'javax.websocket:javax.websocket-api:1.+'
-
 	compile 'org.glassfish.grizzly:grizzly-http-servlet:2.3.+' //Needed for websockets
 	compile 'org.apache.tomcat:tomcat-servlet-api:7.0.42' //Needed for websockets
             
-	//compile 'javax.websocket:javax.websocket-api:1.+'
 
 	//Jackson
+	compile 'org.codehaus.jackson:jackson-core-asl:1.9.+' //Jersey json will use 1.9 anyway
+	compile 'org.codehaus.jackson:jackson-mapper-asl:1.9.+'
 	//compile 'com.fasterxml.jackson.core:jackson-core:2.2.+'
 	//compile 'com.fasterxml.jackson.core:jackson-annotations:2.2.+'
-	compile 'com.fasterxml.jackson.core:jackson-databind:2.2.+'
+	//compile 'com.fasterxml.jackson.core:jackson-databind:2.2.+'
 
 	//MySQL
 	compile 'mysql:mysql-connector-java:5.1.+'
@@ -117,6 +107,8 @@ dependencies {
 
 	// Primitive JSON (used in Push service)
 	compile 'org.json:json:20090211'
+	
+	//compile 'com.google.inject:guice:3.0'
 
 	compile project(':common:RallyeStructures')
 }

@@ -1,18 +1,22 @@
 package de.rallye.auth;
 
+import de.rallye.db.DataAdapter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.security.Principal;
-
+import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.Response;
+import java.security.Principal;
 
 public abstract class BaseAuthFilter implements ContainerRequestFilter {
 
 	private final Logger logger = LogManager.getLogger(BaseAuthFilter.class);
+
+	@Inject
+	protected DataAdapter data;
 	
     /**
      * Apply the filter : check input request, validate or not with user auth

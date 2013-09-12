@@ -1,50 +1,44 @@
 package de.rallye.api;
 
-import java.io.InputStream;
-import java.io.FileInputStream;
-import java.io.File;
+import de.rallye.StadtRallye;
+import de.rallye.config.ConfigTools;
+import de.rallye.config.RallyeConfig;
+import de.rallye.exceptions.WebAppExcept;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.net.URL;
-
-import java.util.Map;
-import java.util.HashMap;
-
+import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import de.rallye.RallyeResources;
-
-import de.rallye.StadtRallye;
-import de.rallye.exceptions.WebAppExcept;
-import org.glassfish.jersey.media.multipart.file.DefaultMediaTypePredictor;
-import org.glassfish.jersey.message.internal.MediaTypeProvider;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 @Path("client")
 public class Client {
 	private static final String RESOURCE_PATH = "webclient/";
-	private RallyeResources R = RallyeResources.getResources();
 
-	private Logger logger =  LogManager.getLogger(Client.class);
+	private static Logger logger =  LogManager.getLogger(Client.class);
 	
-	boolean projectChecked = false;
-	String projectDir;
-
+	private static boolean projectChecked = false;
+	private static String projectDir;
 	
-	private static Map<String,String> mime = new HashMap<String,String>();
+	private static final Map<String,String> mime = new HashMap<String,String>();
 	static {
 		mime.put("js","application/javascript");
 		mime.put("html","text/html");
 		mime.put("htm","text/html");
 		mime.put("gif","image/gif");
 	}
+
+	@Inject	RallyeConfig config;
 
 	@GET
 	@Path("{path}")
@@ -57,7 +51,7 @@ public class Client {
 		
 		//If we are running from project dir, always load files from src directory to avoid recompiles during development
 		if (!projectChecked) {
-			projectDir = R.getProjectDir();
+			projectDir = ConfigTools.getProjectDir();
 			projectChecked = true;
 		}
 		

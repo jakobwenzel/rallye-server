@@ -1,40 +1,32 @@
 package de.rallye.api;
 
-import java.util.List;
+import de.rallye.annotations.KnownUserAuth;
+import de.rallye.auth.RallyePrincipal;
+import de.rallye.db.DataAdapter;
+import de.rallye.exceptions.DataException;
+import de.rallye.exceptions.InputException;
+import de.rallye.exceptions.UnauthorizedException;
+import de.rallye.model.structures.*;
+import de.rallye.push.PushService;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
+import javax.inject.Inject;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-
-import de.rallye.annotations.KnownUserAuth;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import de.rallye.RallyeResources;
-import de.rallye.auth.RallyePrincipal;
-import de.rallye.exceptions.DataException;
-import de.rallye.exceptions.InputException;
-import de.rallye.exceptions.UnauthorizedException;
-import de.rallye.model.structures.ChatEntry;
-import de.rallye.model.structures.ChatPictureLink;
-import de.rallye.model.structures.Chatroom;
-import de.rallye.model.structures.SimpleChatWithPictureHash;
-import de.rallye.model.structures.User;
+import java.util.List;
 
 @Path("rallye/chatrooms")
 public class Chatrooms {
 	
-	private Logger logger =  LogManager.getLogger(Chatrooms.class);
+	private static Logger logger =  LogManager.getLogger(Chatrooms.class);
 
-	private RallyeResources R = RallyeResources.getResources();
+	@Inject	DataAdapter data;
+	@Inject	PushService push;
+	@Inject java.util.Map<String, ChatPictureLink> chatPictureMap;
 
 	@GET
 	@KnownUserAuth
@@ -45,7 +37,7 @@ public class Chatrooms {
 		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
 		
 		try {
-			List<Chatroom> res = R.data.getChatrooms(p.getGroupID());
+			List<Chatroom> res = data.getChatrooms(p.getGroupID());
 			return logger.exit(res);
 		} catch (DataException e) {
 			logger.error("getChatrooms failed", e);
@@ -75,7 +67,7 @@ public class Chatrooms {
 		logger.entry();
 		
 		try {
-			List<ChatEntry> res = R.data.getChats(roomID, timestamp, groupID);
+			List<ChatEntry> res = data.getChats(roomID, timestamp, groupID);
 			return logger.exit(res);
 		} catch (DataException e) {
 			logger.error("getChats failed", e);
@@ -110,20 +102,20 @@ public class Chatrooms {
 			ChatEntry res;
 			
 			if (chat.pictureHash != null) {
-				ChatPictureLink link = ChatPictureLink.getLink(R.hashMap, chat.pictureHash, R.data);
+				ChatPictureLink link = ChatPictureLink.getLink(chatPictureMap, chat.pictureHash, data);
 				
 				Integer picID = link.getPictureID();
 				if (picID != null) {
 					chat.pictureID = picID;
-					res = R.data.addChat(chat, roomID, groupID, userID);
+					res = data.addChat(chat, roomID, groupID, userID);
 				} else {
-					res = R.data.addChat(chat, roomID, groupID, userID);
+					res = data.addChat(chat, roomID, groupID, userID);
 					link.setChat(res.chatID);
 				}
 			} else
-				res = R.data.addChat(chat, roomID, groupID, userID);
+				res = data.addChat(chat, roomID, groupID, userID);
 			
-			R.push.chatAdded(res, roomID);
+			push.chatAdded(res, roomID);
 			
 			return logger.exit(res);
 		} catch (DataException e) {
@@ -139,7 +131,7 @@ public class Chatrooms {
 		logger.entry();
 		
 		try {
-			List<? extends User> res = R.data.getChatroomMembers(roomID);
+			List<? extends User> res = data.getChatroomMembers(roomID);
 			return logger.exit(res);
 		} catch (DataException e) {
 			logger.error("getChatroomMembers failed", e);
