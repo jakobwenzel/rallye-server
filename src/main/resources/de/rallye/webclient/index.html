@@ -244,8 +244,8 @@ function leadZero(num) {
 function formatTime(unixTimestamp) {
     var dt = new Date(unixTimestamp * 1000);
 
-	var day = leadZero(dt.getDay());
-	var month = leadZero(dt.getMonth());
+	var day = leadZero(dt.getDate());
+	var month = leadZero(dt.getMonth()+1);
 	var year = dt.getFullYear();
 	
     var hours = leadZero(dt.getHours());
