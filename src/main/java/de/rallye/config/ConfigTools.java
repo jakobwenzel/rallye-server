@@ -21,17 +21,19 @@ public class ConfigTools {
 		logger.entry();
 		//If we are not runnig from a jar, we are in the classes subdir
 		String location = getClassesDir();
-		if (location.endsWith("classes/")) {
-			location = location.substring(0,location.length()-8);
-		}
-		//We should be in build/libs subdirectory
-		if (!location.endsWith("build/libs/")) {
-			//If not, we are not running in project dir
-			logger.debug("no build/libs/");
+		logger.info("location is "+location);
+		//We are either in build/classes/main/
+		if (location.endsWith("build/classes/main/")) {
+			location = location.substring(0,location.length()-19);	
+		//Or in build/libs subdirectory		
+		} else if (location.endsWith("build/libs/")) {
+			location = location.substring(0,location.length()-11);
+		//If not, we are not running in project dir
+		} else {
+			logger.debug("not in any subdir known.");
 			return null;
 		}
-		//remove build/libs/
-		location = location.substring(0,location.length()-11);
+		
 		//There should be a git config directory around here
 		try {
 			File git = new File(new URL(location+".git").toURI());
@@ -43,7 +45,7 @@ public class ConfigTools {
 			logger.debug(e);
 			return null;
 		}
-		//We are sure this is the correct location
+		//We are now sure this is the correct location
 		return location;
 	}
 
