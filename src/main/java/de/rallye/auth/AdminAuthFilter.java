@@ -26,6 +26,11 @@ public class AdminAuthFilter extends BaseAuthFilter {
 	protected Response getUnauthorized() {
 		return Response.status(Status.UNAUTHORIZED).header("WWW-Authenticate", "Basic realm=\"AdminAuth\"").build();
 	}
+	
+
+	public AdminPrincipal checkAuthentication(String[] login) {
+		return checkAuthentication(null, login);
+	}
 
 	@Override
 	public AdminPrincipal checkAuthentication(ContainerRequestContext containerRequest, String[] login) {
@@ -58,7 +63,8 @@ public class AdminAuthFilter extends BaseAuthFilter {
 			throw new WebApplicationException(e);
 		}
         
-        containerRequest.setSecurityContext(new RallyeSecurityContext<AdminPrincipal>(principal));
+		if (containerRequest!=null)
+			containerRequest.setSecurityContext(new RallyeSecurityContext<AdminPrincipal>(principal));
         logger.info("Authorized: {}:{}", principal.getAdminID(), principal.getName());
         return principal;
 	}

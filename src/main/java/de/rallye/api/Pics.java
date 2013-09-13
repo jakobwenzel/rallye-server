@@ -42,7 +42,7 @@ public class Pics {
 	@KnownUserAuth
 	@Consumes("image/jpeg")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Picture uploadPictureWithHash(File img, @PathParam("hash") String hash, @Context SecurityContext sec) {
+	public Picture uploadPictureWithHash(File img, @PathParam("hash") String hash, @Context SecurityContext sec) throws DataException {
 		logger.entry();
 		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
 		
@@ -58,23 +58,18 @@ public class Pics {
 	@KnownUserAuth
 	@Consumes("image/jpeg")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Picture uploadPicture(File img, @Context SecurityContext sec) {
+	public Picture uploadPicture(File img, @Context SecurityContext sec) throws DataException {
 		logger.entry();
 		return logger.exit(savePicture(img, (RallyePrincipal) sec.getUserPrincipal()));
 	}
 	
-	private Picture savePicture(File img, RallyePrincipal p) {
+	private Picture savePicture(File img, RallyePrincipal p) throws DataException {
 		logger.entry();
 		
 		int pictureID;
 		
-		try {
-			pictureID = data.assignNewPictureID(p.getUserID());
-			imageRepository.put(pictureID, img);
-		} catch (DataException e) {
-			logger.error("could not assign new pictureID", e);
-			throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
-		}
+		pictureID = data.assignNewPictureID(p.getUserID());
+		imageRepository.put(pictureID, img);
 	
 		return logger.exit(new Picture(pictureID));
 	}

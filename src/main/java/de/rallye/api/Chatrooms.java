@@ -43,25 +43,20 @@ public class Chatrooms {
 	@GET
 	@KnownUserAuth
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Chatroom> getChatrooms(@Context SecurityContext sec) {
+	public List<Chatroom> getChatrooms(@Context SecurityContext sec) throws DataException{
 		logger.entry();
 		
 		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
-		
-		try {
-			List<Chatroom> res = data.getChatrooms(p.getGroupID());
-			return logger.exit(res);
-		} catch (DataException e) {
-			logger.error("getChatrooms failed", e);
-			throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
-		}
+	
+		List<Chatroom> res = data.getChatrooms(p.getGroupID());
+		return logger.exit(res);
 	}
 	
 	@GET
 	@KnownUserAuth
 	@Path("{roomID}/since/{timestamp}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<ChatEntry> getChats(@PathParam("roomID") int roomID, @PathParam("timestamp") long timestamp, @Context SecurityContext sec) {
+	public List<ChatEntry> getChats(@PathParam("roomID") int roomID, @PathParam("timestamp") long timestamp, @Context SecurityContext sec) throws DataException {
 		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
 		return getChats(roomID, timestamp, p.getGroupID());
 	}
@@ -70,20 +65,17 @@ public class Chatrooms {
 	@KnownUserAuth
 	@Path("{roomID}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<ChatEntry> getChats(@PathParam("roomID") int roomID, @Context SecurityContext sec) {
+	public List<ChatEntry> getChats(@PathParam("roomID") int roomID, @Context SecurityContext sec) throws DataException {
 		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
 		return getChats(roomID, 0, p.getGroupID());
 	}
 	
-	private List<ChatEntry> getChats(int roomID, long timestamp, int groupID) {
+	private List<ChatEntry> getChats(int roomID, long timestamp, int groupID) throws DataException {
 		logger.entry();
 		
 		try {
 			List<ChatEntry> res = data.getChats(roomID, timestamp, groupID);
 			return logger.exit(res);
-		} catch (DataException e) {
-			logger.error("getChats failed", e);
-			throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
 		} catch (UnauthorizedException e) {
 			logger.error("group {} has no access rights for chatroom {}", groupID, roomID);
 			throw new WebApplicationException(e, Response.Status.FORBIDDEN);
@@ -95,7 +87,7 @@ public class Chatrooms {
 	@Path("{roomID}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public ChatEntry addChat(@PathParam("roomID") int roomID, SimpleChatWithPictureHash chat, @Context SecurityContext sec) {
+	public ChatEntry addChat(@PathParam("roomID") int roomID, SimpleChatWithPictureHash chat, @Context SecurityContext sec) throws DataException {
 		logger.entry();
 		
 		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
@@ -104,51 +96,43 @@ public class Chatrooms {
 		
 		if (chat.message.isEmpty())
 			throw new WebApplicationException(new InputException("Message must not be empty"), Response.Status.BAD_REQUEST);
-		
-		try {
-			if (!p.hasRightsForChatroom(roomID)) {
-				logger.warn("group "+ groupID +" has no access rights for chatroom "+ roomID);
-				throw new WebApplicationException(Response.Status.FORBIDDEN);
-			}
-			
-			ChatEntry res;
-			
-			if (chat.pictureHash != null) {
-				ChatPictureLink link = ChatPictureLink.getLink(chatPictureMap, chat.pictureHash, data);
-				
-				Integer picID = link.getPictureID();
-				if (picID != null) {
-					chat.pictureID = picID;
-					res = data.addChat(chat, roomID, groupID, userID);
-				} else {
-					res = data.addChat(chat, roomID, groupID, userID);
-					link.setChat(res.chatID);
-				}
-			} else
-				res = data.addChat(chat, roomID, groupID, userID);
-			
-			push.chatAdded(res, roomID);
-			
-			return logger.exit(res);
-		} catch (DataException e) {
-			logger.error("getChats failed", e);
-			throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
+
+		if (!p.hasRightsForChatroom(roomID)) {
+			logger.warn("group "+ groupID +" has no access rights for chatroom "+ roomID);
+			throw new WebApplicationException(Response.Status.FORBIDDEN);
 		}
+		
+		ChatEntry res;
+		
+		if (chat.pictureHash != null) {
+			ChatPictureLink link = ChatPictureLink.getLink(chatPictureMap, chat.pictureHash, data);
+			
+			Integer picID = link.getPictureID();
+			if (picID != null) {
+				chat.pictureID = picID;
+				res = data.addChat(chat, roomID, groupID, userID);
+			} else {
+				res = data.addChat(chat, roomID, groupID, userID);
+				link.setChat(res.chatID);
+			}
+		} else
+			res = data.addChat(chat, roomID, groupID, userID);
+		
+		push.chatAdded(res, roomID);
+		
+		return logger.exit(res);
+	
 	}
 	
 	@GET
 	@Path("{roomID}/members")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<? extends User> getMembers(@PathParam("roomID") int roomID) {
+	public List<? extends User> getMembers(@PathParam("roomID") int roomID) throws DataException {
 		logger.entry();
 		
-		try {
-			List<? extends User> res = data.getChatroomMembers(roomID);
-			return logger.exit(res);
-		} catch (DataException e) {
-			logger.error("getChatroomMembers failed", e);
-			throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
-		}
+		List<? extends User> res = data.getChatroomMembers(roomID);
+		return logger.exit(res);
+		
 	}
 	
 }

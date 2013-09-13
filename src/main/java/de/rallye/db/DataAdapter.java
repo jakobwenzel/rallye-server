@@ -8,6 +8,7 @@ import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.InputException;
 import de.rallye.exceptions.UnauthorizedException;
 import de.rallye.model.structures.*;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -111,7 +112,7 @@ public class DataAdapter implements IDataAdapter {
 		try {
 			con = dataSource.getConnection();
 			st = con.createStatement();
-			rs = st.executeQuery("SELECT "+ cols(Ry.Groups.ID, Ry.Groups.NAME, Ry.Groups.DESCRIPTION) +" FROM "+ Ry.Groups.TABLE);
+			rs = st.executeQuery("SELECT "+ cols(Ry.Groups.ID, Ry.Groups.NAME, Ry.Groups.DESCRIPTION) +" FROM "+ Ry.Groups.TABLE+" ORDER BY "+Ry.Groups.NAME);
 
 			groups = new ArrayList<Group>();
 			
@@ -1056,5 +1057,71 @@ public class DataAdapter implements IDataAdapter {
 		} finally {
 			close(con, st, rs);
 		}
+	}
+
+	@Override
+	public int addGroup(Group group) throws DataException {
+		//Invalidate cached group list
+		groups = null;
+		
+		Connection con = null;
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		
+		try {
+			
+			con = dataSource.getConnection();
+			
+			st = con.prepareStatement("INSERT INTO "+ Ry.Groups.TABLE +" ("+ cols(Ry.Groups.NAME, Ry.Groups.DESCRIPTION, Ry.Groups.PASSWORD) +")" +
+					" VALUES (?,?,?)", Statement.RETURN_GENERATED_KEYS);
+			
+
+			st.setString(1, group.name);
+			st.setString(2, group.description);
+			st.setString(3, "test"); //TODO: Make password changeable
+			st.execute();
+			
+			rs = st.getGeneratedKeys();
+			
+			if (rs.first()) {
+				return rs.getInt(1);
+			} else {
+				throw new DataException("Group could not be created");
+			}
+			
+		} catch (SQLException e) {
+			throw new DataException(e);
+		} finally {
+			close(con, st, rs);
+		}
+	}
+
+	@Override
+	public void editGroup(Group group) throws DataException {
+		//Invalidate cached group list
+		groups = null;
+		
+		Connection con = null;
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		
+		try {
+			
+			con = dataSource.getConnection();
+			
+			
+			st = con.prepareStatement("UPDATE "+ Ry.Groups.TABLE +" SET "+ Ry.Groups.NAME +"=?, "+ Ry.Groups.DESCRIPTION+"=? WHERE "+Ry.Groups.ID+"=?");
+
+			st.setString(1, group.name);
+			st.setString(2, group.description);
+			st.setInt(3, group.groupID);
+			st.execute();
+			
+		} catch (SQLException e) {
+			throw new DataException(e);
+		} finally {
+			close(con, st, rs);
+		}
+		
 	}
 }

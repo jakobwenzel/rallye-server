@@ -1,8 +1,11 @@
 package de.rallye;
 
-import de.rallye.auth.EnsureMimeType;
-import de.rallye.injection.RallyeBinder;
-import de.rallye.push.PushWebsocketApp;
+import java.io.IOException;
+import java.net.URI;
+
+import javax.ws.rs.ProcessingException;
+import javax.ws.rs.core.UriBuilder;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.glassfish.grizzly.http.CompressionConfig;
@@ -14,13 +17,14 @@ import org.glassfish.grizzly.websockets.WebSocketAddOn;
 import org.glassfish.grizzly.websockets.WebSocketEngine;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpContainer;
 import org.glassfish.jersey.jackson.JacksonFeature;
+import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ContainerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
-import javax.ws.rs.ProcessingException;
-import javax.ws.rs.core.UriBuilder;
-import java.io.IOException;
-import java.net.URI;
+import de.rallye.admin.AdminWebsocketApp;
+import de.rallye.auth.EnsureMimeType;
+import de.rallye.injection.RallyeBinder;
+import de.rallye.push.PushWebsocketApp;
 
 public class RallyeServer {
 	
@@ -53,7 +57,8 @@ public class RallyeServer {
 		rc.packages("de.rallye.api", "de.rallye.annotations", "de.rallye.auth","de.rallye.exceptions.mappers");
 		rc.register(JacksonFeature.class);
 		rc.register(EnsureMimeType.class);
-		rc.register(new RallyeBinder());
+		rc.register(new RallyeBinder());     
+	    rc.register(MultiPartFeature.class);
 
 		HttpServer serv = createServer(uri, rc); // Do NOT start the server just yet
 		logger.info("Starting Grizzly server at " + uri);
@@ -65,7 +70,9 @@ public class RallyeServer {
 			listener.registerAddOn(addon);
 		}
 		PushWebsocketApp.setData(RallyeBinder.data); //TODO: Remove this ugliness.
+		AdminWebsocketApp.setData(RallyeBinder.data); //TODO: Remove this ugliness.
 		WebSocketEngine.getEngine().register("/rallye", "/push", PushWebsocketApp.getInstance());
+		WebSocketEngine.getEngine().register("/rallye","/admin", AdminWebsocketApp.getInstance());
 
 		serv.start();  
 		return serv;

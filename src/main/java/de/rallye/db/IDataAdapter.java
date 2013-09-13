@@ -29,6 +29,21 @@ import de.rallye.model.structures.UserInternal;
 public interface IDataAdapter {
 
 	public abstract List<Group> getGroups() throws DataException;
+	
+	/**
+	 * Add a new group
+	 * @param group The group to be added. The included groupID is ignored.
+	 * @return ID of the newly created group.
+	 * @throws DataException
+	 */
+	public abstract int addGroup(Group group) throws DataException;
+
+	/**
+	 * Edit a group
+	 * @param group The group to be edited. It is identified by the ID.
+	 * @throws DataException
+	 */
+	public abstract void editGroup(Group group) throws DataException;
 
 	public abstract List<Task> getTasks() throws DataException;
 

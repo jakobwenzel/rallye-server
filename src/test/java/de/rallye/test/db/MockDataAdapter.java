@@ -201,4 +201,16 @@ public class MockDataAdapter implements IDataAdapter {
 
 	}
 
+	@Override
+	public int addGroup(Group group) throws DataException {
+		fail("Method not implemented");
+		return 0;
+	}
+
+	@Override
+	public void editGroup(Group group) throws DataException {
+		fail("Method not implemented");
+		
+	}
+
 }

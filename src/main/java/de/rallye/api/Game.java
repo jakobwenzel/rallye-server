@@ -39,21 +39,13 @@ public class Game {
 	@KnownUserAuth
 	@Path("nextPosition")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response setUpcomingPosition(@Context SecurityContext sec, int nodeID) {
+	public Response setUpcomingPosition(@Context SecurityContext sec, int nodeID) throws DataException {
 		logger.entry();
 		int groupId = ((RallyePrincipal)sec.getUserPrincipal()).getGroupID();
 		
 		logger.debug(groupId +" goes to "+nodeID);
 		
-		try {
-			gameState.setUpcomingPosition(groupId, nodeID);
-		} catch (DataException e) {
-			logger.error("getChatrooms failed", e);
-			throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
-		} catch (WebAppExcept e) {
-			logger.warn(e);
-			throw e;
-		}
+		gameState.setUpcomingPosition(groupId, nodeID);
 		
 		return logger.exit(Response.ok().build());
 	}

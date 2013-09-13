@@ -40,58 +40,44 @@ public class Tasks {
 	
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Task> getTasks() {
+	public List<Task> getTasks() throws DataException {
 		logger.entry();
-		
-		try {
-			List<Task> res = data.getTasks();
-			return logger.exit(res);
-		} catch (DataException e) {
-			logger.error("getTasks failed", e);
-			throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
-		}
+	
+		List<Task> res = data.getTasks();
+		return logger.exit(res);
 	}
 	
 	@GET
 	@Path("{taskID}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@KnownUserAuth
-	public List<Submission> getSubmissions(@PathParam("taskID") int taskID, @Context SecurityContext sec) {
+	public List<Submission> getSubmissions(@PathParam("taskID") int taskID, @Context SecurityContext sec) throws DataException {
 		logger.entry();
 		
 		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
 		
-		try {
-			List<Submission> res = data.getSubmissions(taskID, p.getGroupID());
-			return logger.exit(res);
-		} catch (DataException e) {
-			logger.error("getSubmissions failed", e);
-			throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
-		}
+		List<Submission> res = data.getSubmissions(taskID, p.getGroupID());
+		return logger.exit(res);
 	}
 	
 	@GET
 	@Path("all/{groupID}")
 	@Produces(MediaType.APPLICATION_JSON)
-	@KnownUserAuth
-	public List<TaskSubmissions> getAllSubmissions(@PathParam("groupID") int groupID, @Context SecurityContext sec) {
+	//TODO Enable auth again!
+	//@KnownUserAuth
+	public List<TaskSubmissions> getAllSubmissions(@PathParam("groupID") int groupID, @Context SecurityContext sec) throws DataException {
 		logger.entry();
 		
-		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
+		//RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
 		
 //		if (!p.hasRightsForTaskScoring()) {
 //			logger.warn("admin {} has no access rights taskScoring", p.getAdminID());
 //			throw new WebApplicationException(Response.Status.FORBIDDEN);
 //		}
-		p.ensureGroupMatches(groupID);
+		//p.ensureGroupMatches(groupID);
 		
-		try {
-			List<TaskSubmissions> res = data.getAllSubmissions(groupID);
-			return logger.exit(res);
-		} catch (DataException e) {
-			logger.error("getAllSubmissions failed", e);
-			throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
-		}
+		List<TaskSubmissions> res = data.getAllSubmissions(groupID);
+		return logger.exit(res);
 	}
 	
 	@PUT
@@ -99,20 +85,12 @@ public class Tasks {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@KnownUserAuth
-	public Submission submit(SimpleSubmission submission, @PathParam("taskID") int taskID, @Context SecurityContext sec) {
+	public Submission submit(SimpleSubmission submission, @PathParam("taskID") int taskID, @Context SecurityContext sec) throws DataException, InputException {
 		logger.entry();
 		
 		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
 		
-		try {
-			Submission res = data.submit(taskID, p.getGroupID(), p.getUserID(), submission);
-			return logger.exit(res);
-		} catch (DataException e) {
-			logger.error("submit failed", e);
-			throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
-		} catch (InputException e) {
-			logger.error("Not a valid taskID", e);
-			throw new WebApplicationException(e, Response.Status.BAD_REQUEST);
-		}
+		Submission res = data.submit(taskID, p.getGroupID(), p.getUserID(), submission);
+		return logger.exit(res);
 	}
 }

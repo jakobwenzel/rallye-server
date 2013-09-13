@@ -52,11 +52,11 @@ public class System {
 	@GET
 	@Path("picture")
 	@Produces("image/jpeg")
-	public File getPicture() {
+	public File getPicture() throws FileNotFoundException {
 		File picture = new File(config.getDataDirectory()+"game/picture.jpg");
 		if (picture.exists())
 			return picture;
-		else throw new WebAppExcept("Picture not found", 404);
+		else throw new FileNotFoundException("Picture not found");
 	}
 	
 	@GET
@@ -77,16 +77,11 @@ public class System {
 	@GET
 	@Path("pushModes")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<PushMode> getPushModes() {
+	public List<PushMode> getPushModes() throws DataException {
 		logger.entry();
-		
-		try {
-			List<PushMode> res = data.getPushModes();
-			return logger.exit(res);
-		} catch (DataException e) {
-			logger.error("getPushModes failed", e);
-			throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
-		}
+	
+		List<PushMode> res = data.getPushModes();
+		return logger.exit(res);
 	}
 	
 	@GET
@@ -138,6 +133,6 @@ public class System {
 		File f = new File(config.getDataDirectory()+"rallye.apk");
 		if (f.exists())
 			return logger.exit(f);
-		else throw new FileNotFoundException("Apk not found");// WebAppExcept("Apk not found", 404);
+		else throw new FileNotFoundException("Apk not found");
 	}
 }

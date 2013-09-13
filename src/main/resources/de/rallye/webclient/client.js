@@ -1,4 +1,3 @@
-
 function findRoot() {
 
 	var loc = document.location.href;
@@ -43,7 +42,7 @@ function setup_error_handler() {
 var root = findRoot(); //Root path to server
 var username = window.localStorage["username"]; //Auth username
 var password = window.localStorage["password"]; //Auth password
-
+var loggedin = false; //We don't know if the stored data is valid yet.
 if (username && password) {
 	console.log(username);
 	console.log(password);
@@ -58,6 +57,8 @@ var authQueue = []; //Queue of requests to make when auth finishes.
 
 var resources = {};
 var resourceQueue = {};
+var resourceRaw = {};
+var resourceRawQueue = {};
 /**
  * Get some unchanging resource, only once per page load and return the cached result for subsequent requests
  */
@@ -67,21 +68,43 @@ function getResource(name, url, callback, transform) {
 		callback(resources[name]);
 		return;
 	}
-	//Currently loading?
+	//Currently loading with same name?
 	if (resourceQueue[name]) {
 		resourceQueue[name].push(callback);
 		return;
 	}
+	//Already loaded url?
+	if (resourceRaw[url]) {
+		res = resourceRaw[url];
+		if (transform)
+			res = transform(res);
+		resources[name] = res;
+		callback(res);
+		return;
+	}
+	//Currently loading url with different name?
+	if (resourceRawQueue[url]) {
+		//Call self when finished.
+		resourceRawQueue[url].push(function() {
+			getResource(name,url,callback,transform);
+		});
+		return;
+	}
+	
+	console.log("resource requested: "+url +" as "+name);
 	//Else start new request.
 	resourceQueue[name] = [callback];
+	resourceRawQueue[url] = [];
 	authajax({
 		'url':url,
 		'dataType': 'json'		
 	},function(res) {
 
+		resourceRaw[url] = res;
+
 		if (transform) res = transform(res);
-		
 		resources[name] = res;
+		
 		queue = resourceQueue[name];
 		delete resourceQueue[name];
 		
@@ -90,7 +113,24 @@ function getResource(name, url, callback, transform) {
 			elem(res);
 		});
 		
+
+		queue = resourceRawQueue[url];
+		delete resourceRawQueue[url];
+		
+		queue.forEach(function(elem) {
+			elem(res);
+		});
+		
 	})
+}
+
+function invalidateResources() {
+	//TODO: What if we are loading resources right now?
+	console.log("Resources invalidated.");
+	resources = {};
+	resourceQueue = {};
+	resourceRaw = {};
+	resourceRawQueue = {};
 }
 
 function getUsers(callback) {
@@ -104,6 +144,12 @@ function getUsers(callback) {
 }
 
 
+function getGroupsAsArray(callback) {
+	getResource("groupsArray",root+"rallye/groups",callback, function (arr) {
+		return arr;
+	});
+}
+
 function getGroups(callback) {
 	getResource("groups",root+"rallye/groups",callback, function (arr) {
 		var res = {};
@@ -114,6 +160,22 @@ function getGroups(callback) {
 	});
 }
 
+
+function getTasksAsArray(callback) {
+	getResource("tasksArray",root+"rallye/tasks",callback, function (arr) {
+		return arr;
+	});
+}
+
+function getTasks(callback) {
+	getResource("tasks",root+"rallye/tasks",callback, function (arr) {
+		var res = {};
+		arr.forEach(function (elem) {
+			res[elem.taskID] = elem;
+		});
+		return res;
+	});
+}
 /**
  * wrapper for jQuery.ajax, adding auth information
  */
@@ -181,7 +243,7 @@ function authajax(obj, done, fail, always) {
 			
 
 	//Is there auth info?
-	if (!username || ! password) {
+	if (!loggedin) {
 		console.log("but no auth specified");
 	
 		//Are we already displaying auth?
@@ -216,12 +278,6 @@ function get_system_info(callback) {
 	}).done(callback);
 }
 
-function get_chatrooms(callback) {
-	authajax({
-		url: root+"rallye/chatrooms",
-		dataType: "json"
-	},callback);
-}
 
 function leadZero(num) {
 	if (num<10)
@@ -249,44 +305,6 @@ function get_nodes(callback) {
 		dataType: "json"
 	}).done(callback);
 }
-var roomID;
-function load_chatroom(id) {
-	
-	authajax({
-		url: root+"rallye/chatrooms/"+id,
-		dataType: "json"
-	},function (res) {getUsers(function(users) {getGroups(function(groups) {
-		roomID = id;
-		history.pushState(null, "", root+"client/?chatroom="+id);
-		
-
-		var template = $('#templ_chat').html();
-		
-		var content = res.map(function(chat) {
-			var user = users[chat.userID];
-			var name = user?user.name:chat.userID;
-			var group = groups[chat.groupID];
-			var groupName = group?group.name:chat.groupID;
-			var picture = null;
-			var pictureBig = null
-			if (chat.pictureID) {
-				picture = root+"rallye/pics/"+chat.pictureID+"/thumb";
-				pictureBig = root+"rallye/pics/"+chat.pictureID+"/std";
-			}
-			var ava = root+"rallye/groups/"+chat.groupID+"/avatar";
-			
-			return { name: name, message: chat.message, picture: picture, pictureBig: pictureBig,
-				avatar: ava, time: formatTime(chat.timestamp), group: groupName};
-		
-		});
-		var html = Mustache.to_html(template,content,partials);
-
-		$("#main").html(html).removeAttr("style");
-	});});});
-	
-	
-	return false;
-}
 
 var urlParams;
 function load_querystring() {
@@ -303,160 +321,4 @@ function load_querystring() {
 function getParameterByName(name) {
     return urlParams[name];
 }
-
-google.maps.visualRefresh = true;
-function load_map() {
-	console.log("loading map");
-    var mapOptions = {
-	center: new google.maps.LatLng(49.87, 8.65),
-    zoom: 14,
-    mapTypeId: google.maps.MapTypeId.ROADMAP
-  };
-  $("#main").css("right","0px").css("height","600px");
-  $("#map-canvas").css("width","100%").css("height","100%");
-  var map = new google.maps.Map(document.getElementById("main"),
-      mapOptions);
-  
-
-	history.pushState(null, "", root+"client/?map");
-  
-  	get_nodes(function(nodes) {
-  		function addNode() {
-  				var node = nodes.pop();
-      		  new google.maps.Marker({
-      		      position: new google.maps.LatLng(node.position.latitude,node.position.longitude),
-      		      map: map,
-      		    animation: google.maps.Animation.DROP,
-      		      title:node.name
-      		  });
-      		  if (nodes.length>0)
-      			  setTimeout(addNode,10);
-  			
-  		}
-  		addNode();
-  	});
-  
-  
-	return false;
-}
-
-function submit_message() {
-	var sendbutton = $("#sendbutton");
-	sendbutton.attr("disabled","disabled");
-	sendbutton.html('<img src="load.gif" />');
-	var message = $("#message").val();
-	
-	authajax({
-		url: root+"rallye/chatrooms/"+roomID,
-		method: "PUT",
-		contentType: "application/json",
-		data: JSON.stringify({
-			"message": message
-		})
-	},function(res){ //Success
-		$("#message").val("");
-	},function() { //Error
-		
-	}, function() { //Always
-		sendbutton.html("Send");
-		sendbutton.removeAttr("disabled");
-		
-	});
-	
-	return false;
-
-}
-
-var socket_open = false;
-var socket;
-function send_socket_login() {
-	socket.send(JSON.stringify({
-		type: 'login',
-		username: username,
-		password: password
-	}));
-}
-function setup_socket() {
-	
-	var url = root.replace("http","ws") + "rallye/push";
-	var status = $("#status");
-	status.text("Socket started at "+url);
-	
-	socket = new WebSocket(url);
-	
-	socket.onopen = function(){
-		socket_open = true;
-		status.text("Socket opened");
-		
-		if (username && password)
-			send_socket_login();
-	}
-	socket.onmessage = function(msg){  
-		var data = JSON.parse(msg.data);
-		console.log(data);
-		status.text("Socket working");
-	    
-	    switch(data.type) {
-	    case "login":
-	    	console.log("login returned: "+data.state);
-	    	if (data.state=="ok") {
-
-	    		//Empty global queue
-	    		queue = authQueue;
-	    		authQueue = [];
-	    		
-	    		//Do the requests
-	    		console.log("requesting stuff from auth queue");
-	    		queue.forEach(make_auth_request);
-	    	}
-	    	if (data.state=="fail") {
-				display_login("Invalid login specified. (socket)");
-	    	} else if (data.state=="error") {
-	    		alert("server is broken.");
-	    	}
-	    	break;
-	    case "newMessage":
-	    	var chat = JSON.parse(data.payload);
-	    	console.log(chat);
-	    	
-	    	if (roomID==chat.chatroomID) {
-	    	
-		    	getUsers(function(users) { getGroups(function(groups) {
-				
-					var user = users[chat.userID];
-					var name = user?user.name:chat.userID;
-					var group = groups[chat.groupID];
-					var groupName = group?group.name:chat.groupID;
-					var picture = null;
-					var pictureBig = null
-					if (chat.pictureID) {
-						picture = root+"rallye/pics/"+chat.pictureID+"/thumb";
-						pictureBig = root+"rallye/pics/"+chat.pictureID+"/std";
-					}
-					var ava = root+"rallye/groups/"+chat.groupID+"/avatar";
-			
-					var content =  { name: name, message: chat.message, picture: picture, pictureBig: pictureBig,
-						avatar: ava, time: formatTime(chat.timestamp), group: groupName};
-				
-				
-		    		var html = Mustache.to_html(partials.line,content);
-		    		$("#chatentries").append(html);
-		    		
-		    	});});
-	    	}
-	    	
-	    	break;
-	    default:
-	    	alert("unrecognized message: "+data.type);
-	    }
-	}   
-	
-	socket.onclose = function() {
-	
-		status.text("Socket closed");
-	}
-	
-}
-
-var chatrooms;
 

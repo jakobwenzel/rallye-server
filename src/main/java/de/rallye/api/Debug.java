@@ -49,25 +49,15 @@ public class Debug {
 	@GET
 	@Path("members/{groupID}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<UserInternal> getMembers(@PathParam("groupID") int groupID) {
-		try {
-			return data.getMembers(groupID);
-		} catch (DataException e) {
-			logger.error("Failed to get members", e);
-			throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
-		}
+	public List<UserInternal> getMembers(@PathParam("groupID") int groupID) throws DataException {
+		return data.getMembers(groupID);
 	}
 
 	@GET
 	@Path("chatroomMembers/{roomID}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<UserInternal> getChatroomMembers(@PathParam("roomID") int roomID) {
-		try {
-			return data.getChatroomMembers(roomID);
-		} catch (DataException e) {
-			logger.error("Failed to get chatroom members", e);
-			throw new WebApplicationException(Status.INTERNAL_SERVER_ERROR);
-		}
+	public List<UserInternal> getChatroomMembers(@PathParam("roomID") int roomID) throws DataException {
+		return data.getChatroomMembers(roomID);
 	}
 
 	@PUT

@@ -28,15 +28,10 @@ public class Users {
 	@GET
 	@KnownUserAuth
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<GroupUser> getMembers() {
+	public List<GroupUser> getMembers() throws DataException {
 		logger.entry();
 		
-		try {
-			List<GroupUser> res = data.getAllUsers();
-			return logger.exit(res);
-		} catch (DataException e) {
-			logger.error("getAllUsers failed", e);
-			throw new WebApplicationException(e, Response.Status.INTERNAL_SERVER_ERROR);
-		}
+		List<GroupUser> res = data.getAllUsers();
+		return logger.exit(res);
 	}
 }
