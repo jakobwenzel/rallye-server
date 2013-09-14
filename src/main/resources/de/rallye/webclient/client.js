@@ -321,4 +321,43 @@ function load_querystring() {
 function getParameterByName(name) {
     return urlParams[name];
 }
+//Sends a notification that expires after a timeout. If timeout = 0 it does not expire
+function sendNotification(image, title, message, timeout, showOnFocus) {
+  // Default values for optional params
+  timeout = (typeof timeout !== 'undefined') ? timeout : 0;
+  showOnFocus = (typeof showOnFocus !== 'undefined') ? showOnFocus : true;
+
+  // Check if the browser window is focused
+  var isWindowFocused = document.querySelector(":focus") === null ? false : true;
+
+  // Check if we should send the notification based on the showOnFocus parameter
+  var shouldNotify = !isWindowFocused || isWindowFocused && showOnFocus;
+
+  if (window.webkitNotifications && shouldNotify) {
+    // Create the notification object
+    var notification = window.webkitNotifications.createNotification(
+      image, title, message
+    );
+
+    // Display the notification
+    notification.show();
+
+    if (timeout > 0) {
+      // Hide the notification after the timeout
+      setTimeout(function(){
+        notification.cancel()
+      }, timeout);
+    }
+  }
+};
+function setupNotifications() {
+	if (window.webkitNotifications.checkPermission() != 0) { // 0 is PERMISSION_ALLOWED
+	    window.webkitNotifications.requestPermission();
+	}
+	return false;
+}
+//Provide file both as mp3 and ogg for different browsers, specify it here without file extension.
+function playSound(filename){   
+    document.getElementById("sound").innerHTML='<audio autoplay="autoplay"><source src="' + filename + '.mp3" type="audio/mpeg" /><source src="' + filename + '.ogg" type="audio/ogg" /><embed hidden="true" autostart="true" loop="false" src="' + filename +'.mp3" /></audio>';
+}
 

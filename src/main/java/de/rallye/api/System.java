@@ -12,7 +12,6 @@ import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
@@ -25,7 +24,6 @@ import de.rallye.annotations.KnownUserAuth;
 import de.rallye.config.RallyeConfig;
 import de.rallye.db.IDataAdapter;
 import de.rallye.exceptions.DataException;
-import de.rallye.exceptions.WebAppExcept;
 import de.rallye.model.structures.PushMode;
 import de.rallye.model.structures.ServerInfo;
 

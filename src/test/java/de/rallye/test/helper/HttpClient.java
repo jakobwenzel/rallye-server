@@ -15,7 +15,6 @@ public class HttpClient {
 	static DefaultHttpClient httpclient = new DefaultHttpClient();
 
 	//TODO Add auth
-	@SuppressWarnings("unchecked")
 	public static HttpResponse apiCall(String url, int expectedStatusCode)
 			throws IOException {
 		HttpGet httpget = new HttpGet("http://localhost:10111/" + url);

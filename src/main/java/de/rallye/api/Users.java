@@ -6,14 +6,12 @@ import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import de.rallye.annotations.KnownUserAuth;
+import de.rallye.annotations.KnownUserOrAdminAuth;
 import de.rallye.db.IDataAdapter;
 import de.rallye.exceptions.DataException;
 import de.rallye.model.structures.GroupUser;
@@ -26,7 +24,7 @@ public class Users {
 	@Inject	IDataAdapter data;
 	
 	@GET
-	@KnownUserAuth
+	@KnownUserOrAdminAuth
 	@Produces(MediaType.APPLICATION_JSON)
 	public List<GroupUser> getMembers() throws DataException {
 		logger.entry();

@@ -1,11 +1,14 @@
 package de.rallye.model.structures;
 
-import de.rallye.db.DataAdapter;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.inject.Inject;
+import javax.inject.Singleton;
+
 import org.codehaus.jackson.map.annotate.JsonSerialize;
+import org.jvnet.hk2.annotations.Service;
 
 import de.rallye.db.IDataAdapter;
 import de.rallye.exceptions.DataException;
@@ -13,14 +16,6 @@ import de.rallye.exceptions.EdgeNotFoundException;
 import de.rallye.exceptions.NodeNotFoundException;
 import de.rallye.exceptions.NodeOccupiedException;
 import de.rallye.mapper.GroupPositionsSerializer;
-import org.codehaus.jackson.map.annotate.JsonSerialize;
-import org.jvnet.hk2.annotations.Service;
-
-import javax.inject.Inject;
-import javax.inject.Singleton;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 @Singleton
 @Service

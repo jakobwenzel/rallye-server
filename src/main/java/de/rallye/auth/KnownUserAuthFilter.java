@@ -14,7 +14,6 @@ import de.rallye.db.IDataAdapter;
 import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.InputException;
 import de.rallye.exceptions.UnauthorizedException;
-import de.rallye.exceptions.WebAppExcept;
 
 @KnownUserAuth
 @Provider

@@ -20,6 +20,26 @@ function send_socket_login() {
 		password: password
 	}));
 }
+
+function new_submission(sub) {
+	console.log(sub);
+	getUsers(function(users){getGroups(function(groups){getTasks(function(tasks){
+		var user = users[sub.userID];
+		var task = tasks[sub.taskID];
+		var group = groups[sub.groupID];
+		
+		var message = "von "+group.name+" ("+user.name+") in "+task.name;
+
+		console.log(message);
+		playSound("/client/sound");
+		sendNotification("/client/new_submission.png","Neue Abgabe",message,8000);
+		
+	})})});
+}
+function test_submission() {
+	new_submission({"type":"submission","data":{"submitType":4,"intSubmission":0,"textSubmission":"lalala","submissionID":9,"score":null},"groupID":3,"taskID":2,"userID":286} );
+	return false;
+}
 function setup_socket() {
 	
 	var url = root.replace("http","ws") + "rallye/admin";
@@ -59,6 +79,9 @@ function setup_socket() {
 	    	} else if (data.state=="error") {
 	    		alert("server is broken.");
 	    	}
+	    	break;
+	    case "submission":
+	    	new_submission(data);
 	    	break;
 	    //Other types here
 	    default:
@@ -485,7 +508,7 @@ Picture not implemented<br>
 	{{^groupID}}
 
 	<tr>
-		<td >Avatar:</td>
+		<td>Avatar:</td>
 		<td>
 			<input type="file" onchange="select_upload()">
 		</td>
@@ -510,11 +533,16 @@ Picture not implemented<br>
 </div>
 <div id="left">
 <a href="#" onclick="return edit_group();">Gruppen bearbeiten</a><br>
+<a href="#" onclick="return list_unrated();">Noch nicht bewertete Abgaben</a><br>
 <a href="#" onclick="return list_by_group();">Abgaben nach Gruppe</a><br>
 <a href="#" onclick="return list_by_task();">Abgaben nach Aufgabe</a>
 </div>
 <div id="main">
 </div>
 <div id="logout"><a href="#" onclick="return kill_auth();" >Logout</a></div>
+<a href="#" onclick="return test_submission();">Test submission</a><br>
+<a href="#" onclick="return setupNotifications();">Setup notifications</a>
+
+<div id="sound"></div>
 </body>
 </html>

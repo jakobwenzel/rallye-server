@@ -439,7 +439,6 @@ public class DataAdapter implements IDataAdapter {
 	 * @see de.rallye.db.IDataAdapter#login(int, de.rallye.model.structures.LoginInfo)
 	 */
 	@Override
-	@SuppressWarnings("resource")
 	public UserAuth login(int groupID, LoginInfo info) throws DataException, InputException {
 		invalidateUsers();
 		Connection con = null;

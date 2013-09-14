@@ -57,42 +57,34 @@ public class WebAppExcept extends WebApplicationException {
 
 	public WebAppExcept() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public WebAppExcept(int status) {
 		super(status);
-		// TODO Auto-generated constructor stub
 	}
 
 	public WebAppExcept(Response response) {
 		super(response);
-		// TODO Auto-generated constructor stub
 	}
 
 	public WebAppExcept(Status status) {
 		super(status);
-		// TODO Auto-generated constructor stub
 	}
 
 	public WebAppExcept(Throwable cause, int status) {
 		super(cause, status);
-		// TODO Auto-generated constructor stub
 	}
 
 	public WebAppExcept(Throwable cause, Response response) {
 		super(cause, response);
-		// TODO Auto-generated constructor stub
 	}
 
 	public WebAppExcept(Throwable cause, Status status) {
 		super(cause, status);
-		// TODO Auto-generated constructor stub
 	}
 
 	public WebAppExcept(Throwable cause) {
 		super(cause);
-		// TODO Auto-generated constructor stub
 	}
 	
 	

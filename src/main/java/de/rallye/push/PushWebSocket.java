@@ -8,8 +8,6 @@ import org.glassfish.grizzly.websockets.DefaultWebSocket;
 import org.glassfish.grizzly.websockets.ProtocolHandler;
 import org.glassfish.grizzly.websockets.WebSocketListener;
 
-import de.rallye.model.structures.User;
-
 
 /**
  * Custom WebSocket that saves a reference to the user

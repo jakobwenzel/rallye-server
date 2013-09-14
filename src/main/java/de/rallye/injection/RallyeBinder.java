@@ -13,7 +13,6 @@ import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
 import de.rallye.config.GitRepositoryState;
 import de.rallye.config.RallyeConfig;
-import de.rallye.db.DataAdapter;
 import de.rallye.db.IDataAdapter;
 import de.rallye.images.ImageRepository;
 import de.rallye.model.structures.ChatPictureLink;

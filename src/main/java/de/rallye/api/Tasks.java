@@ -9,15 +9,14 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import de.rallye.admin.AdminWebsocketApp;
 import de.rallye.annotations.KnownUserAuth;
 import de.rallye.auth.RallyePrincipal;
 import de.rallye.db.IDataAdapter;
@@ -63,18 +62,19 @@ public class Tasks {
 	@GET
 	@Path("all/{groupID}")
 	@Produces(MediaType.APPLICATION_JSON)
-	//TODO Enable auth again!
-	//@KnownUserAuth
+	//@KnownUserOrAdminAuth
 	public List<TaskSubmissions> getAllSubmissions(@PathParam("groupID") int groupID, @Context SecurityContext sec) throws DataException {
 		logger.entry();
 		
-		//RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
+		if (sec.getUserPrincipal() instanceof RallyePrincipal) {
+			RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
+			p.ensureGroupMatches(groupID);
+		} //else we are admin and don't need to check group match.
 		
 //		if (!p.hasRightsForTaskScoring()) {
 //			logger.warn("admin {} has no access rights taskScoring", p.getAdminID());
 //			throw new WebApplicationException(Response.Status.FORBIDDEN);
 //		}
-		//p.ensureGroupMatches(groupID);
 		
 		List<TaskSubmissions> res = data.getAllSubmissions(groupID);
 		return logger.exit(res);
@@ -91,6 +91,7 @@ public class Tasks {
 		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
 		
 		Submission res = data.submit(taskID, p.getGroupID(), p.getUserID(), submission);
+		AdminWebsocketApp.getInstance().newSubmission(p.getGroupID(),p.getUserID(),taskID,res);
 		return logger.exit(res);
 	}
 }

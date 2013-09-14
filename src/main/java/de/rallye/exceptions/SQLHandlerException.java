@@ -18,7 +18,6 @@ public class SQLHandlerException extends SQLException {
 	 * 
 	 */
 	public SQLHandlerException() {
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -26,7 +25,6 @@ public class SQLHandlerException extends SQLException {
 	 */
 	public SQLHandlerException(String arg0) {
 		super(arg0);
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -34,7 +32,6 @@ public class SQLHandlerException extends SQLException {
 	 */
 	public SQLHandlerException(Throwable arg0) {
 		super(arg0);
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -43,7 +40,6 @@ public class SQLHandlerException extends SQLException {
 	 */
 	public SQLHandlerException(String arg0, String arg1) {
 		super(arg0, arg1);
-		// TODO Auto-generated constructor stub
 	}
 
 	/**

@@ -5,13 +5,11 @@
 package de.rallye.test.helper;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 
 import java.io.InputStream;
 
 import de.rallye.RallyeServer;
 import de.rallye.config.RallyeConfig;
-import de.rallye.exceptions.DataException;
 import de.rallye.injection.RallyeBinder;
 import de.rallye.test.db.MockDataAdapter;
 /**
