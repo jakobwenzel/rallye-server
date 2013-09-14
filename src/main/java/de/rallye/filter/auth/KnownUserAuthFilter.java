@@ -1,5 +1,7 @@
-package de.rallye.auth;
+package de.rallye.filter.auth;
 
+import javax.annotation.Priority;
+import javax.ws.rs.Priorities;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Response;
@@ -17,6 +19,7 @@ import de.rallye.exceptions.UnauthorizedException;
 
 @KnownUserAuth
 @Provider
+@Priority(Priorities.AUTHENTICATION)
 public class KnownUserAuthFilter extends BaseAuthFilter implements IManualAuthentication<RallyePrincipal> {
 	private static Logger logger = LogManager.getLogger(KnownUserAuthFilter.class);
 	

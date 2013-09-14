@@ -27,8 +27,8 @@ import org.glassfish.grizzly.websockets.WebSocket;
 import org.glassfish.grizzly.websockets.WebSocketApplication;
 import org.glassfish.grizzly.websockets.WebSocketListener;
 
-import de.rallye.auth.AdminAuthFilter;
-import de.rallye.auth.AdminPrincipal;
+import de.rallye.filter.auth.AdminAuthFilter;
+import de.rallye.filter.auth.AdminPrincipal;
 import de.rallye.db.IDataAdapter;
 import de.rallye.model.structures.Submission;
 import de.rallye.push.PushWebSocket;

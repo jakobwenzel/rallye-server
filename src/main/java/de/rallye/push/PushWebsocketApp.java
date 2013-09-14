@@ -25,8 +25,8 @@ import org.glassfish.grizzly.websockets.WebSocket;
 import org.glassfish.grizzly.websockets.WebSocketApplication;
 import org.glassfish.grizzly.websockets.WebSocketListener;
 
-import de.rallye.auth.KnownUserAuthFilter;
-import de.rallye.auth.RallyePrincipal;
+import de.rallye.filter.auth.KnownUserAuthFilter;
+import de.rallye.filter.auth.RallyePrincipal;
 import de.rallye.db.IDataAdapter;
 import de.rallye.model.structures.UserInternal;
 

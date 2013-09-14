@@ -52,7 +52,6 @@ public class Map {
 	public MapConfig getConfig() {
 		logger.entry();
 
-		//TODO: from GameConfig?
 		MapConfig res = config.getMapConfig();
 		return logger.exit(res);
 	}

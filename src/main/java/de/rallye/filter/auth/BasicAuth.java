@@ -1,4 +1,4 @@
-package de.rallye.auth;
+package de.rallye.filter.auth;
 
 import javax.xml.bind.DatatypeConverter;
 

@@ -15,6 +15,7 @@ import org.glassfish.grizzly.http.server.ServerConfiguration;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.grizzly.websockets.WebSocketAddOn;
 import org.glassfish.grizzly.websockets.WebSocketEngine;
+import org.glassfish.jersey.CommonProperties;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpContainer;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
@@ -22,9 +23,10 @@ import org.glassfish.jersey.server.ContainerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
 
 import de.rallye.admin.AdminWebsocketApp;
-import de.rallye.auth.EnsureMimeType;
+import de.rallye.filter.auth.EnsureMimeType;
 import de.rallye.injection.RallyeBinder;
 import de.rallye.push.PushWebsocketApp;
+import org.glassfish.jersey.server.ServerProperties;
 
 public class RallyeServer {
 	
@@ -54,7 +56,7 @@ public class RallyeServer {
 	@SuppressWarnings("unchecked")
 	private HttpServer startServer(URI uri) throws IOException {
 		ResourceConfig rc = new ResourceConfig();
-		rc.packages("de.rallye.api", "de.rallye.annotations", "de.rallye.auth","de.rallye.exceptions.mappers");
+		rc.packages("de.rallye.api", "de.rallye.filter", "de.rallye.filter.auth","de.rallye.exceptions.mappers");
 		rc.register(JacksonFeature.class);
 		rc.register(EnsureMimeType.class);
 		rc.register(new RallyeBinder());     
@@ -95,9 +97,11 @@ public class RallyeServer {
 		}
 
 		// insert
+//		listener.
+
 		CompressionConfig cg = listener.getCompressionConfig();
-		cg.setCompressionMode(CompressionConfig.CompressionMode.OFF);
-		cg.setCompressableMimeTypes("text","application/json");
+		cg.setCompressionMode(CompressionConfig.CompressionMode.ON);
+//		cg.setCompressableMimeTypes("text","application/json");
 		// end insert
 
 		server.addListener(listener);

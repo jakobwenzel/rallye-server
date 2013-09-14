@@ -19,7 +19,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import de.rallye.annotations.KnownUserAuth;
-import de.rallye.auth.RallyePrincipal;
+import de.rallye.filter.auth.RallyePrincipal;
 import de.rallye.db.IDataAdapter;
 import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.InputException;

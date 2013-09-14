@@ -4,8 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.rallye.auth.GroupPrincipal;
-import de.rallye.auth.RallyePrincipal;
+import de.rallye.filter.auth.GroupPrincipal;
+import de.rallye.filter.auth.RallyePrincipal;
 import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.InputException;
 import de.rallye.exceptions.UnauthorizedException;

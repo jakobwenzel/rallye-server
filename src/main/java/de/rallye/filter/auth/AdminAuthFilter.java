@@ -1,8 +1,10 @@
-package de.rallye.auth;
+package de.rallye.filter.auth;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Priority;
+import javax.ws.rs.Priorities;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.Response;
@@ -18,6 +20,7 @@ import de.rallye.exceptions.UnauthorizedException;
 
 @AdminAuth
 @Provider
+@Priority(Priorities.AUTHENTICATION)
 public class AdminAuthFilter extends BaseAuthFilter {
 	
 	private final Logger logger = LogManager.getLogger(AdminAuthFilter.class);

@@ -1,8 +1,8 @@
 package de.rallye.db;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
-import de.rallye.auth.GroupPrincipal;
-import de.rallye.auth.RallyePrincipal;
+import de.rallye.filter.auth.GroupPrincipal;
+import de.rallye.filter.auth.RallyePrincipal;
 import de.rallye.config.RallyeConfig;
 import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.InputException;

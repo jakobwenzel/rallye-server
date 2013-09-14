@@ -1,4 +1,4 @@
-package de.rallye.auth;
+package de.rallye.filter.auth;
 
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
