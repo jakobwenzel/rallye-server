@@ -5,9 +5,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
+import java.net.Authenticator;
+import java.net.HttpURLConnection;
+import java.net.PasswordAuthentication;
+import java.net.URL;
 import java.util.List;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.junit.BeforeClass;
@@ -63,10 +68,41 @@ public class GroupsTest {
 	public void testSetPushConfig() {
 		fail("Not yet implemented");
 	}
+	
 
-	@Test @Ignore
-	public void testLogin() {
-		fail("Not yet implemented");
+	static DefaultHttpClient httpclient = new DefaultHttpClient();
+
+	@Test
+	public void testLogin() throws IOException {
+
+
+		Authenticator.setDefault(new Authenticator() {
+			@Override
+			protected PasswordAuthentication getPasswordAuthentication() {
+				String realm = getRequestingPrompt();
+				assertEquals("Should be right Realm","RallyeNewUser",realm);
+				return new PasswordAuthentication(String.valueOf(1), "test".toCharArray());
+			}
+		});
+		String loginData = "{\"pushID\":\"42\",\"uniqueID\":\"e858af70351adc2f\",\"pushMode\":\"gcm\",\"name\":\"test\"}";
+		URL url = new URL("http://localhost:10111/rallye/groups/1");
+		HttpURLConnection conn =  (HttpURLConnection) url.openConnection();
+		
+
+		conn.setDoOutput(true);
+		conn.addRequestProperty("Content-Type", "application/json");
+//		conn.setFixedLengthStreamingMode(post.length);
+		conn.getOutputStream().write(loginData.getBytes());
+		
+
+		int code = conn.getResponseCode();
+		String msg = conn.getResponseMessage();
+		
+		Authenticator.setDefault(null);
+		
+		assertEquals("Code should be 200",200,code);
+		
+		
 	}
 
 	@Test @Ignore
