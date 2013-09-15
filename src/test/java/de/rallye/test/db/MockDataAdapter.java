@@ -1,18 +1,24 @@
 package de.rallye.test.db;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.rallye.filter.auth.GroupPrincipal;
-import de.rallye.filter.auth.RallyePrincipal;
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
+
 import de.rallye.db.IDataAdapter;
 import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.InputException;
 import de.rallye.exceptions.UnauthorizedException;
+import de.rallye.filter.auth.GroupPrincipal;
+import de.rallye.filter.auth.RallyePrincipal;
 import de.rallye.model.structures.ChatEntry;
 import de.rallye.model.structures.Chatroom;
 import de.rallye.model.structures.Edge;
@@ -25,6 +31,7 @@ import de.rallye.model.structures.PushMode;
 import de.rallye.model.structures.SimpleChatEntry;
 import de.rallye.model.structures.SimpleSubmission;
 import de.rallye.model.structures.Submission;
+import de.rallye.model.structures.SubmissionScore;
 import de.rallye.model.structures.Task;
 import de.rallye.model.structures.TaskSubmissions;
 import de.rallye.model.structures.UserAuth;
@@ -98,15 +105,33 @@ public class MockDataAdapter implements IDataAdapter {
 	@Override
 	public GroupPrincipal getNewUserAuthorization(int groupID, String password)
 			throws DataException, UnauthorizedException {
-		fail("Method not implemented");
-		return null;
+		if (groupID==1 && password.equals("test")) {
+			return new GroupPrincipal(groupID, "test");
+		} else throw new UnauthorizedException();
 	}
 
+	public static String validLogin = "{\"pushID\":\"42\",\"uniqueID\":\"e858af70351adc2f\",\"pushMode\":\"gcm\",\"name\":\"test\"}"; 
 	@Override
 	public UserAuth login(int groupID, LoginInfo info) throws DataException,
 			InputException {
-		fail("Method not implemented");
-		return null;
+		ObjectMapper mapper = new ObjectMapper();
+		LoginInfo ref;
+		try {
+			ref = mapper.readValue(validLogin, LoginInfo.class);
+			assertEquals("Login info should match",ref,info);
+			
+			
+		} catch (JsonParseException e) {
+			e.printStackTrace();
+			fail("Exception: "+e);
+		} catch (JsonMappingException e) {
+			e.printStackTrace();
+			fail("Exception: "+e);
+		} catch (IOException e) {
+			e.printStackTrace();
+			fail("Exception: "+e);
+		}
+		return new UserAuth(1337, "133742");
 	}
 
 	@Override
@@ -211,6 +236,11 @@ public class MockDataAdapter implements IDataAdapter {
 	public void editGroup(Group group) throws DataException {
 		fail("Method not implemented");
 		
+	}
+
+	@Override
+	public void scoreSubmissions(SubmissionScore[] scores) throws DataException {
+		fail("Method not implemented");
 	}
 
 }

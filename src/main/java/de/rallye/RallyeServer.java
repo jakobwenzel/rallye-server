@@ -9,13 +9,13 @@ import javax.ws.rs.core.UriBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.glassfish.grizzly.http.CompressionConfig;
+//import org.glassfish.grizzly.http.CompressionConfig;
 import org.glassfish.grizzly.http.server.HttpServer;
 import org.glassfish.grizzly.http.server.NetworkListener;
 import org.glassfish.grizzly.http.server.ServerConfiguration;
 import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.grizzly.websockets.WebSocketAddOn;
 import org.glassfish.grizzly.websockets.WebSocketEngine;
-import org.glassfish.jersey.CommonProperties;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpContainer;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
@@ -26,7 +26,6 @@ import de.rallye.admin.AdminWebsocketApp;
 import de.rallye.filter.auth.EnsureMimeType;
 import de.rallye.injection.RallyeBinder;
 import de.rallye.push.PushWebsocketApp;
-import org.glassfish.jersey.server.ServerProperties;
 
 public class RallyeServer {
 	
@@ -129,7 +128,7 @@ public class RallyeServer {
 	public void stopServer() {
 		logger.info("Stopping Grizzly server");
 		
-		this.httpServer.shutdown();
+		//this.httpServer.shutdown();
 	}
 
 }

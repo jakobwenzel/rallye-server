@@ -6,8 +6,6 @@
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
 <script type="text/javascript" src="/client/mustache.js"></script>
 <script type="text/javascript" src="/client/qrcode.min.js"></script>
-<script type="text/javascript"
-    src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false">
 </script>
 <script type="text/javascript" src="/client/client.js"></script>
 <script type="text/javascript">
@@ -289,7 +287,18 @@ function list_by_group(id,restore) {
 								isPicture: sub.submitType & 2,
 								isText: sub.submitType & 4,
 								isNumber: sub.submitType & 8,
-								isBarcode: sub.submitType & 16
+								isBarcode: sub.submitType & 16,
+							}
+							if (res.isPicture) {
+								res.picture = root+"rallye/pics/"+sub.intSubmission+"/mini";
+								res.pictureBig = root+"rallye/pics/"+sub.intSubmission+"/std";
+							}
+							if (sub.score) {
+								var parts = sub.score.split("+");
+								if (parts.length==2) {
+									res.points = parts[0];
+									res.bonus = parts[1];
+								}
 							}
 						    for (var attrname in sub) { res[attrname] = sub[attrname]; }
 							return res;							
@@ -303,7 +312,8 @@ function list_by_group(id,restore) {
 					description: group.description,
 					groupID: group.groupID,
 					avatar: root+"rallye/groups/"+group.groupID+"/avatar",
-					tasks: submissionsDisplay
+					tasks: submissionsDisplay,
+					hasTasks: submissionsDisplay.length>0
 				}
 				var template = $('#templ_group_detail').html();
 				var html = Mustache.to_html(template,groupDisplay,partials);
@@ -327,6 +337,65 @@ function list_by_task(id,restore) {
 
 function select_upload() {
 	$('#ava_upload').attr("checked","checked");
+}
+
+function isNormalInteger(str) {
+    return /^(0|[1-9]\d*)$/.test(str);
+}
+
+function save_score() {
+	console.log("saving score");
+	var scores = {}
+	$('.points').each(function() {
+		var id = $(this).attr("subId");
+		scores[id] = { points: $(this).val() };
+	});
+	$('.bonus').each(function() {
+		var id = $(this).attr("subId");
+		if (!scores[id])
+			throw "Bonus without score at "+id;
+		scores[id].bonus = $(this).val();
+	});
+	var res = [];
+	$.each(scores,function(id) {
+		console.log(id);
+		console.log(this);
+		var data = "";
+		if (this.points==="" && this.bonus==="") {
+			console.log("no data");
+		} else {
+			var points, bonus;
+			if (this.points=="") {
+				points = "0";
+			} else if (isNormalInteger(this.points)) {
+				points = this.points;
+			} else {
+				alert("Invalid data: "+this.points);
+				throw "Invalid data";
+			}
+			if (this.bonus=="") {
+				bonus = "0";
+			} else if (isNormalInteger(this.bonus)) {
+				bonus = this.bonus;
+			} else {
+				alert("Invalid data: "+this.bonus);
+				throw "Invalid data";
+			}
+			data = points+"+"+bonus;
+		}
+		res.push({submissionID:parseInt(id),score:data});
+	});
+	console.log(res);
+	authajax({
+		url: root+"rallye/tasks/score",
+		method: "POST",
+		contentType: "application/json",
+		data: JSON.stringify(res)
+	},function(res){ //Success
+		alert("successfully saved.");
+	},function() { //Error
+		alert("could not save scores.");
+	});
 }
 
 $(function () {
@@ -365,8 +434,8 @@ $(function () {
 
 
 	get_system_info(function(res) {
-		$("#servername").html("<b>"+Mustache.escape(res.name)+"</b><br>"+Mustache.escape(res.description));
-		document.title=res.name;
+		$("#servername").html("<b>"+Mustache.escape(res.name)+"</b><br>"+Mustache.escape(res.description)+"<br>"+Mustache.escape(res.build));
+		document.title="Admin on "+res.name;
 	});
 	
 	
@@ -431,17 +500,19 @@ Location not implemented<br>
 Number not implemented<br>
 {{/isNumber}}
 {{#isPicture}}
-Picture not implemented<br>
+<a href="{{pictureBig}}" target="_new"><img src="{{picture}}" /></a><br>
 {{/isPicture}}
 {{#isText}}
-"{{textSubmission}}"
+"{{textSubmission}}"<br>
 {{/isText}}
+Bewertung (id={{submissionID}}): <input type="text" class="score points" value="{{points}}"  subId="{{submissionID}}" />+<input type="text" class="score bonus" value="{{bonus}}" subId="{{submissionID}}">
 </td></tr>
 </script>
 <script id="templ_task" type="text/template">
 <tr class="thumb"> <td>
 <b>{{task.name}}</b><br>
-{{task.description}}
+{{task.description}}<br>
+<i>{{task.points}}</i>
 </td></tr>
 {{#submissions}}{{>submission}}{{/submissions}}
 </script>
@@ -453,10 +524,13 @@ Picture not implemented<br>
 	<td><a href="#" onclick="return edit_group({{groupID}});">Gruppe bearbeiten</a></td>
 	</tr></table>
 
+	{{#hasTasks}}
 	<table>
 	{{#tasks}}{{>task}}{{/tasks}}
-	{{^tasks}}Noch keine Abgaben!{{/tasks}}
 	</table>	
+	<input type="button" value="Bewertungen speichern" onclick="save_score();"/>
+	{{/hasTasks}}
+	{{^hasTasks}}Noch keine Abgaben!{{/hasTasks}}
 </script>
 
 
@@ -533,7 +607,7 @@ Picture not implemented<br>
 </div>
 <div id="left">
 <a href="#" onclick="return edit_group();">Gruppen bearbeiten</a><br>
-<a href="#" onclick="return list_unrated();">Noch nicht bewertete Abgaben</a><br>
+<a href="#" onclick="return false;">Unbewertete Abgaben</a><br>
 <a href="#" onclick="return list_by_group();">Abgaben nach Gruppe</a><br>
 <a href="#" onclick="return list_by_task();">Abgaben nach Aufgabe</a>
 </div>

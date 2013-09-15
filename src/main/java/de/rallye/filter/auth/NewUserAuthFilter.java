@@ -30,6 +30,7 @@ public class NewUserAuthFilter extends BaseAuthFilter {
 	@Override
 	protected GroupPrincipal checkAuthentication(ContainerRequestContext containerRequest, String[] login) {
 		// Checking for User
+		logger.entry();
         GroupPrincipal principal;
         int groupID;
 		try {
@@ -37,11 +38,16 @@ public class NewUserAuthFilter extends BaseAuthFilter {
 				throw new InputException("Login does not contain username and password");
 			
 			groupID = Integer.parseInt(login[0]);
+			logger.info("Got group id: "+groupID);
 			
 			principal = data.getNewUserAuthorization(groupID, login[1]);
+			logger.info("Got principal {}",principal);
 		} catch (DataException e) {
 			logger.error("Database Error", e);
 			throw new WebApplicationException(e);
+		} catch (NumberFormatException e) {
+			logger.info(e);
+			throw new WebApplicationException(Status.UNAUTHORIZED);
 		} catch (InputException e) {
 			logger.error("Invalid login", e);
 			throw new WebApplicationException(e);

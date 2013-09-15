@@ -1,6 +1,7 @@
 package de.rallye.db;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+
 import de.rallye.filter.auth.GroupPrincipal;
 import de.rallye.filter.auth.RallyePrincipal;
 import de.rallye.config.RallyeConfig;
@@ -1122,5 +1123,32 @@ public class DataAdapter implements IDataAdapter {
 			close(con, st, rs);
 		}
 		
+	}
+
+	@Override
+	public void scoreSubmissions(SubmissionScore[] scores) throws DataException {
+		Connection con = null;
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		
+		try {
+			
+			con = dataSource.getConnection();
+			
+			
+			st = con.prepareStatement("UPDATE "+ Ry.Submissions.TABLE +" SET "+ Ry.Submissions.SCORE + "=? WHERE "+Ry.Submissions.ID +"=?");
+
+			for (SubmissionScore score : scores) {
+				st.setString(1, score.score);
+				st.setInt(2, score.submissionID);
+				
+				st.execute();
+			}
+			
+		} catch (SQLException e) {
+			throw new DataException(e);
+		} finally {
+			close(con, st, rs);
+		}
 	}
 }

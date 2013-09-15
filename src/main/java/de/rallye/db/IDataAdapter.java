@@ -21,6 +21,7 @@ import de.rallye.model.structures.PushMode;
 import de.rallye.model.structures.SimpleChatEntry;
 import de.rallye.model.structures.SimpleSubmission;
 import de.rallye.model.structures.Submission;
+import de.rallye.model.structures.SubmissionScore;
 import de.rallye.model.structures.Task;
 import de.rallye.model.structures.TaskSubmissions;
 import de.rallye.model.structures.UserAuth;
@@ -108,5 +109,7 @@ public interface IDataAdapter {
 
 	public abstract void updatePushIds(HashMap<String, String> changes)
 			throws DataException;
+
+	public abstract void scoreSubmissions(SubmissionScore[] scores) throws DataException;
 
 }

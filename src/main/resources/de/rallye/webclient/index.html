@@ -226,7 +226,7 @@ $(function () {
 
 
 	get_system_info(function(res) {
-		$("#servername").html("<b>"+Mustache.escape(res.name)+"</b><br>"+Mustache.escape(res.description));
+		$("#servername").html("<b>"+Mustache.escape(res.name)+"</b><br>"+Mustache.escape(res.description)+"<br>"+Mustache.escape(res.build));
 		document.title=res.name;
 	});
 

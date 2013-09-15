@@ -5,12 +5,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.Authenticator;
 import java.net.HttpURLConnection;
 import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -84,15 +86,15 @@ public class GroupsTest {
 				return new PasswordAuthentication(String.valueOf(1), "test".toCharArray());
 			}
 		});
-		String loginData = "{\"pushID\":\"42\",\"uniqueID\":\"e858af70351adc2f\",\"pushMode\":\"gcm\",\"name\":\"test\"}";
-		URL url = new URL("http://localhost:10111/rallye/groups/1");
+		URL url = new URL("http://127.0.0.1:10111/rallye/groups/1");
 		HttpURLConnection conn =  (HttpURLConnection) url.openConnection();
+		conn.setRequestMethod("PUT");
 		
 
 		conn.setDoOutput(true);
 		conn.addRequestProperty("Content-Type", "application/json");
 //		conn.setFixedLengthStreamingMode(post.length);
-		conn.getOutputStream().write(loginData.getBytes());
+		conn.getOutputStream().write(MockDataAdapter.validLogin.getBytes());
 		
 
 		int code = conn.getResponseCode();
@@ -100,7 +102,15 @@ public class GroupsTest {
 		
 		Authenticator.setDefault(null);
 		
+		try {
 		assertEquals("Code should be 200",200,code);
+		} catch (AssertionError e) {
+			System.err.println("This is the content:");
+			List<String> contents = IOUtils.readLines((InputStream)conn.getContent());
+			for (String line: contents) 
+				System.err.println(line);
+			throw e;
+		}
 		
 		
 	}

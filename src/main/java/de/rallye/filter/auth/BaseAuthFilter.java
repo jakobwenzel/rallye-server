@@ -27,11 +27,14 @@ public abstract class BaseAuthFilter implements ContainerRequestFilter {
     @Override
     public void filter(ContainerRequestContext containerRequest) throws WebApplicationException {
     	logger.entry();
+    	logger.info("We are a {}",this.getClass().getName());
+    	logger.info(containerRequest.getUriInfo().getRequestUri());
 
         String auth = containerRequest.getHeaderString("authorization");
  
         // No Basic Auth was provided
         if(auth == null){
+        	logger.info("No auth at all");
             throw new WebApplicationException(getUnauthorized());
         }
  
@@ -39,6 +42,7 @@ public abstract class BaseAuthFilter implements ContainerRequestFilter {
  
         // Not matching Basic auth conventions:  user:password
         if(login == null || login.length != 2){
+        	logger.info("Auth invalid");
         	throw new WebApplicationException(getUnauthorized());
         }
         
