@@ -15,6 +15,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
+import de.rallye.model.structures.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -24,11 +25,6 @@ import de.rallye.db.IDataAdapter;
 import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.InputException;
 import de.rallye.exceptions.UnauthorizedException;
-import de.rallye.model.structures.ChatEntry;
-import de.rallye.model.structures.ChatPictureLink;
-import de.rallye.model.structures.Chatroom;
-import de.rallye.model.structures.SimpleChatWithPictureHash;
-import de.rallye.model.structures.User;
 import de.rallye.push.PushService;
 
 @Path("rallye/chatrooms")
@@ -109,8 +105,8 @@ public class Chatrooms {
 			
 			Integer picID = link.getPictureID();
 			if (picID != null) {
-				chat.pictureID = picID;
-				res = data.addChat(chat, roomID, groupID, userID);
+				SimpleChatEntry completeChat = new SimpleChatEntry(chat.message, picID);
+				res = data.addChat(completeChat, roomID, groupID, userID);
 			} else {
 				res = data.addChat(chat, roomID, groupID, userID);
 				link.setChat(res.chatID);

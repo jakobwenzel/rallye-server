@@ -321,7 +321,7 @@ public class DataAdapter implements IDataAdapter {
 			nodes = new HashMap<Integer,Node>();
 			
 			while (rs.next()) {
-				nodes.put(rs.getInt(1),new Node(rs.getInt(1), rs.getString(2), rs.getDouble(3), rs.getDouble(4), rs.getString(5)));
+				nodes.put(rs.getInt(1),new Node(rs.getInt(1), rs.getString(2), new LatLng(rs.getDouble(3), rs.getDouble(4)), rs.getString(5)));
 			}
 
 		} finally {
