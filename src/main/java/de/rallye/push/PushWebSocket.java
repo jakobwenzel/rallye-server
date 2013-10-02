@@ -13,7 +13,8 @@ import org.glassfish.grizzly.websockets.WebSocketListener;
  * Custom WebSocket that saves a reference to the user
  */
 public class PushWebSocket extends DefaultWebSocket {
-    private static final Logger logger = LogManager.getLogger(PushWebSocket.class);
+    @SuppressWarnings("unused")
+	private static final Logger logger = LogManager.getLogger(PushWebSocket.class);
     
     // chat user name
     private volatile int user;

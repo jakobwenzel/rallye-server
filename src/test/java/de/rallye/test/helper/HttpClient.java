@@ -45,7 +45,7 @@ public class HttpClient {
 		return r;
 	}
 	
-	@SuppressWarnings("unchecked")
+
 	public static List<String> apiCallAsString(String url, int expectedStatusCode) throws IOException {
 		HttpResponse r = apiCall(url,expectedStatusCode);
 		return IOUtils.readLines(r.getEntity().getContent());

@@ -20,12 +20,13 @@ import de.rallye.model.structures.GameState;
 import de.rallye.push.PushService;
 
 /**
- * HK2 Binder, declaring all dependencies of  injectable Objects
+ * HK2 Binder, declaring all dependencies of injectable Objects
  *
  * WARNING: RallyeConfigFactory has to be initialized separately
  */
 public class RallyeBinder extends AbstractBinder {
 
+	@SuppressWarnings("unused")
 	private static Logger logger = LogManager.getLogger(RallyeBinder.class);
 
 	public static IDataAdapter data;

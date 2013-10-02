@@ -98,7 +98,6 @@ public class GroupsTest {
 		
 
 		int code = conn.getResponseCode();
-		String msg = conn.getResponseMessage();
 		
 		Authenticator.setDefault(null);
 		

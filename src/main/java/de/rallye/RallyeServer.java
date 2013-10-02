@@ -31,9 +31,6 @@ public class RallyeServer {
 	
 	private static final Logger logger = LogManager.getLogger(RallyeServer.class);
 
-	private HttpServer httpServer = null;
-	
-
 	public RallyeServer(String host, int port) {
 		logger.entry();
 
@@ -44,7 +41,7 @@ public class RallyeServer {
 
 		// start http server
 		try {
-			httpServer = startServer(uri);
+			startServer(uri);
 		} catch (IOException e) {
 			logger.catching(e);
 		}
@@ -52,7 +49,7 @@ public class RallyeServer {
 		logger.exit();
 	}
 
-	@SuppressWarnings("unchecked")
+
 	private HttpServer startServer(URI uri) throws IOException {
 		ResourceConfig rc = new ResourceConfig();
 		rc.packages("de.rallye.api", "de.rallye.filter", "de.rallye.filter.auth","de.rallye.exceptions.mappers");
@@ -79,6 +76,7 @@ public class RallyeServer {
 		return serv;
 	}
 
+	@SuppressWarnings("unused")
 	private HttpServer createServer(URI uri, ResourceConfig configuration) {
 		GrizzlyHttpContainer handler = ContainerFactory.createContainer(GrizzlyHttpContainer.class, configuration);
 		boolean secure = false;

@@ -102,6 +102,7 @@ public class AdminWebsocketApp extends WebSocketApplication {
 	
 	ObjectMapper mapper = new ObjectMapper();
 
+	@SuppressWarnings("unused")
 	private static IDataAdapter data;
 	
 
@@ -125,6 +126,7 @@ public class AdminWebsocketApp extends WebSocketApplication {
 				logger.debug("Trying to authenticate user");
 				
 				AdminAuthFilter auth = new AdminAuthFilter();
+				@SuppressWarnings("unused")
 				AdminPrincipal p = auth.checkAuthentication(new String[]{username, password});
 			
 				logger.debug("User authenticated as admin");
