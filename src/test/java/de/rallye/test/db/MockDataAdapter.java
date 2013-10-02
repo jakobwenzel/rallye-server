@@ -56,7 +56,7 @@ public class MockDataAdapter implements IDataAdapter {
 	}
 
 	@Override
-	public List<Task> getTasks() throws DataException {
+	public List<Task> getTasks(Integer groupID) throws DataException {
 		fail("Method not implemented");
 		return null;
 	}

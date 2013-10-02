@@ -133,26 +133,42 @@ public class DataAdapter implements IDataAdapter {
 	 * @see de.rallye.db.IDataAdapter#getTasks()
 	 */
 	@Override
-	public List<Task> getTasks() throws DataException {
-		Statement st = null;
+	public List<Task> getTasks(Integer groupID) throws DataException {
+		PreparedStatement st = null;
 		Connection con = null;
 		ResultSet rs = null;
 
+		//Set to an invalid id if null.
+		if (groupID==null) {
+			logger.info("gid is null");
+			groupID=0;
+		}
+		
 		try {
 			con = dataSource.getConnection();
-			st = con.createStatement();
-			rs = st.executeQuery("SELECT "+ cols(Ry.Tasks.ID, Ry.Tasks.NAME, Ry.Tasks.DESCRIPTION,
+			st = con.prepareStatement("SELECT "+ cols(Ry.Tasks.TABLE+"."+Ry.Tasks.ID, Ry.Tasks.NAME, Ry.Tasks.DESCRIPTION,
 					Ry.Tasks.LATITUDE, Ry.Tasks.LONGITUDE, Ry.Tasks.LOCATION_SPECIFIC,
-					Ry.Tasks.RADIUS, Ry.Tasks.MULTIPLE_SUBMITS, Ry.Tasks.SUBMIT_TYPE, Ry.Tasks.POINTS, Ry.Tasks.ADDITIONAL_RESOURCES) +" FROM "+ Ry.Tasks.TABLE);
+					Ry.Tasks.RADIUS, Ry.Tasks.MULTIPLE_SUBMITS, Ry.Tasks.SUBMIT_TYPE, Ry.Tasks.POINTS,
+					Ry.Tasks.ADDITIONAL_RESOURCES, Ry.Tasks_Groups.SCORE, Ry.Tasks_Groups.BONUS) +" FROM "+
+					Ry.Tasks.TABLE+" LEFT JOIN "+Ry.Tasks_Groups.TABLE+" ON "+Ry.Tasks.TABLE+"."+Ry.Tasks.ID+"="+Ry.Tasks_Groups.TABLE+"."+Ry.Tasks_Groups.ID_TASK+" AND "+Ry.Groups.ID+"=?");
+			
+			st.setInt(1,groupID);
+			logger.info("GID: "+groupID);
+			rs = st.executeQuery();
 
 			List<Task> tasks = new ArrayList<Task>();
 			
 			while (rs.next()) {
 				
 				LatLng coords = (rs.getDouble(4) != 0 || rs.getDouble(5) != 0)? new LatLng(rs.getDouble(4), rs.getDouble(5)) : null;
+				Integer score = rs.getInt(12);
+				if (rs.wasNull()) score = null; //Great API design guys!
+				Integer bonus = rs.getInt(13);
+				if (rs.wasNull()) bonus = null; //Great API design guys!
 				tasks.add(new Task(rs.getInt(1), rs.getBoolean(6), coords, rs.getDouble(7),
 						rs.getString(2), rs.getString(3), rs.getBoolean(8), rs.getInt(9),
-						rs.getString(10), AdditionalResource.additionalResourcesFromString(rs.getString(11))));
+						rs.getString(10), AdditionalResource.additionalResourcesFromString(rs.getString(11)), score, bonus));
+			
 			}
 			
 			return tasks;
@@ -175,7 +191,7 @@ public class DataAdapter implements IDataAdapter {
 		try {
 			con = dataSource.getConnection();
 			st = con.prepareStatement("SELECT "+ cols(Ry.Submissions.ID, Ry.Submissions.ID_TASK, Ry.Submissions.ID_GROUP,
-					Ry.Submissions.ID_USER, Ry.Submissions.SCORE, Ry.Submissions.SUBMIT_TYPE,
+					Ry.Submissions.ID_USER, Ry.Submissions.SUBMIT_TYPE,
 					Ry.Submissions.INT_SUBMISSION, Ry.Submissions.TEXT_SUBMISSION) +" FROM "+ Ry.Submissions.TABLE
 					+" WHERE "+ Ry.Submissions.ID_TASK +"=? AND "+ Ry.Submissions.ID_GROUP +"=?");
 			
@@ -187,7 +203,7 @@ public class DataAdapter implements IDataAdapter {
 			List<Submission> submissions = new ArrayList<Submission>();
 			
 			while (rs.next()) {
-				submissions.add(new Submission(rs.getInt(1), rs.getInt(6), (Integer)rs.getObject(7), rs.getString(8), rs.getString(5)));
+				submissions.add(new Submission(rs.getInt(1), rs.getInt(5), (Integer)rs.getObject(6), rs.getString(7)));
 			}
 			
 			return submissions;
@@ -210,9 +226,9 @@ public class DataAdapter implements IDataAdapter {
 		try {
 			con = dataSource.getConnection();
 			st = con.prepareStatement("SELECT "+ cols(Ry.Submissions.ID, Ry.Submissions.ID_TASK, Ry.Submissions.ID_GROUP,
-					Ry.Submissions.ID_USER, Ry.Submissions.SCORE, Ry.Submissions.SUBMIT_TYPE,
-					Ry.Submissions.INT_SUBMISSION, Ry.Submissions.TEXT_SUBMISSION) +" FROM "+ Ry.Submissions.TABLE
-					+" WHERE "+ Ry.Submissions.ID_GROUP +"=? ORDER BY "+ Ry.Submissions.ID_TASK +" ASC");
+					Ry.Submissions.ID_USER, Ry.Submissions.SUBMIT_TYPE,
+					Ry.Submissions.INT_SUBMISSION, Ry.Submissions.TEXT_SUBMISSION, Ry.Tasks_Groups.SCORE, Ry.Tasks_Groups.BONUS) +" FROM "+ Ry.Submissions.TABLE
+					+" LEFT JOIN "+Ry.Tasks_Groups.TABLE+" USING("+Ry.Tasks_Groups.ID_GROUP+","+Ry.Tasks_Groups.ID_TASK+") WHERE "+ Ry.Submissions.ID_GROUP +"=? ORDER BY "+ Ry.Submissions.ID_TASK +" ASC");
 			
 			st.setInt(1, groupID);
 			
@@ -227,11 +243,16 @@ public class DataAdapter implements IDataAdapter {
 				taskID = rs.getInt(2);
 				
 				if (taskID != lastID) {
+					Integer score = rs.getInt(8);
+					if (rs.wasNull()) score = null;
+					Integer bonus = rs.getInt(9);
+					if (rs.wasNull()) bonus = null;
+					
 					submissions = new ArrayList<Submission>();
-					taskSubmissions.add(new TaskSubmissions(taskID, submissions));
+					taskSubmissions.add(new TaskSubmissions(taskID, submissions, score, bonus));
 				}
 				
-				submissions.add(new Submission(rs.getInt(1), rs.getInt(6), (Integer)rs.getObject(7), rs.getString(8), rs.getString(5)));
+				submissions.add(new Submission(rs.getInt(1), rs.getInt(5), (Integer)rs.getObject(6), rs.getString(7)));
 			}
 			
 			return taskSubmissions;
@@ -1129,6 +1150,7 @@ public class DataAdapter implements IDataAdapter {
 	public void scoreSubmissions(SubmissionScore[] scores) throws DataException {
 		Connection con = null;
 		PreparedStatement st = null;
+		PreparedStatement delSt = null;
 		ResultSet rs = null;
 		
 		try {
@@ -1136,18 +1158,28 @@ public class DataAdapter implements IDataAdapter {
 			con = dataSource.getConnection();
 			
 			
-			st = con.prepareStatement("UPDATE "+ Ry.Submissions.TABLE +" SET "+ Ry.Submissions.SCORE + "=? WHERE "+Ry.Submissions.ID +"=?");
+			st = con.prepareStatement("INSERT INTO "+ Ry.Tasks_Groups.TABLE +" ("+ cols(Ry.Tasks_Groups.ID_GROUP, Ry.Tasks_Groups.ID_TASK, Ry.Tasks_Groups.SCORE, Ry.Tasks_Groups.BONUS) + ") VALUES  (?,?,?,?) ON DUPLICATE KEY UPDATE "+Ry.Tasks_Groups.SCORE+"=VALUES("+Ry.Tasks_Groups.SCORE+"), "+Ry.Tasks_Groups.BONUS+"=VALUES("+Ry.Tasks_Groups.BONUS+")");
+			delSt = con.prepareStatement("DELETE FROM "+Ry.Tasks_Groups.TABLE+" WHERE "+Ry.Tasks_Groups.ID_TASK+"=? AND "+Ry.Tasks_Groups.ID_GROUP+"=?");
 
 			for (SubmissionScore score : scores) {
-				st.setString(1, score.score);
-				st.setInt(2, score.submissionID);
-				
-				st.execute();
+				if (score.remove) {
+					delSt.setInt(1, score.taskID);
+					delSt.setInt(2, score.groupID);
+					delSt.execute();
+				} else {
+					st.setInt(1, score.groupID);
+					st.setInt(2, score.taskID);
+					st.setInt(3, score.score);
+					st.setInt(4, score.bonus);
+					
+					st.execute();
+				}
 			}
 			
 		} catch (SQLException e) {
 			throw new DataException(e);
 		} finally {
+			close(null,delSt,null);
 			close(con, st, rs);
 		}
 	}

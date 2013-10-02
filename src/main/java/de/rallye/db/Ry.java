@@ -102,9 +102,16 @@ public class Ry {
 		public static final String ID_GROUP = Groups.ID;
 		public static final String ID_USER = Users.ID;
 		public static final String SUBMIT_TYPE = "submitType";
-		public static final String SCORE = "score";
 		public static final String INT_SUBMISSION = "intSubmission";
 		public static final String TEXT_SUBMISSION = "textSubmission";
+	}
+	
+	public static class Tasks_Groups {
+		public static final String TABLE = "ry_tasks_groups";
+		public static final String SCORE = "score";
+		public static final String BONUS = "bonus";
+		public static final String ID_TASK = Tasks.ID;
+		public static final String ID_GROUP = Groups.ID;
 	}
 	
 	@Deprecated //TODO: specific for Scotland Yard, not modular

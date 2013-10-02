@@ -62,7 +62,9 @@ public class KnownUserAuthFilter extends BaseAuthFilter implements IManualAuthen
 			
 			userID = Integer.parseInt(usr[0]);
 			groupID = Integer.parseInt(usr[1]);
-
+			assert(data!=null);
+			if (data==null)
+				logger.warn("Data is null");
 			principal = data.getKnownUserAuthorization(groupID, userID, login[1]);
 		} catch (DataException e) {
 			logger.error("Database Error", e);

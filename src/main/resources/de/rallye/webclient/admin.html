@@ -293,17 +293,12 @@ function list_by_group(id,restore) {
 								res.picture = root+"rallye/pics/"+sub.intSubmission+"/mini";
 								res.pictureBig = root+"rallye/pics/"+sub.intSubmission+"/std";
 							}
-							if (sub.score) {
-								var parts = sub.score.split("+");
-								if (parts.length==2) {
-									res.points = parts[0];
-									res.bonus = parts[1];
-								}
-							}
 						    for (var attrname in sub) { res[attrname] = sub[attrname]; }
 							return res;							
 						}),
 						taskID: submission.taskID,
+						score: submission.score,
+						bonus: submission.bonus,
 						task: tasks[submission.taskID]
 					}
 				});
@@ -347,11 +342,15 @@ function save_score() {
 	console.log("saving score");
 	var scores = {}
 	$('.points').each(function() {
-		var id = $(this).attr("subId");
-		scores[id] = { points: $(this).val() };
+		var tid = $(this).attr("taskID");
+		var gid = $(this).attr("groupID");
+		var id = tid+":"+gid;
+		scores[id] = { score: $(this).val(), groupID:parseInt(gid), taskID: parseInt(tid) };
 	});
 	$('.bonus').each(function() {
-		var id = $(this).attr("subId");
+		var tid = $(this).attr("taskID");
+		var gid = $(this).attr("groupID");
+		var id = tid+":"+gid;
 		if (!scores[id])
 			throw "Bonus without score at "+id;
 		scores[id].bonus = $(this).val();
@@ -360,30 +359,29 @@ function save_score() {
 	$.each(scores,function(id) {
 		console.log(id);
 		console.log(this);
-		var data = "";
-		if (this.points==="" && this.bonus==="") {
+		if (this.score==="" && this.bonus==="") {
 			console.log("no data");
+			this.remove = true;
 		} else {
-			var points, bonus;
-			if (this.points=="") {
-				points = "0";
-			} else if (isNormalInteger(this.points)) {
-				points = this.points;
-			} else {
-				alert("Invalid data: "+this.points);
+			this.remove = false;
+			if (this.score=="") {
+				this.score = "0";
+			} else if (!isNormalInteger(this.score)) {
+				alert("Invalid data: "+this.score);
 				throw "Invalid data";
+			} else {
+				this.score = parseInt(this.score);
 			}
 			if (this.bonus=="") {
-				bonus = "0";
-			} else if (isNormalInteger(this.bonus)) {
-				bonus = this.bonus;
-			} else {
+				this.bonus = "0";
+			} else if (!isNormalInteger(this.bonus)) {
 				alert("Invalid data: "+this.bonus);
 				throw "Invalid data";
+			} else {
+				this.bonus = parseInt(this.bonus);
 			}
-			data = points+"+"+bonus;
 		}
-		res.push({submissionID:parseInt(id),score:data});
+		res.push(this);
 	});
 	console.log(res);
 	authajax({
@@ -505,7 +503,6 @@ Number not implemented<br>
 {{#isText}}
 "{{textSubmission}}"<br>
 {{/isText}}
-Bewertung (id={{submissionID}}): <input type="text" class="score points" value="{{points}}"  subId="{{submissionID}}" />+<input type="text" class="score bonus" value="{{bonus}}" subId="{{submissionID}}">
 </td></tr>
 </script>
 <script id="templ_task" type="text/template">
@@ -515,6 +512,9 @@ Bewertung (id={{submissionID}}): <input type="text" class="score points" value="
 <i>{{task.points}}</i>
 </td></tr>
 {{#submissions}}{{>submission}}{{/submissions}}
+<tr><td>
+Bewertung (id={{taskID}}:{{groupID}}): <input type="text" class="score points" value="{{score}}"  taskID="{{taskID}}" groupID="{{groupID}}" />+<input type="text" class="score bonus" value="{{bonus}}" taskID="{{taskID}}" groupID="{{groupID}}">
+</td></tr>
 </script>
 
 <script id="templ_group_detail" type="text/template">

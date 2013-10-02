@@ -12,9 +12,11 @@ import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
 import de.rallye.annotations.AdminAuth;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import de.rallye.db.IDataAdapter;
 import de.rallye.exceptions.InputException;
 import de.rallye.exceptions.UnauthorizedException;
 
@@ -24,12 +26,20 @@ import de.rallye.exceptions.UnauthorizedException;
 public class AdminAuthFilter extends BaseAuthFilter {
 	
 	private final Logger logger = LogManager.getLogger(AdminAuthFilter.class);
-	
+
+
 	@Override
 	protected Response getUnauthorized() {
 		return Response.status(Status.UNAUTHORIZED).header("WWW-Authenticate", "Basic realm=\"AdminAuth\"").build();
 	}
 	
+	
+	public AdminAuthFilter() {
+		
+	}
+	public AdminAuthFilter(IDataAdapter data) {
+		this.data = data;
+	}
 
 	public AdminPrincipal checkAuthentication(String[] login) {
 		return checkAuthentication(null, login);

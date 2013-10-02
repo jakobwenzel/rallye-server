@@ -22,20 +22,21 @@ import org.apache.logging.log4j.Logger;
 import de.rallye.admin.AdminWebsocketApp;
 import de.rallye.annotations.AdminAuth;
 import de.rallye.annotations.KnownUserAuth;
+import de.rallye.annotations.KnownUserOrAdminAuth;
 import de.rallye.db.IDataAdapter;
 import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.InputException;
 import de.rallye.filter.auth.RallyePrincipal;
 import de.rallye.model.structures.SimpleSubmission;
 import de.rallye.model.structures.Submission;
-import de.rallye.model.structures.Task;
 import de.rallye.model.structures.SubmissionScore;
+import de.rallye.model.structures.Task;
 import de.rallye.model.structures.TaskSubmissions;
 
 @Path("rallye/tasks")
 public class Tasks {
 
-	public static final int API_VERSION = 4;
+	public static final int API_VERSION = 5;
 	public static final String API_NAME = "ist_rallye";
 
 	private Logger logger =  LogManager.getLogger(Tasks.class);
@@ -44,10 +45,18 @@ public class Tasks {
 	
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Task> getTasks() throws DataException {
+	@KnownUserOrAdminAuth
+	public List<Task> getTasks(@Context SecurityContext sec) throws DataException {
 		logger.entry();
 	
-		List<Task> res = data.getTasks();
+
+		Integer groupID = null;
+		if (sec.getUserPrincipal() instanceof RallyePrincipal) {
+			RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
+			groupID = p.getGroupID();
+		}
+		List<Task> res = data.getTasks(groupID);
+		
 		return logger.exit(res);
 	}
 	
@@ -67,7 +76,7 @@ public class Tasks {
 	@GET
 	@Path("all/{groupID}")
 	@Produces(MediaType.APPLICATION_JSON)
-	//@KnownUserOrAdminAuth
+	@KnownUserOrAdminAuth
 	public List<TaskSubmissions> getAllSubmissions(@PathParam("groupID") int groupID, @Context SecurityContext sec) throws DataException {
 		logger.entry();
 		

@@ -46,7 +46,10 @@ public interface IDataAdapter {
 	 */
 	public abstract void editGroup(Group group) throws DataException;
 
-	public abstract List<Task> getTasks() throws DataException;
+	/**
+	 * Get all tasks. If groupID is not null, include the ratings of the specified group
+	 */
+	public abstract List<Task> getTasks(Integer groupID) throws DataException;
 
 	public abstract List<Submission> getSubmissions(int taskID, int groupID)
 			throws DataException;
