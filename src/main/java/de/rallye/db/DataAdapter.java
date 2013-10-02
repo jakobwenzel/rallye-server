@@ -1171,7 +1171,7 @@ public class DataAdapter implements IDataAdapter {
 			con = dataSource.getConnection();
 			
 			
-			st = con.prepareStatement("INSERT INTO "+ Ry.Tasks_Groups.TABLE +" ("+ cols(Ry.Tasks_Groups.ID_GROUP, Ry.Tasks_Groups.ID_TASK, Ry.Tasks_Groups.SCORE, Ry.Tasks_Groups.BONUS) + ") VALUES  (?,?,?,?) ON DUPLICATE KEY UPDATE "+Ry.Tasks_Groups.SCORE+"=VALUES("+Ry.Tasks_Groups.SCORE+"), "+Ry.Tasks_Groups.BONUS+"=VALUES("+Ry.Tasks_Groups.BONUS+")");
+			st = con.prepareStatement("INSERT INTO "+ Ry.Tasks_Groups.TABLE +" ("+ cols(Ry.Tasks_Groups.ID_GROUP, Ry.Tasks_Groups.ID_TASK, Ry.Tasks_Groups.SCORE, Ry.Tasks_Groups.BONUS) + ") VALUES  (?,?,?,?) ON DUPLICATE KEY UPDATE "+Ry.Tasks_Groups.SCORE+"=VALUES("+Ry.Tasks_Groups.SCORE+"), "+Ry.Tasks_Groups.BONUS+"=VALUES("+Ry.Tasks_Groups.BONUS+"), "+Ry.Tasks_Groups.OUTDATED+"=false");
 			delSt = con.prepareStatement("DELETE FROM "+Ry.Tasks_Groups.TABLE+" WHERE "+Ry.Tasks_Groups.ID_TASK+"=? AND "+Ry.Tasks_Groups.ID_GROUP+"=?");
 
 			for (SubmissionScore score : scores) {
