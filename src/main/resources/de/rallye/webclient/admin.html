@@ -260,6 +260,40 @@ function new_group(blah,restore) {
 	return false;
 }
 
+function transformSubmission(sub) {
+	var res = {
+			isLocation: sub.submitType & 1,
+			isPicture: sub.submitType & 2,
+			isText: sub.submitType & 4,
+			isNumber: sub.submitType & 8,
+			isBarcode: sub.submitType & 16,
+		}
+	if (res.isPicture) {
+		res.picture = root+"rallye/pics/"+sub.intSubmission+"/mini";
+		res.pictureBig = root+"rallye/pics/"+sub.intSubmission+"/std";
+	}
+    for (var attrname in sub) { res[attrname] = sub[attrname]; }
+	return res;							
+}
+
+function transformSubmissions(submissions, showGroup, showTask, groups,tasks) {
+	
+	return submissions.map(function(submission){
+		return {
+			submissions:submission.submissions.map(transformSubmission),
+			taskID: submission.taskID,
+			groupID: submission.groupID,
+			score: submission.score,
+			bonus: submission.bonus,
+			scoreOutdated: submission.scoreOutdated,
+			task: tasks[submission.taskID],
+			group: groups[submission.groupID],
+			showGroup: showGroup,
+			showTask: showTask
+		}
+	});
+}
+
 function list_by_group(id,restore) {
 	if (!id) {
 		if (!restore) history.pushState(null, "", root+"client/admin.html?group");
@@ -279,30 +313,7 @@ function list_by_group(id,restore) {
 				url: root+"rallye/tasks/all/"+id
 			},function(submissions){ //Success
 				console.log(submissions);
-				var submissionsDisplay = submissions.map(function(submission){
-					return {
-						submissions:submission.submissions.map(function(sub) {
-							var res = {
-								isLocation: sub.submitType & 1,
-								isPicture: sub.submitType & 2,
-								isText: sub.submitType & 4,
-								isNumber: sub.submitType & 8,
-								isBarcode: sub.submitType & 16,
-							}
-							if (res.isPicture) {
-								res.picture = root+"rallye/pics/"+sub.intSubmission+"/mini";
-								res.pictureBig = root+"rallye/pics/"+sub.intSubmission+"/std";
-							}
-						    for (var attrname in sub) { res[attrname] = sub[attrname]; }
-							return res;							
-						}),
-						taskID: submission.taskID,
-						score: submission.score,
-						bonus: submission.bonus,
-						scoreOutdated: submission.scoreOutdated,
-						task: tasks[submission.taskID]
-					}
-				});
+				var submissionsDisplay = transformSubmissions(submissions, false, true, groups, tasks);
 				var groupDisplay = {
 					name : group.name,
 					description: group.description,
@@ -323,11 +334,50 @@ function list_by_group(id,restore) {
 	return false;
 }
 
+function display_task_selection() {
+	getTasksAsArray(function(tasks) {
+		var template = $('#templ_taskselection').html();
+		var html = Mustache.to_html(template,tasks,partials);
+		$("#main").html(html);
+	})
+}
 
 function list_by_task(id,restore) {
+	if (!id) {
+		if (!restore) history.pushState(null, "", root+"client/admin.html?task");
+		display_task_selection();
+		return false;
+	}
+	if (!restore) history.pushState(null, "", root+"client/admin.html?task="+id);
+	
+	getGroups(function(groups) {getTasks(function(tasks) {
 
-	if (!restore) history.pushState(null, "", root+"client/admin.html?task");
-	$("#main").html("Listing by task not implemented");
+		var task = tasks[id];
+		if(!task) {
+			$('#main').html("A task with this id does not exist: "+Mustache.escape(id));
+		} else {
+			authajax({
+				url: root+"rallye/tasks/byTask/"+id
+			},function(submissions){ //Success
+				console.log(submissions);
+				var submissionsDisplay = transformSubmissions(submissions, true, false, groups, tasks);
+				var taskDisplay = {
+					name : task.name,
+					description: task.description,
+					taskID: task.taskID,
+					maxPoints: task.maxPoints,
+					tasks: submissionsDisplay,
+					hasTasks: submissionsDisplay.length>0
+				}
+				var template = $('#templ_task_detail').html();
+				var html = Mustache.to_html(template,taskDisplay,partials);
+				$("#main").html(html);
+			},function() { //Error
+				$('#main').html("Error loading submissions");
+			});
+		
+		}
+	});});
 	return false;
 }
 
@@ -435,6 +485,7 @@ $(function () {
 	partials = {
 			'group': $("#templ_groupselection_group").html(),
 			'task': $("#templ_task").html(),
+			'taskSel': $("#templ_taskselection_task").html(),
 			'submission': $("#templ_submission").html()
 	};
 
@@ -520,12 +571,21 @@ Number not implemented<br>
 {{/isText}}
 </td></tr>
 </script>
+
 <script id="templ_task" type="text/template">
+{{#showTask}}
 <tr class="thumb"> <td>
 <b>{{task.name}}</b><br>
 {{task.description}}<br>
-<i>{{task.points}}</i>
+<i>{{task.maxPoints}}</i>
 </td></tr>
+{{/showTask}}
+{{#showGroup}}
+<tr class="thumb"> <td>
+<b>{{group.name}}</b><br>
+{{group.description}}
+</td></tr>
+{{/showGroup}}
 {{#submissions}}{{>submission}}{{/submissions}}
 <tr><td>
 Bewertung (id={{taskID}}:{{groupID}}):
@@ -558,6 +618,20 @@ Bewertung (id={{taskID}}:{{groupID}}):
 </script>
 
 
+<script id="templ_task_detail" type="text/template">
+	<h2>{{name}}</h2>{{description}}<br>
+	<i>{{maxPoints}}</i><br>
+
+	{{#hasTasks}}
+	<table>
+	{{#tasks}}{{>task}}{{/tasks}}
+	</table>	
+	<input type="button" value="Bewertungen speichern" onclick="save_score();"/>
+	{{/hasTasks}}
+	{{^hasTasks}}Noch keine Abgaben!{{/hasTasks}}
+</script>
+
+
 <script id="templ_groupselection_group" type="text/template">
 	<tr style="border: 1px solid black;" onclick="return {{callback}}({{groupID}});">
 		<td class="thumb"><img src="{{avatar}}" /></td>
@@ -571,6 +645,19 @@ Bewertung (id={{taskID}}:{{groupID}}):
 	{{#footerlink}}
 	<tr><td colspan="2"><a href="#" onclick="return {{footerlink}}();">Neue Gruppe anlegen</a></td></tr>
 	{{/footerlink}}
+	</table>
+</script>
+
+
+<script id="templ_taskselection_task" type="text/template">
+	<tr onclick="return list_by_task({{taskID}});">
+		<td style="border-bottom: 1px solid gray;" ><b>{{name}}</b><br>{{description}}</td>
+	</tr>
+</script>
+<script id="templ_taskselection" type="text/template">
+	<table>
+	<tr><td><h2>Zu bewertende Aufgabe auswählen</h2></td></tr>
+	{{#.}} {{>taskSel}}  {{/.}}
 	</table>
 </script>
 <script id="templ_group_edit" type="text/template">

@@ -56,6 +56,9 @@ public interface IDataAdapter {
 
 	public abstract List<TaskSubmissions> getAllSubmissions(int groupID)
 			throws DataException;
+	
+	public abstract List<TaskSubmissions> getSubmissionsByTask(int taskID)
+			throws DataException;
 
 	public abstract Submission submit(int taskID, int groupID, int userID,
 			SimpleSubmission submission) throws DataException, InputException;

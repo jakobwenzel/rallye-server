@@ -183,7 +183,7 @@ public class MockDataAdapter implements IDataAdapter {
 
 	@Override
 	public List<PushMode> getPushModes() throws DataException {
-		// TODO Fill with data
+		fail("Method not implemented");
 		return new ArrayList<PushMode>();
 	}
 
@@ -241,6 +241,13 @@ public class MockDataAdapter implements IDataAdapter {
 	@Override
 	public void scoreSubmissions(SubmissionScore[] scores) throws DataException {
 		fail("Method not implemented");
+	}
+
+	@Override
+	public List<TaskSubmissions> getSubmissionsByTask(int taskID)
+			throws DataException {
+		// TODO Automatisch generierter Methodenstub
+		return null;
 	}
 
 }

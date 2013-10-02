@@ -94,6 +94,17 @@ public class Tasks {
 		return logger.exit(res);
 	}
 	
+	@GET
+	@Path("byTask/{taskID}")
+	@Produces(MediaType.APPLICATION_JSON)
+	@AdminAuth
+	public List<TaskSubmissions> getAllByTask(@PathParam("taskID") int taskID) throws DataException {
+		logger.entry();
+		
+		List<TaskSubmissions> res = data.getSubmissionsByTask(taskID);
+		return logger.exit(res);
+	}
+	
 	@PUT
 	@Path("{taskID}")
 	@Consumes(MediaType.APPLICATION_JSON)

@@ -1,6 +1,7 @@
 package de.rallye.config;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Properties;
 
 public class GitRepositoryState {
@@ -10,13 +11,19 @@ public class GitRepositoryState {
 
 	private GitRepositoryState() throws IOException {
 		Properties properties = new Properties();
-		properties.load(GitRepositoryState.class.getClassLoader().getResourceAsStream("git.properties"));
-
-		Object desc = properties.get("git.commit.id.description");
-		this.description = (desc == null)? "" : desc.toString();
-
-		Object time = properties.get("git.build.time");
-		this.buildTime = time.toString();
+		InputStream str = GitRepositoryState.class.getClassLoader().getResourceAsStream("git.properties");
+		if (str !=null) {
+			properties.load(str);
+	
+			Object desc = properties.get("git.commit.id.description");
+			this.description = (desc == null)? "" : desc.toString();
+	
+			Object time = properties.get("git.build.time");
+			this.buildTime = time.toString();
+		} else {
+			this.description="Unknown build";
+			this.buildTime="Unknown";
+		}
 	}
 
 	public static GitRepositoryState getState() {

@@ -214,6 +214,55 @@ public class DataAdapter implements IDataAdapter {
 		}
 	}
 	
+	/**
+	 * Convert a table of tasks with scores to a list of TaskSubmissions
+	 * The columns expected in the resultSet are:
+	 * 1: Submission Id
+	 * 2: task id
+	 * 3: group id
+	 * 4: user id
+	 * 5: submit type
+	 * 6: intSubmission
+	 * 7: textSubmission
+	 * 8: score 
+	 * 9: bonus
+	 * 10: outdated
+	 * Submissions for the same task and group are expected to follow each other in the table.
+	 * @param rs
+	 * @return
+	 * @throws SqlException
+	 */
+	protected List<TaskSubmissions> convertResultToTaskSubmissions(ResultSet rs) throws SQLException {
+		List<TaskSubmissions> taskSubmissions = new ArrayList<TaskSubmissions>();
+		List<Submission> submissions = null;
+		
+		int taskID = -1, lastTaskID = -1;
+		int groupID = -1, lastGroupID = -1;
+		while (rs.next()) {
+			lastTaskID = taskID;
+			lastGroupID = groupID;
+			
+			taskID = rs.getInt(2);
+			groupID = rs.getInt(3);
+			
+			
+			if (taskID != lastTaskID || groupID != lastGroupID) {
+				Integer score = rs.getInt(8);
+				if (rs.wasNull()) score = null;
+				Integer bonus = rs.getInt(9);
+				if (rs.wasNull()) bonus = null;
+				
+				boolean scoreOutdated = rs.getBoolean(10);
+				
+				submissions = new ArrayList<Submission>();
+				taskSubmissions.add(new TaskSubmissions(taskID, groupID, submissions, score, bonus, scoreOutdated));
+			}
+			
+			submissions.add(new Submission(rs.getInt(1), rs.getInt(5), (Integer)rs.getObject(6), rs.getString(7)));
+		}
+		return taskSubmissions;
+	}
+	
 	/* (non-Javadoc)
 	 * @see de.rallye.db.IDataAdapter#getAllSubmissions(int)
 	 */
@@ -234,30 +283,39 @@ public class DataAdapter implements IDataAdapter {
 			
 			rs = st.executeQuery();
 
-			List<TaskSubmissions> taskSubmissions = new ArrayList<TaskSubmissions>();
-			List<Submission> submissions = null;
 			
-			int taskID = -1, lastID = -1;
-			while (rs.next()) {
-				lastID = taskID;
-				taskID = rs.getInt(2);
-				
-				if (taskID != lastID) {
-					Integer score = rs.getInt(8);
-					if (rs.wasNull()) score = null;
-					Integer bonus = rs.getInt(9);
-					if (rs.wasNull()) bonus = null;
-					
-					boolean scoreOutdated = rs.getBoolean(10);
-					
-					submissions = new ArrayList<Submission>();
-					taskSubmissions.add(new TaskSubmissions(taskID, submissions, score, bonus, scoreOutdated));
-				}
-				
-				submissions.add(new Submission(rs.getInt(1), rs.getInt(5), (Integer)rs.getObject(6), rs.getString(7)));
-			}
 			
-			return taskSubmissions;
+			return convertResultToTaskSubmissions(rs);
+		} catch (SQLException e) {
+			throw new DataException(e);
+		} finally {
+			close(con, st, rs);
+		}
+	}
+	
+
+
+	@Override
+	public List<TaskSubmissions> getSubmissionsByTask(int taskID)
+			throws DataException {
+		PreparedStatement st = null;
+		Connection con = null;
+		ResultSet rs = null;
+
+		try {
+			con = dataSource.getConnection();
+			st = con.prepareStatement("SELECT "+ cols(Ry.Submissions.ID, Ry.Submissions.ID_TASK, Ry.Submissions.ID_GROUP,
+					Ry.Submissions.ID_USER, Ry.Submissions.SUBMIT_TYPE,
+					Ry.Submissions.INT_SUBMISSION, Ry.Submissions.TEXT_SUBMISSION, Ry.Tasks_Groups.SCORE, Ry.Tasks_Groups.BONUS, Ry.Tasks_Groups.OUTDATED) +" FROM "+ Ry.Submissions.TABLE
+					+" LEFT JOIN "+Ry.Tasks_Groups.TABLE+" USING("+Ry.Tasks_Groups.ID_GROUP+","+Ry.Tasks_Groups.ID_TASK+") WHERE "+ Ry.Submissions.ID_TASK +"=? ORDER BY "+ Ry.Submissions.ID_GROUP +" ASC");
+			
+			st.setInt(1, taskID);
+			
+			rs = st.executeQuery();
+
+			
+			
+			return convertResultToTaskSubmissions(rs);
 		} catch (SQLException e) {
 			throw new DataException(e);
 		} finally {
