@@ -27,14 +27,18 @@ public class StadtRallye {
 
 		//Init resources
 		RallyeConfig config = RallyeConfig.fromFile(ConfigTools.findConfigFile(), GitRepositoryState.getState());
-		RallyeBinder.config = config;
-		RallyeBinder.data = DataAdapter.getInstance(config);
-		
-		//start server
-		String host = (args.length > 0 ? args[0] : config.getHostName());
-		RallyeServer server = new RallyeServer(host, config.getRestPort());
-
-		ServerConsole console = new ServerConsole(config.getConsolePort(), server);
-		console.start();
+		//If there are config errors, we exit.
+		if (config!=null) {
+			RallyeBinder.config = config;
+			RallyeBinder.data = DataAdapter.getInstance(config);
+			
+			//start server
+			String host = (args.length > 0 ? args[0] : config.getHostName());
+			RallyeServer server = new RallyeServer(host, config.getRestPort());
+	
+			ServerConsole console = new ServerConsole(config.getConsolePort(), server);
+			console.start();
+		} else 
+			logger.error("Please provide a valid config file. Exiting.");
 	}
 }

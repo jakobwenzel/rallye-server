@@ -28,6 +28,9 @@ public class ConfigTools {
 		//Or in build/libs subdirectory		
 		} else if (location.endsWith("build/libs/")) {
 			location = location.substring(0,location.length()-11);
+		//Or in bin/
+		} else if (location.endsWith("bin/")) {
+			location = location.substring(0,location.length()-4);
 		//If not, we are not running in project dir
 		} else {
 			logger.debug("not in any subdir known.");
@@ -67,7 +70,7 @@ public class ConfigTools {
 	 *  working dir/config.json
 	 *  jar dir/config.json
 	 *  project dir/config.json
-	 *  homedir/rallyeserv-config.json
+	 *  homedir/.rallyeserv-config.json
 	 *
 	 *  project dir is the directory containing .git. If the .git subdir does not exist,
 	 *  the project dir will not be checked for a config.

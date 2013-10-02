@@ -57,10 +57,8 @@ public class RallyeConfig {
 		RallyeConfig config;
 
 		if (configFile==null) {
-			logger.warn("No config file. Using Default Config");
-			config = new RallyeConfig();
-			config.setGit(git);
-			return config;
+			logger.error("No config file found.");
+			return null;
 		}
 		logger.info("Loading config file from {}/{}", configFile.getParent(), configFile);
 		ObjectMapper mapper = new ObjectMapper();
@@ -76,10 +74,8 @@ public class RallyeConfig {
 			logger.debug(config.toString());
 			return config;
 		} catch ( IOException e) {
-			logger.error("Falling back to default config", e);
-			config = new RallyeConfig();
-			config.setGit(git);
-			return config;
+			logger.error("Config invalid.", e);
+			return null;
 		}
 	}
 
