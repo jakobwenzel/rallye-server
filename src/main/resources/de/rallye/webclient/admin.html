@@ -299,6 +299,7 @@ function list_by_group(id,restore) {
 						taskID: submission.taskID,
 						score: submission.score,
 						bonus: submission.bonus,
+						scoreOutdated: submission.scoreOutdated,
 						task: tasks[submission.taskID]
 					}
 				});
@@ -338,6 +339,11 @@ function isNormalInteger(str) {
     return /^(0|[1-9]\d*)$/.test(str);
 }
 
+function removeOutdated(taskID, groupID) {
+	$("[taskID="+taskID+"][groupID="+groupID+"]").removeClass("outdated");
+	$("span[taskID="+taskID+"][groupID="+groupID+"]").hide();
+}
+
 function save_score() {
 	console.log("saving score");
 	var scores = {}
@@ -345,15 +351,20 @@ function save_score() {
 		var tid = $(this).attr("taskID");
 		var gid = $(this).attr("groupID");
 		var id = tid+":"+gid;
-		scores[id] = { score: $(this).val(), groupID:parseInt(gid), taskID: parseInt(tid) };
+		if (!$(this).hasClass("outdated"))
+			scores[id] = { score: $(this).val(), groupID:parseInt(gid), taskID: parseInt(tid) };
 	});
 	$('.bonus').each(function() {
 		var tid = $(this).attr("taskID");
 		var gid = $(this).attr("groupID");
 		var id = tid+":"+gid;
+
+		if ($(this).hasClass("outdated"))
+				return;
+		
 		if (!scores[id])
 			throw "Bonus without score at "+id;
-		scores[id].bonus = $(this).val();
+			scores[id].bonus = $(this).val();
 	});
 	var res = [];
 	$.each(scores,function(id) {
@@ -471,6 +482,10 @@ body {
 	background-color: rgb(200,200,200);
 
 }
+
+.outdated {
+	background-color: rgb(255,220,80);
+}
 </style>
 </head>
 <body>
@@ -513,7 +528,16 @@ Number not implemented<br>
 </td></tr>
 {{#submissions}}{{>submission}}{{/submissions}}
 <tr><td>
-Bewertung (id={{taskID}}:{{groupID}}): <input type="text" class="score points" value="{{score}}"  taskID="{{taskID}}" groupID="{{groupID}}" />+<input type="text" class="score bonus" value="{{bonus}}" taskID="{{taskID}}" groupID="{{groupID}}">
+Bewertung (id={{taskID}}:{{groupID}}):
+{{^scoreOutdated}}
+<input type="text" class="score points" value="{{score}}"  taskID="{{taskID}}" groupID="{{groupID}}" />+
+<input type="text" class="score bonus" value="{{bonus}}" taskID="{{taskID}}" groupID="{{groupID}}"/>
+{{/scoreOutdated}} 
+{{#scoreOutdated}}
+<input type="text" class="score points outdated" value="{{score}}"  taskID="{{taskID}}" groupID="{{groupID}}" onchange="removeOutdated({{taskID}},{{groupID}});" onkeydown="removeOutdated({{taskID}},{{groupID}});"/>+
+<input type="text" class="score bonus outdated" value="{{bonus}}" taskID="{{taskID}}" groupID="{{groupID}}" onchange="removeOutdated({{taskID}},{{groupID}});" onkeydown="removeOutdated({{taskID}},{{groupID}});"/>
+<span taskID="{{taskID}}" groupID="{{groupID}}">Neue Abgabe seit letzter Bewertung.</span>
+{{/scoreOutdated}}
 </td></tr>
 </script>
 
