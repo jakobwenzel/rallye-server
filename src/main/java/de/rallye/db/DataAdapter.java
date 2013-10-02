@@ -227,7 +227,7 @@ public class DataAdapter implements IDataAdapter {
 			con = dataSource.getConnection();
 			st = con.prepareStatement("SELECT "+ cols(Ry.Submissions.ID, Ry.Submissions.ID_TASK, Ry.Submissions.ID_GROUP,
 					Ry.Submissions.ID_USER, Ry.Submissions.SUBMIT_TYPE,
-					Ry.Submissions.INT_SUBMISSION, Ry.Submissions.TEXT_SUBMISSION, Ry.Tasks_Groups.SCORE, Ry.Tasks_Groups.BONUS) +" FROM "+ Ry.Submissions.TABLE
+					Ry.Submissions.INT_SUBMISSION, Ry.Submissions.TEXT_SUBMISSION, Ry.Tasks_Groups.SCORE, Ry.Tasks_Groups.BONUS, Ry.Tasks_Groups.OUTDATED) +" FROM "+ Ry.Submissions.TABLE
 					+" LEFT JOIN "+Ry.Tasks_Groups.TABLE+" USING("+Ry.Tasks_Groups.ID_GROUP+","+Ry.Tasks_Groups.ID_TASK+") WHERE "+ Ry.Submissions.ID_GROUP +"=? ORDER BY "+ Ry.Submissions.ID_TASK +" ASC");
 			
 			st.setInt(1, groupID);
@@ -248,8 +248,10 @@ public class DataAdapter implements IDataAdapter {
 					Integer bonus = rs.getInt(9);
 					if (rs.wasNull()) bonus = null;
 					
+					boolean scoreOutdated = rs.getBoolean(10);
+					
 					submissions = new ArrayList<Submission>();
-					taskSubmissions.add(new TaskSubmissions(taskID, submissions, score, bonus));
+					taskSubmissions.add(new TaskSubmissions(taskID, submissions, score, bonus, scoreOutdated));
 				}
 				
 				submissions.add(new Submission(rs.getInt(1), rs.getInt(5), (Integer)rs.getObject(6), rs.getString(7)));
@@ -275,6 +277,8 @@ public class DataAdapter implements IDataAdapter {
 		try {
 			con = dataSource.getConnection();
 			
+			
+			//Check if the task exists
 			st = con.prepareStatement("SELECT * FROM "+ Ry.Tasks.TABLE +" WHERE "+ Ry.Tasks.ID +"=?");
 			st.setInt(1, taskID);
 			rs = st.executeQuery();
@@ -286,6 +290,7 @@ public class DataAdapter implements IDataAdapter {
 			//TODO: sanity check: see if the submission matches submitType and as such is valid
 			
 
+			//Insert into db
 			st = con.prepareStatement("INSERT INTO "+ Ry.Submissions.TABLE +" ("+
 					cols(Ry.Submissions.ID_TASK, Ry.Submissions.ID_GROUP, Ry.Submissions.ID_USER, Ry.Submissions.SUBMIT_TYPE, Ry.Submissions.INT_SUBMISSION, Ry.Submissions.TEXT_SUBMISSION)
 					+") VALUES (?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
@@ -309,6 +314,14 @@ public class DataAdapter implements IDataAdapter {
 			int submissionID = rs.getInt(1);
 			
 			Submission res = new Submission(submissionID, submission);
+			
+			
+			//Invalidate existing score
+			st = con.prepareStatement("UPDATE "+Ry.Tasks_Groups.TABLE+" SET outdated = 1 WHERE "+Ry.Tasks_Groups.ID_TASK+"=? AND "+Ry.Tasks_Groups.ID_GROUP+"=?");
+			st.setInt(1, taskID);
+			st.setInt(2, groupID);
+			st.execute();
+			
 			
 			return res;
 		} catch (SQLException e) {
@@ -617,8 +630,8 @@ public class DataAdapter implements IDataAdapter {
 	 * @see de.rallye.db.IDataAdapter#getChatrooms(int)
 	 */
 	@Override
-	public synchronized List<Chatroom> getChatrooms(int groupID) throws DataException { // Somebody (!!!Jakob!!!) implemented caching of available Chatrooms!!!
-		Connection con = null;// And he was smart enough to do it in 1 SINGLE list for ALL groups
+	public synchronized List<Chatroom> getChatrooms(int groupID) throws DataException {
+		Connection con = null; 
 		PreparedStatement st = null;
 		ResultSet rs = null;
 		

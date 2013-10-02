@@ -112,6 +112,7 @@ public class Ry {
 		public static final String BONUS = "bonus";
 		public static final String ID_TASK = Tasks.ID;
 		public static final String ID_GROUP = Groups.ID;
+		public static final String OUTDATED = "outdated";
 	}
 	
 	@Deprecated //TODO: specific for Scotland Yard, not modular
