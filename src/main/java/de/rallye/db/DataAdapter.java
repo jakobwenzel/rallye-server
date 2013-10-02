@@ -322,6 +322,29 @@ public class DataAdapter implements IDataAdapter {
 			close(con, st, rs);
 		}
 	}
+
+	@Override
+	public List<TaskSubmissions> getUnratedSubmissions() throws DataException {
+		PreparedStatement st = null;
+		Connection con = null;
+		ResultSet rs = null;
+
+		try {
+			con = dataSource.getConnection();
+			st = con.prepareStatement("SELECT "+ cols(Ry.Submissions.ID, Ry.Submissions.ID_TASK, Ry.Submissions.ID_GROUP,
+					Ry.Submissions.ID_USER, Ry.Submissions.SUBMIT_TYPE,
+					Ry.Submissions.INT_SUBMISSION, Ry.Submissions.TEXT_SUBMISSION, Ry.Tasks_Groups.SCORE, Ry.Tasks_Groups.BONUS, Ry.Tasks_Groups.OUTDATED) +" FROM "+ Ry.Submissions.TABLE
+					+" LEFT JOIN "+Ry.Tasks_Groups.TABLE+" USING("+Ry.Tasks_Groups.ID_GROUP+","+Ry.Tasks_Groups.ID_TASK+") WHERE ("+ Ry.Tasks_Groups.SCORE +" IS NULL AND "+ Ry.Tasks_Groups.BONUS +" IS NULL) OR "+ Ry.Tasks_Groups.OUTDATED +"=1 ORDER BY "+ Ry.Submissions.ID_GROUP +" ASC, "+Ry.Submissions.ID_TASK+" ASC");
+			
+			rs = st.executeQuery();
+			
+			return convertResultToTaskSubmissions(rs);
+		} catch (SQLException e) {
+			throw new DataException(e);
+		} finally {
+			close(con, st, rs);
+		}
+	}
 	
 	/* (non-Javadoc)
 	 * @see de.rallye.db.IDataAdapter#submit(int, int, int, de.rallye.model.structures.SimpleSubmission)

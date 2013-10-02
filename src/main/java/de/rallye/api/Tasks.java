@@ -105,6 +105,17 @@ public class Tasks {
 		return logger.exit(res);
 	}
 	
+	@GET
+	@Path("unrated")
+	@Produces(MediaType.APPLICATION_JSON)
+	@AdminAuth
+	public List<TaskSubmissions> getUnrated() throws DataException {
+		logger.entry();
+		
+		List<TaskSubmissions> res = data.getUnratedSubmissions();
+		return logger.exit(res);
+	}
+	
 	@PUT
 	@Path("{taskID}")
 	@Consumes(MediaType.APPLICATION_JSON)

@@ -381,6 +381,33 @@ function list_by_task(id,restore) {
 	return false;
 }
 
+
+function list_unrated(restore) {
+	if (!restore) history.pushState(null, "", root+"client/admin.html?unrated");
+	
+	getGroups(function(groups) {getTasks(function(tasks) {
+
+
+		authajax({
+			url: root+"rallye/tasks/unrated"
+		},function(submissions){ //Success
+			console.log(submissions);
+			var submissionsDisplay = transformSubmissions(submissions, true, true, groups, tasks);
+			var display = {
+				tasks: submissionsDisplay,
+				hasTasks: submissionsDisplay.length>0
+			}
+			var template = $('#templ_unrated').html();
+			var html = Mustache.to_html(template,display,partials);
+			$("#main").html(html);
+		},function() { //Error
+			$('#main').html("Error loading submissions");
+		});
+	
+	});});
+	return false;
+}
+
 function select_upload() {
 	$('#ava_upload').attr("checked","checked");
 }
@@ -478,6 +505,7 @@ $(function () {
 		if (!parameterDispatch("group",list_by_group))
 		if (!parameterDispatch("editgroup",edit_group))
 		if (!parameterDispatch("newgroup",new_group))
+		if (!parameterDispatch("unrated",list_unrated))
 			$('#main').html('');
 		loaded = true;
 	}
@@ -631,6 +659,16 @@ Bewertung (id={{taskID}}:{{groupID}}):
 	{{^hasTasks}}Noch keine Abgaben!{{/hasTasks}}
 </script>
 
+<script id="templ_unrated" type="text/template">
+	{{#hasTasks}}
+	<table>
+	{{#tasks}}{{>task}}{{/tasks}}
+	</table>	
+	<input type="button" value="Bewertungen speichern" onclick="save_score();"/>
+	{{/hasTasks}}
+	{{^hasTasks}}Alle Abgaben bewertet!{{/hasTasks}}
+</script>
+
 
 <script id="templ_groupselection_group" type="text/template">
 	<tr style="border: 1px solid black;" onclick="return {{callback}}({{groupID}});">
@@ -718,7 +756,7 @@ Bewertung (id={{taskID}}:{{groupID}}):
 </div>
 <div id="left">
 <a href="#" onclick="return edit_group();">Gruppen bearbeiten</a><br>
-<a href="#" onclick="return false;">Unbewertete Abgaben</a><br>
+<a href="#" onclick="return list_unrated();">Unbewertete Abgaben</a><br>
 <a href="#" onclick="return list_by_group();">Abgaben nach Gruppe</a><br>
 <a href="#" onclick="return list_by_task();">Abgaben nach Aufgabe</a>
 </div>

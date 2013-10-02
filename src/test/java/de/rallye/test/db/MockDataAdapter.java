@@ -246,7 +246,13 @@ public class MockDataAdapter implements IDataAdapter {
 	@Override
 	public List<TaskSubmissions> getSubmissionsByTask(int taskID)
 			throws DataException {
-		// TODO Automatisch generierter Methodenstub
+		fail("Method not implemented");
+		return null;
+	}
+
+	@Override
+	public List<TaskSubmissions> getUnratedSubmissions() throws DataException {
+		fail("Method not implemented");
 		return null;
 	}
 
