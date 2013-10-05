@@ -130,6 +130,9 @@ public class Tasks {
 	@KnownUserAuth
 	public Submission submit(SimpleSubmission submission, @PathParam("taskID") int taskID, @Context SecurityContext sec) throws DataException, InputException {
 		logger.entry();
+
+		if (!gameState.isCanSubmit())
+			throw new InputException("Śubmitting disabled.");
 		
 		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
 		
