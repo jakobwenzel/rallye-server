@@ -230,7 +230,7 @@ public class DataAdapter implements IDataAdapter {
 	 * Submissions for the same task and group are expected to follow each other in the table.
 	 * @param rs
 	 * @return
-	 * @throws SqlException
+	 * @throws SQLException
 	 */
 	protected List<TaskSubmissions> convertResultToTaskSubmissions(ResultSet rs) throws SQLException {
 		List<TaskSubmissions> taskSubmissions = new ArrayList<TaskSubmissions>();
@@ -1274,6 +1274,72 @@ public class DataAdapter implements IDataAdapter {
 			throw new DataException(e);
 		} finally {
 			close(null,delSt,null);
+			close(con, st, rs);
+		}
+	}
+
+	@java.lang.Override
+	public RallyeGameState loadGameState() throws DataException {
+		Connection con = null;
+		PreparedStatement st = null;
+		ResultSet rs = null;
+
+		try {
+			con = dataSource.getConnection();
+			st = con.prepareStatement("SELECT "+ cols(Ry.GameState.SHOW_RATING_TO_USERS, Ry.GameState.CAN_SUBMIT)
+					+" FROM "+ Ry.GameState.TABLE);
+			rs = st.executeQuery();
+
+			if (!rs.next()) //Move to first element
+				return null;
+			RallyeGameState res = new RallyeGameState(rs.getBoolean(1), rs.getBoolean(2));
+
+			if (rs.next())
+				throw new DataException("Database should containt at most 1 GameState");
+
+			return res;
+		} catch (SQLException e) {
+			throw new DataException(e);
+		} finally {
+			close(con, st, rs);
+		}
+	}
+
+	@java.lang.Override
+	public void saveGameState(RallyeGameState gameState) throws DataException {
+		Connection con = null;
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		Savepoint transaction = null;
+
+		try {
+			con = dataSource.getConnection();
+			con.setAutoCommit(false);
+			transaction = con.setSavepoint();
+
+			st = con.prepareStatement("DELETE FROM "+ Ry.GameState.TABLE);
+			st.executeUpdate();
+			st.close();
+
+			st = con.prepareStatement("INSERT INTO "+ Ry.GameState.TABLE+" ("+ cols(Ry.GameState.SHOW_RATING_TO_USERS, Ry.GameState.CAN_SUBMIT)
+					+") VALUES (?,?)");
+
+
+			st.setBoolean(1,gameState.isShowRatingToUsers());
+			st.setBoolean(2,gameState.isCanSubmit());
+
+			st.executeUpdate();
+
+			con.commit();
+		} catch (SQLException e) {
+			try {
+				con.rollback(transaction);
+			} catch (SQLException e1) {
+				logger.warn("Exception while rolling back: "+e1);
+				e1.printStackTrace();
+			}
+			throw new DataException(e);
+		} finally {
 			close(con, st, rs);
 		}
 	}

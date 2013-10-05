@@ -17,6 +17,7 @@ import de.rallye.db.IDataAdapter;
 import de.rallye.images.ImageRepository;
 import de.rallye.model.structures.ChatPictureLink;
 import de.rallye.model.structures.GameState;
+import de.rallye.model.structures.RallyeGameState;
 import de.rallye.push.PushService;
 
 /**
@@ -31,6 +32,7 @@ public class RallyeBinder extends AbstractBinder {
 
 	public static IDataAdapter data;
 	public static RallyeConfig config;
+	public static RallyeGameState gameState;
 
 
 	private static class ChatPictureMap extends TypeLiteral<Map<String, ChatPictureLink>> {
@@ -51,5 +53,7 @@ public class RallyeBinder extends AbstractBinder {
 		bind(data).to(IDataAdapter.class);
 		bind(GameState.class).to(GameState.class).in(Singleton.class);
 		bind(PushService.class).to(PushService.class).in(Singleton.class);
+
+		bind(gameState).to(RallyeGameState.class);
 	}
 }

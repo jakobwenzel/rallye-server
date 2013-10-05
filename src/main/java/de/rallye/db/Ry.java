@@ -132,4 +132,10 @@ public class Ry {
 		public static final String START_TIME = "gameStartTime";
 		public static final String SPAWN_ANYWHERE = "freeStartPoint";
 	}
+
+	public static class GameState {
+		public static final String TABLE = "ry_gameState";
+		public static final String SHOW_RATING_TO_USERS = "showRatingToUsers";
+		public static final String CAN_SUBMIT = "canSubmit";
+	}
 }

@@ -28,6 +28,7 @@ import de.rallye.model.structures.LoginInfo;
 import de.rallye.model.structures.Node;
 import de.rallye.model.structures.PushConfig;
 import de.rallye.model.structures.PushMode;
+import de.rallye.model.structures.RallyeGameState;
 import de.rallye.model.structures.SimpleChatEntry;
 import de.rallye.model.structures.SimpleSubmission;
 import de.rallye.model.structures.Submission;
@@ -240,6 +241,17 @@ public class MockDataAdapter implements IDataAdapter {
 
 	@Override
 	public void scoreSubmissions(SubmissionScore[] scores) throws DataException {
+		fail("Method not implemented");
+	}
+
+	@Override
+	public RallyeGameState loadGameState() throws DataException {
+		fail("Method not implemented");
+		return null;
+	}
+
+	@Override
+	public void saveGameState(RallyeGameState gameState) throws DataException {
 		fail("Method not implemented");
 	}
 

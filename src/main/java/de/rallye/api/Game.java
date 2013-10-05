@@ -14,10 +14,14 @@ import javax.ws.rs.core.SecurityContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import de.rallye.annotations.AdminAuth;
 import de.rallye.annotations.KnownUserAuth;
+import de.rallye.annotations.KnownUserOrAdminAuth;
+import de.rallye.db.IDataAdapter;
 import de.rallye.filter.auth.RallyePrincipal;
 import de.rallye.exceptions.DataException;
 import de.rallye.model.structures.GameState;
+import de.rallye.model.structures.RallyeGameState;
 
 
 @Path("rallye/game")
@@ -27,32 +31,46 @@ public class Game {
 
 	private Logger logger =  LogManager.getLogger(Game.class);
 
-	@Inject	GameState gameState;
+	@Inject RallyeGameState gameState;
+	@Inject
+	IDataAdapter data;
 
 
 	@GET
-	@KnownUserAuth
+	@KnownUserOrAdminAuth
 	@Path("state")
 	@Produces(MediaType.APPLICATION_JSON)
-	public GameState getChats(@Context SecurityContext sec) {
-		return gameState;
+	public RallyeGameState getGameState(@Context SecurityContext sec) {
+		logger.entry();
+		return logger.exit(gameState);
 	}
-	
+
 
 	@POST
-	@KnownUserAuth
-	@Path("nextPosition")
-	@Consumes(MediaType.APPLICATION_JSON)
-	public Response setUpcomingPosition(@Context SecurityContext sec, int nodeID) throws DataException {
+	@AdminAuth
+	@Path("state")
+	public Response setGameState(RallyeGameState state) throws DataException {
 		logger.entry();
-		int groupId = ((RallyePrincipal)sec.getUserPrincipal()).getGroupID();
-		
-		logger.debug(groupId +" goes to "+nodeID);
-		
-		gameState.setUpcomingPosition(groupId, nodeID);
-		
+		this.gameState.copy(state);
+		data.saveGameState(state);
+
 		return logger.exit(Response.ok().build());
 	}
+
+//	@POST
+//	@KnownUserAuth
+//	@Path("nextPosition")
+//	@Consumes(MediaType.APPLICATION_JSON)
+//	public Response setUpcomingPosition(@Context SecurityContext sec, int nodeID) throws DataException {
+//		logger.entry();
+//		int groupId = ((RallyePrincipal)sec.getUserPrincipal()).getGroupID();
+//
+//		logger.debug(groupId +" goes to "+nodeID);
+//
+//		gameState.setUpcomingPosition(groupId, nodeID);
+//
+//		return logger.exit(Response.ok().build());
+//	}
 	
 	
 }

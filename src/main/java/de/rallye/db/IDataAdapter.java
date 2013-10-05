@@ -18,6 +18,7 @@ import de.rallye.model.structures.LoginInfo;
 import de.rallye.model.structures.Node;
 import de.rallye.model.structures.PushConfig;
 import de.rallye.model.structures.PushMode;
+import de.rallye.model.structures.RallyeGameState;
 import de.rallye.model.structures.SimpleChatEntry;
 import de.rallye.model.structures.SimpleSubmission;
 import de.rallye.model.structures.Submission;
@@ -120,5 +121,9 @@ public interface IDataAdapter {
 			throws DataException;
 
 	public abstract void scoreSubmissions(SubmissionScore[] scores) throws DataException;
+
+	public abstract RallyeGameState loadGameState() throws DataException;
+
+	public abstract void saveGameState(RallyeGameState gameState) throws DataException;
 
 }
