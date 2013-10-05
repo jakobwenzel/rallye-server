@@ -70,7 +70,7 @@ public class MockDataAdapter implements IDataAdapter {
 	}
 
 	@Override
-	public List<TaskSubmissions> getAllSubmissions(int groupID)
+	public List<TaskSubmissions> getAllSubmissions(int groupID, boolean includeRatings)
 			throws DataException {
 		fail("Method not implemented");
 		return null;
@@ -256,14 +256,14 @@ public class MockDataAdapter implements IDataAdapter {
 	}
 
 	@Override
-	public List<TaskSubmissions> getSubmissionsByTask(int taskID)
+	public List<TaskSubmissions> getSubmissionsByTask(int taskID, boolean includeRatings)
 			throws DataException {
 		fail("Method not implemented");
 		return null;
 	}
 
 	@Override
-	public List<TaskSubmissions> getUnratedSubmissions() throws DataException {
+	public List<TaskSubmissions> getUnratedSubmissions(boolean includeRatings) throws DataException {
 		fail("Method not implemented");
 		return null;
 	}

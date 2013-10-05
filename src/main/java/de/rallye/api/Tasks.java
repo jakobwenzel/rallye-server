@@ -27,6 +27,7 @@ import de.rallye.db.IDataAdapter;
 import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.InputException;
 import de.rallye.filter.auth.RallyePrincipal;
+import de.rallye.model.structures.RallyeGameState;
 import de.rallye.model.structures.SimpleSubmission;
 import de.rallye.model.structures.Submission;
 import de.rallye.model.structures.SubmissionScore;
@@ -42,18 +43,21 @@ public class Tasks {
 	private Logger logger =  LogManager.getLogger(Tasks.class);
 
 	@Inject	IDataAdapter data;
+	@Inject
+	RallyeGameState gameState;
 	
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@KnownUserOrAdminAuth
 	public List<Task> getTasks(@Context SecurityContext sec) throws DataException {
 		logger.entry();
-	
 
+		//Group id is only passed to getTasks to include ratings
 		Integer groupID = null;
 		if (sec.getUserPrincipal() instanceof RallyePrincipal) {
 			RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
-			groupID = p.getGroupID();
+			if (gameState.isShowRatingToUsers())
+				groupID = p.getGroupID();
 		}
 		List<Task> res = data.getTasks(groupID);
 		
@@ -79,10 +83,13 @@ public class Tasks {
 	@KnownUserOrAdminAuth
 	public List<TaskSubmissions> getAllSubmissions(@PathParam("groupID") int groupID, @Context SecurityContext sec) throws DataException {
 		logger.entry();
-		
+
+		boolean includeRatings = true;
 		if (sec.getUserPrincipal() instanceof RallyePrincipal) {
 			RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
 			p.ensureGroupMatches(groupID);
+
+			includeRatings = gameState.isShowRatingToUsers();
 		} //else we are admin and don't need to check group match.
 		
 //		if (!p.hasRightsForTaskScoring()) {
@@ -90,7 +97,7 @@ public class Tasks {
 //			throw new WebApplicationException(Response.Status.FORBIDDEN);
 //		}
 		
-		List<TaskSubmissions> res = data.getAllSubmissions(groupID);
+		List<TaskSubmissions> res = data.getAllSubmissions(groupID, includeRatings);
 		return logger.exit(res);
 	}
 	
@@ -101,7 +108,7 @@ public class Tasks {
 	public List<TaskSubmissions> getAllByTask(@PathParam("taskID") int taskID) throws DataException {
 		logger.entry();
 		
-		List<TaskSubmissions> res = data.getSubmissionsByTask(taskID);
+		List<TaskSubmissions> res = data.getSubmissionsByTask(taskID, true);
 		return logger.exit(res);
 	}
 	
@@ -112,7 +119,7 @@ public class Tasks {
 	public List<TaskSubmissions> getUnrated() throws DataException {
 		logger.entry();
 		
-		List<TaskSubmissions> res = data.getUnratedSubmissions();
+		List<TaskSubmissions> res = data.getUnratedSubmissions(true);
 		return logger.exit(res);
 	}
 	

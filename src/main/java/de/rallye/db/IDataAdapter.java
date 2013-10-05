@@ -55,14 +55,15 @@ public interface IDataAdapter {
 	public abstract List<Submission> getSubmissions(int taskID, int groupID)
 			throws DataException;
 
-	public abstract List<TaskSubmissions> getAllSubmissions(int groupID)
-			throws DataException;
-	
-	public abstract List<TaskSubmissions> getSubmissionsByTask(int taskID)
+	/* (non-Javadoc)
+	 * @see de.rallye.db.IDataAdapter#getAllSubmissions(int)
+	 */
+	List<TaskSubmissions> getAllSubmissions(int groupID, boolean includeRating) throws DataException;
+
+	List<TaskSubmissions> getSubmissionsByTask(int taskID, boolean includeRating)
 			throws DataException;
 
-	public abstract List<TaskSubmissions> getUnratedSubmissions()
-			throws DataException;
+	List<TaskSubmissions> getUnratedSubmissions(boolean includeRating) throws DataException;
 
 	public abstract Submission submit(int taskID, int groupID, int userID,
 			SimpleSubmission submission) throws DataException, InputException;

@@ -232,7 +232,7 @@ public class DataAdapter implements IDataAdapter {
 	 * @return
 	 * @throws SQLException
 	 */
-	protected List<TaskSubmissions> convertResultToTaskSubmissions(ResultSet rs) throws SQLException {
+	protected List<TaskSubmissions> convertResultToTaskSubmissions(ResultSet rs, boolean includeRating) throws SQLException {
 		List<TaskSubmissions> taskSubmissions = new ArrayList<TaskSubmissions>();
 		List<Submission> submissions = null;
 		
@@ -247,10 +247,13 @@ public class DataAdapter implements IDataAdapter {
 			
 			
 			if (taskID != lastTaskID || groupID != lastGroupID) {
-				Integer score = rs.getInt(8);
-				if (rs.wasNull()) score = null;
-				Integer bonus = rs.getInt(9);
-				if (rs.wasNull()) bonus = null;
+				Integer score = null, bonus = null;
+					if (includeRating) {
+					score = rs.getInt(8);
+					if (rs.wasNull()) score = null;
+					bonus = rs.getInt(9);
+					if (rs.wasNull()) bonus = null;
+				}
 				
 				boolean scoreOutdated = rs.getBoolean(10);
 				
@@ -267,7 +270,7 @@ public class DataAdapter implements IDataAdapter {
 	 * @see de.rallye.db.IDataAdapter#getAllSubmissions(int)
 	 */
 	@Override
-	public List<TaskSubmissions> getAllSubmissions(int groupID) throws DataException {
+	public List<TaskSubmissions> getAllSubmissions(int groupID, boolean includeRating) throws DataException {
 		PreparedStatement st = null;
 		Connection con = null;
 		ResultSet rs = null;
@@ -285,7 +288,7 @@ public class DataAdapter implements IDataAdapter {
 
 			
 			
-			return convertResultToTaskSubmissions(rs);
+			return convertResultToTaskSubmissions(rs, includeRating);
 		} catch (SQLException e) {
 			throw new DataException(e);
 		} finally {
@@ -296,7 +299,7 @@ public class DataAdapter implements IDataAdapter {
 
 
 	@Override
-	public List<TaskSubmissions> getSubmissionsByTask(int taskID)
+	public List<TaskSubmissions> getSubmissionsByTask(int taskID, boolean includeRating)
 			throws DataException {
 		PreparedStatement st = null;
 		Connection con = null;
@@ -315,7 +318,7 @@ public class DataAdapter implements IDataAdapter {
 
 			
 			
-			return convertResultToTaskSubmissions(rs);
+			return convertResultToTaskSubmissions(rs, includeRating);
 		} catch (SQLException e) {
 			throw new DataException(e);
 		} finally {
@@ -324,7 +327,7 @@ public class DataAdapter implements IDataAdapter {
 	}
 
 	@Override
-	public List<TaskSubmissions> getUnratedSubmissions() throws DataException {
+	public List<TaskSubmissions> getUnratedSubmissions(boolean includeRating) throws DataException {
 		PreparedStatement st = null;
 		Connection con = null;
 		ResultSet rs = null;
@@ -338,7 +341,7 @@ public class DataAdapter implements IDataAdapter {
 			
 			rs = st.executeQuery();
 			
-			return convertResultToTaskSubmissions(rs);
+			return convertResultToTaskSubmissions(rs, includeRating);
 		} catch (SQLException e) {
 			throw new DataException(e);
 		} finally {
