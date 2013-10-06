@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 
 import de.rallye.db.IDataAdapter;
 import de.rallye.exceptions.DataException;
+import de.rallye.push.PushService;
 
 public class ChatPictureLink {
 	
@@ -15,12 +16,13 @@ public class ChatPictureLink {
 	public enum Mode { EditChatWhenUploaded, PictureUploaded };
 	
 	private Integer pictureID;
-	private Integer chatID;
+	private Integer roomID;
+	private ChatEntry chatEntry;
 	
 	private Mode mode;
 	
 	public interface ILinkCallback {
-		void propagateLink(ChatPictureLink link, Mode mode);
+		void propagateLink(ChatPictureLink link, Mode mode, PushService push);
 	}
 	
 	private ILinkCallback callback;
@@ -30,38 +32,39 @@ public class ChatPictureLink {
 	}
 	
 	
-	public void setPicture(int pictureID) {
+	public void setPicture(int pictureID, PushService push) {
 		this.pictureID = pictureID;
 		
 		logger.info("{}: attached picture {}", this, pictureID);
 		
-		checkLinkComplete();
+		checkLinkComplete(push);
 	}
 	
-	public void setChat(int chatID) {
-		this.chatID = chatID;
+	public void setChat(ChatEntry chatEntry, int roomID, PushService push) {
+		this.chatEntry = chatEntry;
+		this.roomID = roomID;
 		
-		logger.info("{}: attached chat {}", this, chatID);
+		logger.info("{}: attached chat {}", this, chatEntry.chatID);
 		
-		checkLinkComplete();
+		checkLinkComplete(push);
 	}
 	
 	public Integer getPictureID() {
 		return pictureID;
 	}
 	
-	public Integer getChatID() {
-		return chatID;
+	public ChatEntry getChat() {
+		return chatEntry;
 	}
 	
-	private void checkLinkComplete() {
-		if (pictureID != null && pictureID > 0 && chatID != null && chatID > 0 && mode == Mode.EditChatWhenUploaded) {
-			callback.propagateLink(this, mode);
+	private void checkLinkComplete(PushService push) {
+		if (pictureID != null && pictureID > 0 && chatEntry != null && chatEntry.chatID > 0 && mode == Mode.EditChatWhenUploaded) {
+			callback.propagateLink(this, mode, push);
 			logger.info("{}: complete -> edit chat", this);
 		} else if (pictureID != null && pictureID > 0) {
 			mode = Mode.PictureUploaded;
 			logger.info("{}: set mode {}", this, mode);
-		} else if (chatID != null && chatID > 0) {
+		} else if (chatEntry != null && chatEntry.chatID > 0) {
 			mode = Mode.EditChatWhenUploaded;
 			logger.info("{}: set mode {}", this, mode);
 		}
@@ -85,10 +88,11 @@ public class ChatPictureLink {
 		}
 
 		@Override
-		public void propagateLink(ChatPictureLink link, Mode mode) {
+		public void propagateLink(ChatPictureLink link, Mode mode, PushService push) {
 			try {
-				data.editChatAddPicture(link.chatID, link.pictureID);
-				//TODO: Push
+				data.editChatAddPicture(link.chatEntry.chatID, link.pictureID);
+
+				push.chatChanged(link.chatEntry, link.roomID);
 			} catch (DataException e) {
 				logger.error("{}: Linking failed", this, e);
 			}

@@ -25,6 +25,7 @@ import de.rallye.images.ImageRepository;
 import de.rallye.model.structures.ChatPictureLink;
 import de.rallye.model.structures.Picture;
 import de.rallye.model.structures.PictureSize;
+import de.rallye.push.PushService;
 
 @Path("rallye/pics")
 public class Pics {
@@ -34,6 +35,7 @@ public class Pics {
 	@Inject	IDataAdapter data;
 	@Inject java.util.Map<String, ChatPictureLink> chatPictureMap;
 	@Inject	ImageRepository imageRepository;
+	@Inject PushService push;
 	
 	@PUT
 	@Path("{hash}")
@@ -46,7 +48,7 @@ public class Pics {
 		
 		Picture pic = savePicture(img, p);
 		if (pic != null) {
-			ChatPictureLink.getLink(chatPictureMap, hash, data).setPicture(pic.pictureID);
+			ChatPictureLink.getLink(chatPictureMap, hash, data).setPicture(pic.pictureID, push);
 		}
 		
 		return logger.exit(pic);

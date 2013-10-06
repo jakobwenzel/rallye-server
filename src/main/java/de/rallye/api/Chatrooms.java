@@ -109,7 +109,7 @@ public class Chatrooms {
 				res = data.addChat(completeChat, roomID, groupID, userID);
 			} else {
 				res = data.addChat(chat, roomID, groupID, userID);
-				link.setChat(res.chatID);
+				link.setChat(res, roomID, push);
 			}
 		} else
 			res = data.addChat(chat, roomID, groupID, userID);
