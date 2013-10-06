@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import de.rallye.filter.auth.AdminPrincipal;
 import de.rallye.filter.auth.GroupPrincipal;
 import de.rallye.filter.auth.RallyePrincipal;
 import de.rallye.exceptions.DataException;
@@ -126,5 +127,7 @@ public interface IDataAdapter {
 	public abstract RallyeGameState loadGameState() throws DataException;
 
 	public abstract void saveGameState(RallyeGameState gameState) throws DataException;
+
+	public abstract AdminPrincipal getAdminPrincipal(String username, String password) throws DataException, InputException;
 
 }

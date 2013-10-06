@@ -2,6 +2,7 @@ package de.rallye.db;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
+import de.rallye.filter.auth.AdminPrincipal;
 import de.rallye.filter.auth.GroupPrincipal;
 import de.rallye.filter.auth.RallyePrincipal;
 import de.rallye.config.RallyeConfig;
@@ -1293,7 +1294,7 @@ public class DataAdapter implements IDataAdapter {
 					+" FROM "+ Ry.GameState.TABLE);
 			rs = st.executeQuery();
 
-			if (!rs.next()) //Move to first element
+			if (!rs.first()) //Move to first element
 				return null;
 			RallyeGameState res = new RallyeGameState(rs.getBoolean(1), rs.getBoolean(2));
 
@@ -1341,6 +1342,46 @@ public class DataAdapter implements IDataAdapter {
 				logger.warn("Exception while rolling back: "+e1);
 				e1.printStackTrace();
 			}
+			throw new DataException(e);
+		} finally {
+			close(con, st, rs);
+		}
+	}
+
+	@Override
+	public AdminPrincipal getAdminPrincipal(String username, String password) throws DataException, InputException {
+		if (username==null || username.length()<=0 || password == null || password.length() <= 0)
+			throw new InputException("Incomplete Login");
+
+		Connection con = null;
+		PreparedStatement st = null;
+		ResultSet rs = null;
+
+		try {
+
+
+			con = dataSource.getConnection();
+			st = con.prepareStatement("SELECT "+ cols(Ry.Admins.ID, Ry.Admins.USERNAME, Ry.Admins.RIGHTS)
+					+" FROM "+ Ry.Admins.TABLE +" WHERE "+ Ry.Admins.USERNAME +"=? AND "+ Ry.Users.PASSWORD +"=?");
+			st.setString(1, username);
+			st.setString(2, password);
+
+			rs = st.executeQuery();
+
+			if (rs.first()) {
+				int id = rs.getInt(1);
+				String rightsStr = rs.getString(3);
+				List<String> rights;
+				if (rightsStr!=null)
+					rights = Arrays.asList(rightsStr.split(","));
+				else
+					rights = new ArrayList<String>();
+
+				return new AdminPrincipal(id,username,rights);
+			} else {
+				return null;
+			}
+		} catch (SQLException e) {
 			throw new DataException(e);
 		} finally {
 			close(con, st, rs);

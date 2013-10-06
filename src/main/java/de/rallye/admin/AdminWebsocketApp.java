@@ -125,7 +125,7 @@ public class AdminWebsocketApp extends WebSocketApplication {
 			try {
 				logger.debug("Trying to authenticate user");
 				
-				AdminAuthFilter auth = new AdminAuthFilter();
+				AdminAuthFilter auth = new AdminAuthFilter(data);
 				@SuppressWarnings("unused")
 				AdminPrincipal p = auth.checkAuthentication(new String[]{username, password});
 			

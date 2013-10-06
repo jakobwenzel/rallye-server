@@ -17,6 +17,7 @@ import de.rallye.db.IDataAdapter;
 import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.InputException;
 import de.rallye.exceptions.UnauthorizedException;
+import de.rallye.filter.auth.AdminPrincipal;
 import de.rallye.filter.auth.GroupPrincipal;
 import de.rallye.filter.auth.RallyePrincipal;
 import de.rallye.model.structures.ChatEntry;
@@ -252,6 +253,12 @@ public class MockDataAdapter implements IDataAdapter {
 	@Override
 	public void saveGameState(RallyeGameState gameState) throws DataException {
 		fail("Method not implemented");
+	}
+
+	@Override
+	public AdminPrincipal getAdminPrincipal(String username, String password) throws DataException {
+		fail("Method not implemented");
+		return null;
 	}
 
 	@Override

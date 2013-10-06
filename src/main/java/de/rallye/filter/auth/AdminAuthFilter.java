@@ -17,6 +17,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import de.rallye.db.IDataAdapter;
+import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.InputException;
 import de.rallye.exceptions.UnauthorizedException;
 
@@ -52,19 +53,13 @@ public class AdminAuthFilter extends BaseAuthFilter {
 		try {
 			if (login.length != 2)
 				throw new InputException("Login does not contain username and password");
-			
-			if (login[0].equals("taskScorer") && login[1].equals("test")) {
-				List<String> rights = new ArrayList<String>();
-				rights.add("taskScoring");
-				principal = new AdminPrincipal(1, "taskScorer", rights);
-			} else if (login[0].equals("ray") && login[1].equals("test")) {
-				principal = new AdminPrincipal(2, "ray", new ArrayList<String>());
-			} else {
+
+			principal = data.getAdminPrincipal(login[0],login[1]);
+			if (principal==null)
 				throw new UnauthorizedException();
-			}
-//		} catch (DataException e) {
-//			logger.error("Database Error", e);
-//			throw new WebApplicationException(e);
+		} catch (DataException e) {
+			logger.error("Database Error", e);
+			throw new WebApplicationException(e);
 		} catch (InputException e) {
 			logger.error("Invalid login", e);
 			throw new WebApplicationException(e);

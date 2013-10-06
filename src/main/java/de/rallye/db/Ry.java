@@ -138,4 +138,12 @@ public class Ry {
 		public static final String SHOW_RATING_TO_USERS = "showRatingToUsers";
 		public static final String CAN_SUBMIT = "canSubmit";
 	}
+
+	public static class Admins {
+		public static final String TABLE = "ry_admins";
+		public static final String ID = "adminID";
+		public static final String USERNAME = "username";
+		public static final String PASSWORD = "password";
+		public static final String RIGHTS = "rights";
+	}
 }
