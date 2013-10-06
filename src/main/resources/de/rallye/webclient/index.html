@@ -8,9 +8,11 @@
 <script type="text/javascript"
     src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false">
 </script>
+<script type="text/javascript">
+var clientName = "client";
+</script>
 <script type="text/javascript" src="/client/client.js"></script>
 <script type="text/javascript">
-
 google.maps.visualRefresh = true;
 function load_map() {
 	console.log("loading map");
@@ -240,7 +242,7 @@ $(function () {
 			return list + link;
 		
 		},"");
-		roomLinks = roomLinks + '<a href="#" onclick="return load_map();">Map</a>'
+		roomLinks = roomLinks + '<hr><a href="#" onclick="return load_map();">Map</a>'
 		$("#left").html(roomLinks);
 	});
 	

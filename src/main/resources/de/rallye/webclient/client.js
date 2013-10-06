@@ -40,8 +40,8 @@ function setup_error_handler() {
 }
 
 var root = findRoot(); //Root path to server
-var username = window.localStorage["username"]; //Auth username
-var password = window.localStorage["password"]; //Auth password
+var username = window.localStorage[clientName+"username"]; //Auth username
+var password = window.localStorage[clientName+"password"]; //Auth password
 var loggedin = false; //We don't know if the stored data is valid yet.
 if (username && password) {
 	console.log(username);
@@ -217,8 +217,8 @@ function submit_login() {
 
 	if (remember) {
 	 	$("#logout").css("display","");
-		window.localStorage["username"] = username;
-		window.localStorage["password"] = password;
+		window.localStorage[clientName+"username"] = username;
+		window.localStorage[clientName+"password"] = password;
 	}
 	
 	$("#main").html("Logging in...");
