@@ -361,3 +361,18 @@ function playSound(filename){
     document.getElementById("sound").innerHTML='<audio autoplay="autoplay"><source src="' + filename + '.mp3" type="audio/mpeg" /><source src="' + filename + '.ogg" type="audio/ogg" /><embed hidden="true" autostart="true" loop="false" src="' + filename +'.mp3" /></audio>';
 }
 
+var connectRetries = 0;
+//Reconnect to websocket after some time, increasing with number of retries
+function socket_reconnect() {
+	var time = connectRetries*connectRetries; // wait number of retries squared in seconds
+
+
+	var status = $("#status");
+	status.text("Connection lost, retrying after "+time+"s");
+
+	window.setTimeout(function() {
+		setup_socket();
+	},time*1000);
+
+	connectRetries++;
+}

@@ -54,7 +54,8 @@ function setup_socket() {
 	socket.onopen = function(){
 		socket_open = true;
 		status.text("Socket opened");
-		
+
+		connectRetries=0;
 		if (username && password)
 			send_socket_login();
 	}
@@ -95,6 +96,8 @@ function setup_socket() {
 	socket.onclose = function() {
 	
 		status.text("Socket closed");
+		socket_reconnect();
+
 	}
 	
 }
