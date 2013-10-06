@@ -484,6 +484,44 @@ function save_score() {
 	});
 }
 
+
+function gamestate(restore) {
+
+	if (!restore) history.pushState(null, "", root+"client/admin.html?gamestate");
+	authajax({
+			url: root+"rallye/game/state"
+		},function(state){ //Success
+			console.log(state);
+			var template = $('#templ_gamestate').html();
+			var html = Mustache.to_html(template,state,partials);
+			$("#main").html(html);
+		},function() { //Error
+			$('#main').html("Error loading gamestate");
+		});
+
+	return false;
+}
+
+function submit_gamestate() {
+	var data = {
+		showRatingToUsers: $('#canSubmit').attr("checked")=="checked",
+		canSubmit: $('#showRating').attr("showRating")=="checked"
+	}
+	console.log(data);
+	authajax({
+		url: root+"rallye/game/state",
+		method: "POST",
+		contentType: "application/json",
+		data: JSON.stringify(data)
+	},function(res){ //Success
+		alert("successfully saved.");
+	},function() { //Error
+		alert("could not save gamestate.");
+	});
+
+	return false;
+}
+
 $(function () {
 	var loaded = true;
 	var initial = false;
@@ -506,6 +544,7 @@ $(function () {
 		if (!parameterDispatch("editgroup",edit_group))
 		if (!parameterDispatch("newgroup",new_group))
 		if (!parameterDispatch("unrated",list_unrated))
+		if (!parameterDispatch("gamestate",gamestate))
 			$('#main').html('');
 		loaded = true;
 	}
@@ -750,6 +789,16 @@ Bewertung (id={{taskID}}:{{groupID}}):
 </table>
 </script>
 
+<script id="templ_gamestate" type="text/template">
+	<form>
+		<table>
+			<tr><td><label for="showRatings"><input type="checkbox" id="showRatings" {{#showRatingToUsers}}checked{{/showRatingToUsers}}>Bewertungen für Benutzer anzeigen</label></tr>
+			<tr><td><label for="canSubmit"><input type="checkbox" id="canSubmit" {{#canSubmit}}checked{{/canSubmit}}>Neue Abgaben erlauben</label></tr>
+			<tr><td><input type="submit" value="Save" onclick="return submit_gamestate();"></td></tr>
+		</table>
+	</form>
+</script>
+
 <div id="servername">
 </div>
 <div> Status: <span id="status" />
@@ -759,6 +808,9 @@ Bewertung (id={{taskID}}:{{groupID}}):
 <a href="#" onclick="return list_unrated();">Unbewertete Abgaben</a><br>
 <a href="#" onclick="return list_by_group();">Abgaben nach Gruppe</a><br>
 <a href="#" onclick="return list_by_task();">Abgaben nach Aufgabe</a>
+	<hr>
+	<a href="#" onclick="return gamestate();">Spielstatus</a>
+
 </div>
 <div id="main">
 </div>
