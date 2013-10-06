@@ -11,6 +11,7 @@ import java.io.InputStream;
 import de.rallye.RallyeServer;
 import de.rallye.config.RallyeConfig;
 import de.rallye.injection.RallyeBinder;
+import de.rallye.model.structures.RallyeGameState;
 import de.rallye.test.db.MockDataAdapter;
 /**
  *
@@ -41,6 +42,7 @@ public class StartTestServer {
 		RallyeConfig config = RallyeConfig.fromStream(stream);
 		RallyeBinder.config = config;
 		RallyeBinder.data = MockDataAdapter.getInstance();
+		RallyeBinder.gameState = RallyeGameState.getInstance(RallyeBinder.data);
 		
 		//start server
 		RallyeServer server = new RallyeServer(config.getHostName(), config.getRestPort());

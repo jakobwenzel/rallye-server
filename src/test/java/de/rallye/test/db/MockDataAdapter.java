@@ -246,8 +246,7 @@ public class MockDataAdapter implements IDataAdapter {
 
 	@Override
 	public RallyeGameState loadGameState() throws DataException {
-		fail("Method not implemented");
-		return null;
+		return new RallyeGameState(true, true);
 	}
 
 	@Override

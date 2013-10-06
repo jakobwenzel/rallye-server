@@ -54,6 +54,8 @@ public class RallyeBinder extends AbstractBinder {
 		bind(GameState.class).to(GameState.class).in(Singleton.class);
 		bind(PushService.class).to(PushService.class).in(Singleton.class);
 
+		if (gameState==null)
+			logger.warn("GameState is null");
 		bind(gameState).to(RallyeGameState.class);
 	}
 }
