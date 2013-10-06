@@ -171,6 +171,7 @@ function edit_group_save() {
 	var group = {
 			name: $('#edit_name').val(),
 			description: $('#edit_description').val(),
+			password: $('#edit_password').val(),
 			groupID: editingID
 	}
 	if (!group.name) {
@@ -220,7 +221,7 @@ function edit_group(id,restore) {
 					version: 2,
 					server: root+"rallye/",
 					groupID: group.groupID,
-					groupPassword: "test"
+					groupPassword: group.password
 				}
 			new QRCode(document.getElementById("qrcode"), {
 				text:JSON.stringify(qrData),
@@ -235,7 +236,8 @@ function edit_group(id,restore) {
 function new_group_save() {
 	var group = {
 			name: $('#edit_name').val(),
-			description: $('#edit_description').val()
+			description: $('#edit_description').val(),
+			password: $('#edit_password').val(),
 	}
 	if (!group.name) {
 		alert("You need to enter a group name.");
@@ -759,6 +761,10 @@ Bewertung (id={{taskID}}:{{groupID}}):
 	<tr>
 		<td>Gruppenbeschreibung:</td>
 		<td><input type="text" value="{{description}}" id="edit_description"></td>
+	</tr>
+	<tr>
+		<td>Gruppenpasswort:</td>
+		<td><input type="text" value="{{password}}" id="edit_password"></td>
 	</tr>
 	{{#groupID}}
 	<tr>

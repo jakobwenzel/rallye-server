@@ -103,7 +103,7 @@ public class DataAdapter implements IDataAdapter {
 	 * @see de.rallye.db.IDataAdapter#getGroups()
 	 */
 	@Override
-	public synchronized List<Group> getGroups() throws DataException {
+	public synchronized List<Group> getGroups(boolean includePasswords) throws DataException {
 
 		if (groups!=null) return groups;
 		
@@ -114,13 +114,21 @@ public class DataAdapter implements IDataAdapter {
 		try {
 			con = dataSource.getConnection();
 			st = con.createStatement();
-			rs = st.executeQuery("SELECT "+ cols(Ry.Groups.ID, Ry.Groups.NAME, Ry.Groups.DESCRIPTION) +" FROM "+ Ry.Groups.TABLE+" ORDER BY "+Ry.Groups.NAME);
+			if(includePasswords)
+				rs = st.executeQuery("SELECT "+ cols(Ry.Groups.ID, Ry.Groups.NAME, Ry.Groups.DESCRIPTION, Ry.Groups.PASSWORD) +" FROM "+ Ry.Groups.TABLE+" ORDER BY "+Ry.Groups.NAME);
+			else
+				rs = st.executeQuery("SELECT "+ cols(Ry.Groups.ID, Ry.Groups.NAME, Ry.Groups.DESCRIPTION) +" FROM "+ Ry.Groups.TABLE+" ORDER BY "+Ry.Groups.NAME);
 
 			groups = new ArrayList<Group>();
-			
-			while (rs.next()) {
-				groups.add(new Group(rs.getInt(1), rs.getString(2), rs.getString(3)));
-			}
+
+			if (includePasswords)
+				while (rs.next()) {
+					groups.add(new Group(rs.getInt(1), rs.getString(2), rs.getString(3), rs.getString(4)));
+				}
+			else
+				while (rs.next()) {
+					groups.add(new Group(rs.getInt(1), rs.getString(2), rs.getString(3)));
+				}
 			
 			return groups;
 		} catch (SQLException e) {
@@ -1197,7 +1205,7 @@ public class DataAdapter implements IDataAdapter {
 
 			st.setString(1, group.name);
 			st.setString(2, group.description);
-			st.setString(3, "test"); //TODO: Make password changeable
+			st.setString(3, group.password);
 			st.execute();
 			
 			rs = st.getGeneratedKeys();
@@ -1229,11 +1237,12 @@ public class DataAdapter implements IDataAdapter {
 			con = dataSource.getConnection();
 			
 			
-			st = con.prepareStatement("UPDATE "+ Ry.Groups.TABLE +" SET "+ Ry.Groups.NAME +"=?, "+ Ry.Groups.DESCRIPTION+"=? WHERE "+Ry.Groups.ID+"=?");
+			st = con.prepareStatement("UPDATE "+ Ry.Groups.TABLE +" SET "+ Ry.Groups.NAME +"=?, "+ Ry.Groups.DESCRIPTION+"=?, "+Ry.Groups.PASSWORD+"=? WHERE "+Ry.Groups.ID+"=?");
 
 			st.setString(1, group.name);
 			st.setString(2, group.description);
-			st.setInt(3, group.groupID);
+			st.setString(3, group.password);
+			st.setInt(4, group.groupID);
 			st.execute();
 			
 		} catch (SQLException e) {

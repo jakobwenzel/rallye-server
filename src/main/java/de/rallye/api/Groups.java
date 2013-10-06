@@ -53,10 +53,21 @@ public class Groups {
 	public List<Group> getGroups() throws DataException {
 		logger.entry();
 	
-		List<Group> res = data.getGroups();
+		List<Group> res = data.getGroups(false);
 		return logger.exit(res);
 	}
-	
+
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@AdminAuth
+	@Path("admin")
+	public List<Group> getGroupsAdmin() throws DataException {
+		logger.entry();
+
+		List<Group> res = data.getGroups(true);
+		return logger.exit(res);
+	}
+
 	@GET
 	@Path("{groupID}")
 	@KnownUserAuth

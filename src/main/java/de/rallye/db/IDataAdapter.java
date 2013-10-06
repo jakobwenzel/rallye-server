@@ -31,7 +31,7 @@ import de.rallye.model.structures.UserInternal;
 
 public interface IDataAdapter {
 
-	public abstract List<Group> getGroups() throws DataException;
+	public abstract List<Group> getGroups(boolean includePasswords) throws DataException;
 	
 	/**
 	 * Add a new group

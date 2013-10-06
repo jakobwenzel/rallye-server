@@ -145,13 +145,19 @@ function getUsers(callback) {
 
 
 function getGroupsAsArray(callback) {
-	getResource("groupsArray",root+"rallye/groups",callback, function (arr) {
+	var url = root+"rallye/groups";
+	if (clientName=="admin")
+		url = url+"/admin";
+	getResource("groupsArray",url,callback, function (arr) {
 		return arr;
 	});
 }
 
 function getGroups(callback) {
-	getResource("groups",root+"rallye/groups",callback, function (arr) {
+	var url = root+"rallye/groups";
+	if (clientName=="admin")
+		url = url+"/admin";
+	getResource("groups",url,callback, function (arr) {
 		var res = {};
 		arr.forEach(function (elem) {
 			res[elem.groupID] = elem;
