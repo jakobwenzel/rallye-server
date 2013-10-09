@@ -54,6 +54,8 @@ public class Pics {
 			ChatPictureLink.getLink(chatPictureMap, hash, data).setPicture(pic.pictureID);
 			SubmissionPictureLink.getLink(submissionPictureMap, hash, data).setPicture(pic.pictureID);
 		}
+
+		logger.debug("Picture {} has hash {}", pic.pictureID, hash);
 		
 		return logger.exit(pic);
 	}

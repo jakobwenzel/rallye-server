@@ -154,9 +154,10 @@ public class Tasks {
 				res = data.submit(taskID, p.getGroupID(), p.getUserID(), completeSubmission);
 			} else {
 
-				logger.debug("no pic id yet");
 				res = data.submit(taskID, p.getGroupID(), p.getUserID(), submission);
 				link.setObject(res);
+
+				logger.debug("submission {} has hash {}",res.submissionID,submission.pictureHash);
 
 			}
 		} else
