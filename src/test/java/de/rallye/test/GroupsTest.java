@@ -43,7 +43,7 @@ public class GroupsTest {
 		
 		HttpResponse c = apiCall("rallye/groups", 200);
 		List<Group> groups = mapper.readValue(c.getEntity().getContent(), new TypeReference<List<Group>>(){});
-		assertEquals("Returned Groups should be equal to source",data.getGroups(),groups);
+		assertEquals("Returned Groups should be equal to source",data.getGroups(true),groups);
 	}
 
 	@Test @Ignore
