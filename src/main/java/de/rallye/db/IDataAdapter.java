@@ -130,4 +130,5 @@ public interface IDataAdapter {
 
 	public abstract AdminPrincipal getAdminPrincipal(String username, String password) throws DataException, InputException;
 
+	void editSubmissionAddPicture(int submissionID, int pictureID)  throws DataException;
 }

@@ -1396,4 +1396,27 @@ public class DataAdapter implements IDataAdapter {
 			close(con, st, rs);
 		}
 	}
+
+	@Override
+	public void editSubmissionAddPicture(int submissionID, int pictureID) throws DataException {
+		PreparedStatement st = null;
+		Connection con = null;
+		ResultSet rs = null;
+
+		try {
+			con = dataSource.getConnection();
+			st = con.prepareStatement("UPDATE "+ Ry.Submissions.TABLE +" SET "+ Ry.Submissions.INT_SUBMISSION +"=? WHERE "+ Ry.Submissions.ID +"=?");
+			st.setInt(1, pictureID);
+			st.setInt(2, submissionID);
+
+			if (st.executeUpdate() > 0)
+				return;
+			else
+				throw new DataException("Failed to add picture to Submission");
+		} catch (SQLException e) {
+			throw new DataException(e);
+		} finally {
+			close(con, st, rs);
+		}
+	}
 }

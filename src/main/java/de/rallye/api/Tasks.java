@@ -27,9 +27,13 @@ import de.rallye.db.IDataAdapter;
 import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.InputException;
 import de.rallye.filter.auth.RallyePrincipal;
+import de.rallye.model.structures.ChatPictureLink;
+import de.rallye.model.structures.PictureLink;
 import de.rallye.model.structures.RallyeGameState;
 import de.rallye.model.structures.SimpleSubmission;
+import de.rallye.model.structures.SimpleSubmissionWithPictureHash;
 import de.rallye.model.structures.Submission;
+import de.rallye.model.structures.SubmissionPictureLink;
 import de.rallye.model.structures.SubmissionScore;
 import de.rallye.model.structures.Task;
 import de.rallye.model.structures.TaskSubmissions;
@@ -43,8 +47,9 @@ public class Tasks {
 	private Logger logger =  LogManager.getLogger(Tasks.class);
 
 	@Inject	IDataAdapter data;
-	@Inject
-	RallyeGameState gameState;
+	@Inject RallyeGameState gameState;
+
+	@Inject java.util.Map<String, SubmissionPictureLink> submissionPictureMap;
 	
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
@@ -128,15 +133,35 @@ public class Tasks {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	@KnownUserAuth
-	public Submission submit(SimpleSubmission submission, @PathParam("taskID") int taskID, @Context SecurityContext sec) throws DataException, InputException {
+	public Submission submit(SimpleSubmissionWithPictureHash submission, @PathParam("taskID") int taskID, @Context SecurityContext sec) throws DataException, InputException {
 		logger.entry();
 
 		if (!gameState.isCanSubmit())
 			throw new InputException("Śubmitting disabled.");
 		
 		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
-		
-		Submission res = data.submit(taskID, p.getGroupID(), p.getUserID(), submission);
+
+		Submission res;
+
+		if (submission.pictureHash!=null) {
+			logger.debug("Has Picture hash");
+			SubmissionPictureLink link = SubmissionPictureLink.getLink(submissionPictureMap, submission.pictureHash, data);
+
+			Integer picID = link.getPictureID();
+			if (picID != null) {
+				logger.debug("We have a pic id: "+picID);
+				SimpleSubmission completeSubmission = new SimpleSubmission(submission.submitType,picID,submission.textSubmission);
+				res = data.submit(taskID, p.getGroupID(), p.getUserID(), completeSubmission);
+			} else {
+
+				logger.debug("no pic id yet");
+				res = data.submit(taskID, p.getGroupID(), p.getUserID(), submission);
+				link.setObject(res);
+
+			}
+		} else
+			res = data.submit(taskID, p.getGroupID(), p.getUserID(), submission);
+
 		AdminWebsocketApp.getInstance().newSubmission(p.getGroupID(),p.getUserID(),taskID,res);
 		return logger.exit(res);
 	}

@@ -262,6 +262,11 @@ public class MockDataAdapter implements IDataAdapter {
 	}
 
 	@Override
+	public void editSubmissionAddPicture(int submissionID, int pictureID)  throws DataException {
+		fail("Method not implemented");
+	}
+
+	@Override
 	public List<TaskSubmissions> getSubmissionsByTask(int taskID, boolean includeRatings)
 			throws DataException {
 		fail("Method not implemented");

@@ -23,8 +23,10 @@ import de.rallye.db.IDataAdapter;
 import de.rallye.exceptions.DataException;
 import de.rallye.images.ImageRepository;
 import de.rallye.model.structures.ChatPictureLink;
+import de.rallye.model.structures.PictureLink;
 import de.rallye.model.structures.Picture;
 import de.rallye.model.structures.PictureSize;
+import de.rallye.model.structures.SubmissionPictureLink;
 import de.rallye.push.PushService;
 
 @Path("rallye/pics")
@@ -34,6 +36,7 @@ public class Pics {
 
 	@Inject	IDataAdapter data;
 	@Inject java.util.Map<String, ChatPictureLink> chatPictureMap;
+	@Inject java.util.Map<String, SubmissionPictureLink> submissionPictureMap;
 	@Inject	ImageRepository imageRepository;
 	@Inject PushService push;
 	
@@ -48,7 +51,8 @@ public class Pics {
 		
 		Picture pic = savePicture(img, p);
 		if (pic != null) {
-			ChatPictureLink.getLink(chatPictureMap, hash, data).setPicture(pic.pictureID, push);
+			ChatPictureLink.getLink(chatPictureMap, hash, data).setPicture(pic.pictureID);
+			SubmissionPictureLink.getLink(submissionPictureMap, hash, data).setPicture(pic.pictureID);
 		}
 		
 		return logger.exit(pic);

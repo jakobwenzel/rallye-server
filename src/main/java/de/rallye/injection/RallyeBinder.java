@@ -16,8 +16,11 @@ import de.rallye.config.RallyeConfig;
 import de.rallye.db.IDataAdapter;
 import de.rallye.images.ImageRepository;
 import de.rallye.model.structures.ChatPictureLink;
+import de.rallye.model.structures.PictureLink;
 import de.rallye.model.structures.GameState;
 import de.rallye.model.structures.RallyeGameState;
+import de.rallye.model.structures.Submission;
+import de.rallye.model.structures.SubmissionPictureLink;
 import de.rallye.push.PushService;
 
 /**
@@ -39,6 +42,10 @@ public class RallyeBinder extends AbstractBinder {
 
 	}
 
+	private static class SubmissionPictureMap extends TypeLiteral<Map<String, SubmissionPictureLink>> {
+
+	}
+
 
 	@Override
 	protected void configure() {
@@ -48,6 +55,7 @@ public class RallyeBinder extends AbstractBinder {
 		bind(ImageRepository.class).to(ImageRepository.class).in(Singleton.class);
 
 		bind(Collections.synchronizedMap(new HashMap<String, ChatPictureLink>())).to(new ChatPictureMap());
+		bind(Collections.synchronizedMap(new HashMap<String, SubmissionPictureLink>())).to(new SubmissionPictureMap());
 
 //		bindFactory(DataAdapterFactory.class).to(DataAdapter.class);
 		bind(data).to(IDataAdapter.class);
