@@ -149,7 +149,7 @@ public class Tasks {
 
 			Integer picID = link.getPictureID();
 			if (picID != null) {
-				logger.debug("We have a pic id: "+picID);
+				logger.debug("We have a pic id {}, has hash {} ",picID,submission.pictureHash);
 				SimpleSubmission completeSubmission = new SimpleSubmission(submission.submitType,picID,submission.textSubmission);
 				res = data.submit(taskID, p.getGroupID(), p.getUserID(), completeSubmission);
 			} else {
