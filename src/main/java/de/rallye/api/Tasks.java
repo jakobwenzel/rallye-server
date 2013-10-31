@@ -137,7 +137,7 @@ public class Tasks {
 		logger.entry();
 
 		if (!gameState.isCanSubmit())
-			throw new InputException("Śubmitting disabled.");
+			throw new InputException("Submitting disabled.");
 		
 		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
 
