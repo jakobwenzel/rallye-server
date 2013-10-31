@@ -40,7 +40,7 @@ import de.rallye.model.structures.UserInternal;
 @Path("rallye/debug")
 public class Debug {
 
-	private Logger logger = LogManager.getLogger(Debug.class);
+	private final Logger logger = LogManager.getLogger(Debug.class);
 
 	@Inject	IDataAdapter data;
 
@@ -62,26 +62,23 @@ public class Debug {
 	@Path("pic")
 	@Consumes("image/jpeg")
 	@Produces("text/plain")
-	public String convert(File img) throws FileNotFoundException, IOException {
+	public String convert(File img) throws /*FileNotFoundException,*/ IOException {
 		ImageInputStream iis = ImageIO.createImageInputStream(new BufferedInputStream(new FileInputStream(img)));
 		Iterator<ImageReader> readers = ImageIO.getImageReadersByMIMEType("image/jpeg");
 		IIOImage image = null;
 		if (readers.hasNext()) {
 			ImageReader reader = readers.next();
 			reader.setInput(iis, true);
-			try {
-				image = reader.readAll(0, null);
-			} catch (javax.imageio.IIOException e) {
-				throw e;
-			}
+
+			image = reader.readAll(0, null);
 
 			IIOMetadata metadata = image.getMetadata();
 			String[] names = metadata.getMetadataFormatNames();
 
 			StringBuilder sb = new StringBuilder();
-			for (int i = 0; i < names.length; i++) {
-				sb.append("Format name: " + names[i]);
-				sb.append(displayMetadata(metadata.getAsTree(names[i])));
+			for (String name : names) {
+				sb.append("Format name: " + name);
+				sb.append(displayMetadata(metadata.getAsTree(name)));
 			}
 			return sb.toString();
 		}

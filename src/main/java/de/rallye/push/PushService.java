@@ -33,9 +33,9 @@ public class PushService {
 	
 	private final Logger logger = LogManager.getLogger(PushService.class);
 	
-	private Map<Integer, IPushAdapter> pushModes = Collections.synchronizedMap(new HashMap<Integer, IPushAdapter>());
+	private final Map<Integer, IPushAdapter> pushModes = Collections.synchronizedMap(new HashMap<Integer, IPushAdapter>());
 
-	private IDataAdapter data;
+	private final IDataAdapter data;
 //	private ObjectMapper mapper;
 
 	@Inject

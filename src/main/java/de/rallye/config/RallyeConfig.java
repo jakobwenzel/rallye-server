@@ -23,14 +23,14 @@ public class RallyeConfig {
 	private static final Logger logger = LogManager.getLogger(RallyeConfig.class);
 	
 	//This is the default data.
-	@JsonProperty private String hostName = "0.0.0.0";
-	@JsonProperty private int restPort = 10101;
-	@JsonProperty private int consolePort = 10100;
-	@JsonProperty private String gcmApiKey = "";
-	@JsonProperty private String serverName = "";
-	@JsonProperty private String description = "";
+	@JsonProperty private final String hostName = "0.0.0.0";
+	@JsonProperty private final int restPort = 10101;
+	@JsonProperty private final int consolePort = 10100;
+	@JsonProperty private final String gcmApiKey = "";
+	@JsonProperty private final String serverName = "";
+	@JsonProperty private final String description = "";
 	@JsonProperty private MapConfig mapConfig;
-	@JsonProperty private ImageCacheConfig imageCacheConfig = new ImageCacheConfig(100, 25);
+	@JsonProperty private final ImageCacheConfig imageCacheConfig = new ImageCacheConfig(100, 25);
 
 	@JsonProperty private String configFileDir = "";
 
@@ -38,12 +38,12 @@ public class RallyeConfig {
 		public String connectString;
 		public String username;
 		public String password;
-		public int maxIdleTime = 3600;
+		public final int maxIdleTime = 3600;
 	}
 
-	@JsonProperty private DbConnectionConfig dbConnectionConfig = new DbConnectionConfig();
-	@JsonProperty private String dataDirectory = "data/";
-	@JsonProperty private boolean dataRelativeToConfig = false;
+	@JsonProperty private final DbConnectionConfig dbConnectionConfig = new DbConnectionConfig();
+	@JsonProperty private final String dataDirectory = "data/";
+	@JsonProperty private final boolean dataRelativeToConfig = false;
 
 	//TODO: read Api versions from modules / manifest
 	private final ServerInfo.Api[] APIS = {new ServerInfo.Api(Tasks.API_NAME, Tasks.API_VERSION), new ServerInfo.Api(Game.API_NAME, Game.API_VERSION), new ServerInfo.Api(System.API_NAME, System.API_VERSION)};

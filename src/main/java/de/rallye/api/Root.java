@@ -14,7 +14,8 @@ import org.apache.logging.log4j.Logger;
 
 @Path("")
 public class Root {
-	private Logger logger =  LogManager.getLogger(Root.class);
+
+	private static final Logger logger =  LogManager.getLogger(Root.class);
 
 	@GET
 	public Response index(@Context SecurityContext sec) {

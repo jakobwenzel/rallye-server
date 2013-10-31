@@ -25,14 +25,14 @@ import de.rallye.model.structures.PushEntity.Type;
 public class GCMPushAdapter implements IPushAdapter {
 	
 	private final Logger logger = LogManager.getLogger(GCMPushAdapter.class);
-	private static Executor threadPool = Executors.newCachedThreadPool();
+	private static final Executor threadPool = Executors.newCachedThreadPool();
 	
 	private static final int RETRIES = 3;
 	private static final int TTL = 60;
 	private static final int MAX_IDS = 1000;
 	
-	private Sender sender;
-	private IDataAdapter data;
+	private final Sender sender;
+	private final IDataAdapter data;
 	
 	
 	public GCMPushAdapter(String gcmKey, IDataAdapter data) {

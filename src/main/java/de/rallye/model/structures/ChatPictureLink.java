@@ -24,9 +24,8 @@ class RoomChat {
 		RoomChat roomChat = (RoomChat) o;
 
 		if (roomID != roomChat.roomID) return false;
-		if (!entry.equals(roomChat.entry)) return false;
+		return entry.equals(roomChat.entry);
 
-		return true;
 	}
 
 	@Override
@@ -63,7 +62,7 @@ public class ChatPictureLink extends PictureLink<RoomChat> {
 	}
 
 	private static class LinkCallback implements ILinkCallback<RoomChat> {
-		private IDataAdapter data;
+		private final IDataAdapter data;
 
 		public LinkCallback(IDataAdapter data) {
 			this.data = data;

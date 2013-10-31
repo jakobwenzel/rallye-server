@@ -1,19 +1,13 @@
 package de.rallye.model.structures;
 
-import java.util.Map;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import de.rallye.db.IDataAdapter;
-import de.rallye.exceptions.DataException;
-import de.rallye.push.PushService;
-
 public class PictureLink<T> {
 	
-	protected static Logger logger = LogManager.getLogger(PictureLink.class);
+	protected static final Logger logger = LogManager.getLogger(PictureLink.class);
 	
-	public enum Mode {EditObjectWhenUploaded, PictureUploaded };
+	public enum Mode {EditObjectWhenUploaded, PictureUploaded }
 	
 	private Integer pictureID;
 	private T linkableObject;
@@ -25,7 +19,7 @@ public class PictureLink<T> {
 		void propagateLink(PictureLink<T> link, Mode mode);
 	}
 	
-	private ILinkCallback<T> callback;
+	private final ILinkCallback<T> callback;
 	
 	public PictureLink(ILinkCallback<T> callback) {
 		this.callback = callback;

@@ -14,7 +14,7 @@ import de.rallye.exceptions.DataException;
  */
 public class RallyeGameState {
 
-	private static Logger logger =  LogManager.getLogger(RallyeGameState.class);
+	private static final Logger logger =  LogManager.getLogger(RallyeGameState.class);
 
 	protected RallyeConfig config;
 	static private RallyeGameState instance;

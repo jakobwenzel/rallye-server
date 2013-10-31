@@ -21,7 +21,7 @@ import de.rallye.exceptions.UnauthorizedException;
 @Provider
 @Priority(Priorities.AUTHENTICATION)
 public class KnownUserAuthFilter extends BaseAuthFilter implements IManualAuthentication<RallyePrincipal> {
-	private static Logger logger = LogManager.getLogger(KnownUserAuthFilter.class);
+	private static final Logger logger = LogManager.getLogger(KnownUserAuthFilter.class);
 	
 	public KnownUserAuthFilter() {
 		

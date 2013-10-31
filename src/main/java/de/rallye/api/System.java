@@ -95,7 +95,7 @@ public class System {
 		LinkedHashMap<Integer, String> list = new LinkedHashMap<Integer, String>() {
 			protected boolean removeEldestEntry(java.util.Map.Entry<Integer,String> arg0) {
 				return size() > 50;
-			};
+			}
 		};
 		
 		int i = 0;

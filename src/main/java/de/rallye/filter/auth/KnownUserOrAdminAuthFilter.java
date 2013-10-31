@@ -19,7 +19,7 @@ import de.rallye.annotations.KnownUserOrAdminAuth;
 @Provider
 @Priority(Priorities.AUTHENTICATION)
 public class KnownUserOrAdminAuthFilter extends BaseAuthFilter{
-	private static Logger logger = LogManager.getLogger(KnownUserOrAdminAuthFilter.class);
+	private static final Logger logger = LogManager.getLogger(KnownUserOrAdminAuthFilter.class);
 	protected Response getUnauthorized(String message) {
 		if (message!=null)
 			return Response.status(Status.UNAUTHORIZED).entity(message).header("WWW-Authenticate", "Basic realm=\"RallyeAuth\"").build();

@@ -16,10 +16,8 @@ import de.rallye.config.RallyeConfig;
 import de.rallye.db.IDataAdapter;
 import de.rallye.images.ImageRepository;
 import de.rallye.model.structures.ChatPictureLink;
-import de.rallye.model.structures.PictureLink;
 import de.rallye.model.structures.GameState;
 import de.rallye.model.structures.RallyeGameState;
-import de.rallye.model.structures.Submission;
 import de.rallye.model.structures.SubmissionPictureLink;
 import de.rallye.push.PushService;
 
@@ -31,7 +29,7 @@ import de.rallye.push.PushService;
 public class RallyeBinder extends AbstractBinder {
 
 	@SuppressWarnings("unused")
-	private static Logger logger = LogManager.getLogger(RallyeBinder.class);
+	private static final Logger logger = LogManager.getLogger(RallyeBinder.class);
 
 	public static IDataAdapter data;
 	public static RallyeConfig config;

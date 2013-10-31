@@ -15,8 +15,8 @@ public class GroupPositionsSerializer extends JsonSerializer<Map<Integer,Node>> 
 
 	@Override
 	public void serialize(Map<Integer, Node> value, JsonGenerator jgen,
-			SerializerProvider provider) throws IOException,
-			JsonProcessingException {
+			SerializerProvider provider) throws IOException/*,
+			JsonProcessingException*/ {
 		
 		jgen.writeStartArray();
 		

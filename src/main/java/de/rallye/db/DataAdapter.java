@@ -21,9 +21,9 @@ import java.util.Map.Entry;
 
 public class DataAdapter implements IDataAdapter {
 	
-	private static Logger logger = LogManager.getLogger(DataAdapter.class.getName());
+	private static final Logger logger = LogManager.getLogger(DataAdapter.class.getName());
 	
-	private ComboPooledDataSource dataSource;
+	private final ComboPooledDataSource dataSource;
 
 	
 	public DataAdapter(ComboPooledDataSource dataSource) throws SQLException {
@@ -654,7 +654,7 @@ public class DataAdapter implements IDataAdapter {
 		}
 	}
 	
-	Random rnd = new Random();
+	final Random rnd = new Random();
 	private String generateNewUserPassword(int groupID) {
 		long pw = System.currentTimeMillis() + groupID + rnd.nextInt();
 		
@@ -885,7 +885,9 @@ public class DataAdapter implements IDataAdapter {
 					con.rollback(transaction);
 					logger.error("Rolling back new chat");
 				}
-			} catch (Exception e) {}
+			} catch (Exception e) {
+				logger.error("Exception during Rollback", e);
+			}
 			
 			close(con, st, rs);
 		}
@@ -948,9 +950,8 @@ public class DataAdapter implements IDataAdapter {
 			if (!rs.first()) {
 				throw new DataException("User is not in group (should never have gotten here)");
 			}
-			
-			PushConfig cfg = new PushConfig(rs.getString(2), rs.getString(1));
-			return cfg;
+
+			return new PushConfig(rs.getString(2), rs.getString(1));
 		} catch (SQLException e) {
 			throw new DataException(e);
 		} finally {
@@ -1020,7 +1021,7 @@ public class DataAdapter implements IDataAdapter {
 		}
 	}
 
-	Map<Integer,List<UserInternal>> members = new HashMap<Integer,List<UserInternal>>();
+	final Map<Integer,List<UserInternal>> members = new HashMap<Integer,List<UserInternal>>();
 	/* (non-Javadoc)
 	 * @see de.rallye.db.IDataAdapter#getMembers(int)
 	 */
@@ -1064,7 +1065,7 @@ public class DataAdapter implements IDataAdapter {
 	}
 	
 
-	Map<Integer,List<UserInternal>> roomMembers = new HashMap<Integer,List<UserInternal>>();
+	final Map<Integer,List<UserInternal>> roomMembers = new HashMap<Integer,List<UserInternal>>();
 	
 	/* (non-Javadoc)
 	 * @see de.rallye.db.IDataAdapter#getChatroomMembers(int)
@@ -1148,9 +1149,7 @@ public class DataAdapter implements IDataAdapter {
 			st.setInt(1, pictureID);
 			st.setInt(2, chatID);
 			
-			if (st.executeUpdate() > 0)
-				return;
-			else
+			if (st.executeUpdate() <= 0)
 				throw new DataException("Failed to add picture to Chat");
 		} catch (SQLException e) {
 			throw new DataException(e);

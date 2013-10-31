@@ -30,7 +30,7 @@ import de.rallye.push.PushService;
 @Path("rallye/chatrooms")
 public class Chatrooms {
 	
-	private static Logger logger =  LogManager.getLogger(Chatrooms.class);
+	private static final Logger logger =  LogManager.getLogger(Chatrooms.class);
 
 	@Inject	IDataAdapter data;
 	@Inject	PushService push;

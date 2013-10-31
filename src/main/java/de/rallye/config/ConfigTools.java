@@ -15,7 +15,7 @@ import java.net.URL;
  */
 public class ConfigTools {
 
-	private static Logger logger = LogManager.getLogger(ConfigTools.class);
+	private static final Logger logger = LogManager.getLogger(ConfigTools.class);
 
 	public static String getProjectDir() {
 		logger.entry();

@@ -29,10 +29,10 @@ public class ImageRepository {
 	private static final Logger logger = LogManager.getLogger(ImageRepository.class);
 
 	private final String repository;
-	private ImageCache thumbCache;
-	private ImageCache miniCache;
+	private final ImageCache thumbCache;
+	private final ImageCache miniCache;
 	
-	private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 	
 	
 	private static class ImageCache extends LinkedHashMap<Integer, BufferedImage> {

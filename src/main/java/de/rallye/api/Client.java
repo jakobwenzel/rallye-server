@@ -25,7 +25,7 @@ import java.util.Map;
 public class Client {
 	private static final String RESOURCE_PATH = "webclient/";
 
-	private static Logger logger =  LogManager.getLogger(Client.class);
+	private static final Logger logger =  LogManager.getLogger(Client.class);
 	
 	private static boolean projectChecked = false;
 	private static String projectDir;

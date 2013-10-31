@@ -6,7 +6,7 @@ import javax.ws.rs.core.SecurityContext;
 
 public class RallyeSecurityContext<T extends Principal> implements SecurityContext {
 
-	private T principal;
+	private final T principal;
 	
 	public RallyeSecurityContext(T principal) {
 		this.principal = principal;

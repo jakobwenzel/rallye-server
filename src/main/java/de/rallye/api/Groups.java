@@ -42,7 +42,7 @@ import de.rallye.model.structures.UserAuth;
 @Path("rallye/groups")
 public class Groups {
 	
-	private Logger logger =  LogManager.getLogger(Groups.class);
+	private static final Logger logger =  LogManager.getLogger(Groups.class);
 
 	@Inject	IDataAdapter data;
 	@Inject	RallyeConfig config;
@@ -83,9 +83,7 @@ public class Groups {
 	@Path("{groupID}/avatar")
 	@Produces("image/jpeg")
 	public File getGroupAvatar(@PathParam("groupID") int groupID) {
-		File f = new File(config.getDataDirectory()+"game/"+ groupID +"/avatar.jpg");
-		
-		return f;
+		return new File(config.getDataDirectory()+"game/"+ groupID +"/avatar.jpg");
 	}
 	
 
@@ -173,9 +171,7 @@ public class Groups {
 		
 		logger.info("New User: {}", info);
 		
-		UserAuth login = data.login(authGroup, info);
-		return login;
-		
+		return data.login(authGroup, info);
 	}
 	
 	@DELETE

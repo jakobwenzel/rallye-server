@@ -21,7 +21,7 @@ import de.rallye.model.structures.Node;
 @Path("rallye/map")
 public class Map {
 	
-	private Logger logger =  LogManager.getLogger(Map.class.getName());
+	private static final Logger logger =  LogManager.getLogger(Map.class.getName());
 
 	@Inject	IDataAdapter data;
 	@Inject	RallyeConfig config;

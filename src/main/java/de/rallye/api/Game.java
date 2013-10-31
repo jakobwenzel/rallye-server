@@ -1,7 +1,6 @@
 package de.rallye.api;
 
 import javax.inject.Inject;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -15,12 +14,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import de.rallye.annotations.AdminAuth;
-import de.rallye.annotations.KnownUserAuth;
 import de.rallye.annotations.KnownUserOrAdminAuth;
 import de.rallye.db.IDataAdapter;
-import de.rallye.filter.auth.RallyePrincipal;
 import de.rallye.exceptions.DataException;
-import de.rallye.model.structures.GameState;
 import de.rallye.model.structures.RallyeGameState;
 
 
@@ -29,7 +25,7 @@ public class Game {
 	public static final String API_NAME = "scotlandYard";
 	public static final int API_VERSION = 3;
 
-	private Logger logger =  LogManager.getLogger(Game.class);
+	private static final Logger logger =  LogManager.getLogger(Game.class);
 
 	@Inject RallyeGameState gameState;
 	@Inject

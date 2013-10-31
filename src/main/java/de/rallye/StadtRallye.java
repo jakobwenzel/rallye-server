@@ -21,7 +21,7 @@ public class StadtRallye {
 		COM_LOGGER.setLevel(Level.SEVERE);
 	}*/
 
-	private static Logger logger = LogManager.getLogger(StadtRallye.class);
+	private static final Logger logger = LogManager.getLogger(StadtRallye.class);
 
 	public static void main(String[] args) {
 

@@ -27,8 +27,6 @@ import de.rallye.db.IDataAdapter;
 import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.InputException;
 import de.rallye.filter.auth.RallyePrincipal;
-import de.rallye.model.structures.ChatPictureLink;
-import de.rallye.model.structures.PictureLink;
 import de.rallye.model.structures.RallyeGameState;
 import de.rallye.model.structures.SimpleSubmission;
 import de.rallye.model.structures.SimpleSubmissionWithPictureHash;
@@ -44,7 +42,7 @@ public class Tasks {
 	public static final int API_VERSION = 5;
 	public static final String API_NAME = "ist_rallye";
 
-	private Logger logger =  LogManager.getLogger(Tasks.class);
+	private static final Logger logger =  LogManager.getLogger(Tasks.class);
 
 	@Inject	IDataAdapter data;
 	@Inject RallyeGameState gameState;

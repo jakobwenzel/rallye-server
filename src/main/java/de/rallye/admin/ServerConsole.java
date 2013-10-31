@@ -19,10 +19,10 @@ import de.rallye.RallyeServer;
  */
 public class ServerConsole implements Runnable {
 	
-	public static Logger logger = LogManager.getLogger(ServerConsole.class);
+	public static final Logger logger = LogManager.getLogger(ServerConsole.class);
 
 	private ServerSocket socket = null;
-	private RallyeServer server;
+	private final RallyeServer server;
 
 	/**
 	 * create a tcp-console on localhost.

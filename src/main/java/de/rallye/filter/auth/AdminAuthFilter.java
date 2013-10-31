@@ -1,8 +1,5 @@
 package de.rallye.filter.auth;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.annotation.Priority;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.WebApplicationException;

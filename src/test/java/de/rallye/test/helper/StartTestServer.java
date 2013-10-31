@@ -45,9 +45,7 @@ public class StartTestServer {
 		RallyeBinder.gameState = RallyeGameState.getInstance(RallyeBinder.data);
 		
 		//start server
-		RallyeServer server = new RallyeServer(config.getHostName(), config.getRestPort());
-		return server;
-		
+		return new RallyeServer(config.getHostName(), config.getRestPort());
 	}
 
 }

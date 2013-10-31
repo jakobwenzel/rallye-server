@@ -4,7 +4,6 @@ import java.util.Map;
 
 import de.rallye.db.IDataAdapter;
 import de.rallye.exceptions.DataException;
-import de.rallye.push.PushService;
 
 /**
  * Created by Jakob Wenzel on 09.10.13.
@@ -26,7 +25,7 @@ public class SubmissionPictureLink extends PictureLink<Submission>{
 	}
 
 	private static class LinkCallback implements PictureLink.ILinkCallback<Submission> {
-		private IDataAdapter data;
+		private final IDataAdapter data;
 
 		public LinkCallback(IDataAdapter data) {
 			this.data = data;
