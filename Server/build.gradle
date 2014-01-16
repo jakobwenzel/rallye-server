@@ -1,0 +1,114 @@
+import java.text.SimpleDateFormat
+
+repositories {
+	mavenCentral()
+	maven {
+		url "https://maven.java.net/content/repositories/public"
+	}
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'application'
+
+mainClassName = "de.rallye.StadtRallye"
+
+/*task buildInfo {
+	
+    def cmd = "git rev-parse --short HEAD"
+    def proc = cmd.execute()
+    def revision = proc.text.trim()	
+	
+	cmd = 'git status --porcelain'
+	proc = cmd.execute()
+	def output = proc.text.trim()
+	def dirty = false
+	
+	output.eachLine {
+		if (!it.startsWith("??"))
+			dirty = true;
+	}
+	
+	if (dirty) {
+		revision = revision+"-DEV"
+	}
+	
+	
+	//if (!output.equals("")) {
+	//	
+	//	infoFile<<"-DEV"
+	//}
+	
+	def sdf = new SimpleDateFormat()
+    sdf.applyPattern( "dd.MM.yyyy '@' HH\\:mm\\:ss z" )
+	def time = sdf.format(new Date())
+	
+	File infoFile = file('src/main/resources/git.properties')
+	def content = "git.commit.id.description="+revision+"\ngit.build.time="+time+"\n"
+	infoFile.write(content)
+	
+}*/
+task copyToLib(type: Copy) {
+    into "$buildDir/libs/lib"
+    from configurations.runtime
+}
+jar {
+	doFirst {
+	 
+		manifest {
+			attributes "Main-Class" : mainClassName
+			attributes 'Class-Path': configurations.compile.collect { 'lib/'+it.getName() }.join(' ')
+		}
+    }
+	it.dependsOn copyToLib
+	//it.dependsOn buildInfo
+}
+
+sourceCompatibility = 1.6
+targetCompatibility = 1.6
+
+dependencies {
+	
+	compile 'org.glassfish.jersey.containers:jersey-container-grizzly2-http:2.2'
+	compile 'org.glassfish.jersey.media:jersey-media-json-jackson:2.2'
+	compile 'org.glassfish.jersey.media:jersey-media-multipart:2.2'
+
+	compile 'org.glassfish.grizzly:grizzly-http-server:2.3.+'
+	
+	compile 'org.glassfish.grizzly:grizzly-websockets:2.3.+'
+
+	compile 'org.glassfish.grizzly:grizzly-http-servlet:2.3.+' //Needed for websockets
+	compile 'org.apache.tomcat:tomcat-servlet-api:7.0.42' //Needed for websockets
+            
+
+	//Jackson
+	compile 'org.codehaus.jackson:jackson-core-asl:1.9.+' //Jersey json will use 1.9 anyway
+	compile 'org.codehaus.jackson:jackson-mapper-asl:1.9.+'
+	//compile 'com.fasterxml.jackson.core:jackson-core:2.2.+'
+	//compile 'com.fasterxml.jackson.core:jackson-annotations:2.2.+'
+	//compile 'com.fasterxml.jackson.core:jackson-databind:2.2.+'
+
+	//MySQL
+	compile 'mysql:mysql-connector-java:5.1.+'
+	compile 'com.mchange:c3p0:0.9.2.+'
+
+
+	//Log4j
+	//compile 'org.apache.logging.log4j:log4j-api:2.+'
+	compile 'org.apache.logging.log4j:log4j-core:2.+'
+
+	// Google Cloud Messaging (deprecated)
+	compile 'com.ganyo:gcm-server:1.+'
+
+	// Primitive JSON (used in Push service)
+	compile 'org.json:json:20090211'
+	
+	compile 'commons-io:commons-io:2.4'
+	//compile 'com.google.inject:guice:3.0'
+
+	//Testing
+	testCompile 'junit:junit:4.11'
+	testCompile 'org.apache.httpcomponents:httpclient:4.2.5'	
+	
+	compile project(':common:RallyeStructures')
+}
