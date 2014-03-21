@@ -42,9 +42,9 @@ public class RallyeConfig {
 		public final int maxIdleTime = 3600;
 	}
 
-	@JsonProperty private final DbConnectionConfig dbConnectionConfig = new DbConnectionConfig();
-	@JsonProperty private final String dataDirectory = "data/";
-	@JsonProperty private final boolean dataRelativeToConfig = false;
+	@JsonProperty private final DbConnectionConfig dbConnectionConfig;
+	@JsonProperty private final String dataDirectory;
+	@JsonProperty private final boolean dataRelativeToConfig;
 
 	//TODO: read Api versions from modules / manifest
 	private final ServerInfo.Api[] APIS = {new ServerInfo.Api(Tasks.API_NAME, Tasks.API_VERSION), new ServerInfo.Api(Game.API_NAME, Game.API_VERSION), new ServerInfo.Api(System.API_NAME, System.API_VERSION)};
@@ -179,7 +179,11 @@ public class RallyeConfig {
 		@JsonProperty("gcmApiKey") String gcmApiKey,
 		@JsonProperty("serverName")String serverName,
 		@JsonProperty("description") String description,
-		@JsonProperty("imageCacheConfig") ImageCacheConfig imageCacheConfig
+		@JsonProperty("imageCacheConfig") ImageCacheConfig imageCacheConfig,
+
+		@JsonProperty("dbConnectionConfig") DbConnectionConfig dbConnectionConfig,
+	@JsonProperty("dataDirectory") String dataDirectory,
+	@JsonProperty("dataRelativeToConfig") Boolean dataRelativeToConfig
 	) {
 		this.hostName = (hostname!=null) ? hostname : "";
 		this.restPort = (restPort!=null) ? restPort : 10101;
@@ -188,6 +192,10 @@ public class RallyeConfig {
 		this.serverName = (serverName!=null) ? serverName : "";
 		this.description = (description!=null) ? description: "";
 		this.imageCacheConfig = (imageCacheConfig!=null) ? imageCacheConfig : new ImageCacheConfig(100, 25);
+
+		this.dbConnectionConfig = (dbConnectionConfig!=null) ? dbConnectionConfig : new DbConnectionConfig();
+		this.dataDirectory = (dataDirectory!=null) ? dataDirectory : "data/";
+		this.dataRelativeToConfig = (dataRelativeToConfig!=null) ? dataRelativeToConfig : false;
 	}
 
 	public RallyeConfig() {
@@ -199,5 +207,8 @@ public class RallyeConfig {
 		serverName = "";
 		description = "";
 		imageCacheConfig = new ImageCacheConfig(100, 25);
+		dbConnectionConfig = new DbConnectionConfig();
+		dataDirectory = "data/";
+		dataRelativeToConfig = false;
 	}
 }
