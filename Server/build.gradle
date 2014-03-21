@@ -13,41 +13,48 @@ apply plugin: 'application'
 
 mainClassName = "de.rallye.StadtRallye"
 
-/*task buildInfo {
-	
-    def cmd = "git rev-parse --short HEAD"
-    def proc = cmd.execute()
-    def revision = proc.text.trim()	
-	
-	cmd = 'git status --porcelain'
-	proc = cmd.execute()
-	def output = proc.text.trim()
-	def dirty = false
-	
-	output.eachLine {
-		if (!it.startsWith("??"))
-			dirty = true;
+task buildInfo {
+	ext.destinationDir = file("$buildDir/gitinfo")
+	doLast {
+		
+		def cmd = "git rev-parse --short HEAD"
+		def proc = cmd.execute()
+		def revision = proc.text.trim()
+
+		cmd = 'git status --porcelain'
+		proc = cmd.execute()
+		def output = proc.text.trim()
+		def dirty = false
+
+		output.eachLine {
+			if (!it.startsWith("??"))
+				dirty = true;
+		}
+
+		if (dirty) {
+			revision = revision+ "-DEV"
+		}
+
+
+		def sdf = new SimpleDateFormat()
+		sdf.applyPattern("dd.MM.yyyy '@' HH\\:mm\\:ss z")
+		def time = sdf.format(new Date())
+
+
+
+		destinationDir.mkdirs()
+
+
+		ext.infoFile = file(destinationDir.getAbsolutePath() + '/git.properties')
+		def content = "git.commit.id.description=" + revision + "\ngit.build.time=" + time + "\n"
+		infoFile.write(content)
 	}
-	
-	if (dirty) {
-		revision = revision+"-DEV"
-	}
-	
-	
-	//if (!output.equals("")) {
-	//	
-	//	infoFile<<"-DEV"
-	//}
-	
-	def sdf = new SimpleDateFormat()
-    sdf.applyPattern( "dd.MM.yyyy '@' HH\\:mm\\:ss z" )
-	def time = sdf.format(new Date())
-	
-	File infoFile = file('src/main/resources/git.properties')
-	def content = "git.commit.id.description="+revision+"\ngit.build.time="+time+"\n"
-	infoFile.write(content)
-	
-}*/
+}
+
+processResources {
+	it.dependsOn buildInfo
+	from buildInfo.destinationDir
+}
 task copyToLib(type: Copy) {
     into "$buildDir/libs/lib"
     from configurations.runtime
@@ -61,7 +68,6 @@ jar {
 		}
     }
 	it.dependsOn copyToLib
-	//it.dependsOn buildInfo
 }
 
 sourceCompatibility = 1.6
