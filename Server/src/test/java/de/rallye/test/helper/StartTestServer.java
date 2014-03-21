@@ -6,7 +6,10 @@ package de.rallye.test.helper;
 
 import static org.junit.Assert.assertNotNull;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 
 import de.rallye.RallyeServer;
 import de.rallye.config.RallyeConfig;
@@ -34,10 +37,8 @@ public class StartTestServer {
 		//Init resources
 		InputStream stream = StartTestServer.class.getResourceAsStream(configName);
 		assertNotNull("We should be able to find the config \""+configName+"\"",stream);
-		
 
-		
-		
+
 		//Init resources
 		RallyeConfig config = RallyeConfig.fromStream(stream);
 		RallyeBinder.config = config;

@@ -36,6 +36,9 @@ public class ConfigTools {
 			logger.debug("not in any subdir known.");
 			return null;
 		}
+
+		//Remove Server subdir
+		location = location.substring(0, location.length()-7);
 		
 		//There should be a git config directory around here
 		try {
