@@ -7,6 +7,7 @@ import de.rallye.model.structures.MapConfig;
 import de.rallye.model.structures.ServerInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 import org.codehaus.jackson.map.ObjectMapper;
@@ -17,20 +18,20 @@ import java.io.IOException;
 import java.io.InputStream;
 
 @Service
-@JsonIgnoreProperties(ignoreUnknown = true)
+//@JsonIgnoreProperties(ignoreUnknown = true)
 public class RallyeConfig {
 	
 	private static final Logger logger = LogManager.getLogger(RallyeConfig.class);
 	
 	//This is the default data.
-	@JsonProperty private final String hostName = "0.0.0.0";
-	@JsonProperty private final int restPort = 10101;
-	@JsonProperty private final int consolePort = 10100;
-	@JsonProperty private final String gcmApiKey = "";
-	@JsonProperty private final String serverName = "";
-	@JsonProperty private final String description = "";
+	@JsonProperty private final String hostName;
+	@JsonProperty private final int restPort;
+	@JsonProperty private final int consolePort;
+	@JsonProperty private final String gcmApiKey;
+	@JsonProperty private final String serverName;
+	@JsonProperty private final String description;
 	@JsonProperty private MapConfig mapConfig;
-	@JsonProperty private final ImageCacheConfig imageCacheConfig = new ImageCacheConfig(100, 25);
+	@JsonProperty private final ImageCacheConfig imageCacheConfig;
 
 	@JsonProperty private String configFileDir = "";
 
@@ -168,5 +169,35 @@ public class RallyeConfig {
 	@Override
 	public String toString() {
 		return hostName +":"+ restPort +" (ConsolePort: "+ consolePort +")\n"+ getServerInfo();
+	}
+
+	@JsonCreator
+	public RallyeConfig(@JsonProperty("hostName") String hostname,
+
+		@JsonProperty("restPort") Integer restPort,
+		@JsonProperty("consolePort") Integer consolePort,
+		@JsonProperty("gcmApiKey") String gcmApiKey,
+		@JsonProperty("serverName")String serverName,
+		@JsonProperty("description") String description,
+		@JsonProperty("imageCacheConfig") ImageCacheConfig imageCacheConfig
+	) {
+		this.hostName = (hostname!=null) ? hostname : "";
+		this.restPort = (restPort!=null) ? restPort : 10101;
+		this.consolePort = (consolePort!=null) ? consolePort : 10100;
+		this.gcmApiKey = (gcmApiKey!=null) ? gcmApiKey : "";
+		this.serverName = (serverName!=null) ? serverName : "";
+		this.description = (description!=null) ? description: "";
+		this.imageCacheConfig = (imageCacheConfig!=null) ? imageCacheConfig : new ImageCacheConfig(100, 25);
+	}
+
+	public RallyeConfig() {
+
+		hostName = "0.0.0.0";
+		restPort = 10101;
+		consolePort = 10100;
+		gcmApiKey = "";
+		serverName = "";
+		description = "";
+		imageCacheConfig = new ImageCacheConfig(100, 25);
 	}
 }
