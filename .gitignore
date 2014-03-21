@@ -10,6 +10,6 @@ build
 .idea
 out
 log
-src/main/resources/git.properties
 config.json
 data
+local.properties
