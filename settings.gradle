@@ -1,1 +1,5 @@
-include 'Server', ':common:RallyeStructures'
+include ':Server', ':common:RallyeStructures'
+
+
+rootProject.name = 'rallye-server-root'
+project(':Server').name = 'rallye-server'
