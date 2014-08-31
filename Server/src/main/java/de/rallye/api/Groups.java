@@ -1,43 +1,49 @@
+/*
+ * Copyright (c) 2014 Jakob Wenzel, Ramon Wirsch.
+ *
+ * This file is part of RallySoft.
+ *
+ * RallyeSoft is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Foobar is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package de.rallye.api;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.List;
-
-import javax.inject.Inject;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
-
+import de.rallye.annotations.AdminAuth;
+import de.rallye.annotations.KnownUserAuth;
+import de.rallye.annotations.NewUserAuth;
+import de.rallye.config.RallyeConfig;
+import de.rallye.db.IDataAdapter;
+import de.rallye.exceptions.DataException;
+import de.rallye.exceptions.InputException;
+import de.rallye.filter.auth.GroupPrincipal;
+import de.rallye.filter.auth.RallyePrincipal;
+import de.rallye.model.structures.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataParam;
 
-import de.rallye.annotations.AdminAuth;
-import de.rallye.annotations.KnownUserAuth;
-import de.rallye.annotations.NewUserAuth;
-import de.rallye.filter.auth.GroupPrincipal;
-import de.rallye.filter.auth.RallyePrincipal;
-import de.rallye.config.RallyeConfig;
-import de.rallye.db.IDataAdapter;
-import de.rallye.exceptions.DataException;
-import de.rallye.exceptions.InputException;
-import de.rallye.model.structures.Group;
-import de.rallye.model.structures.LoginInfo;
-import de.rallye.model.structures.PushConfig;
-import de.rallye.model.structures.User;
-import de.rallye.model.structures.UserAuth;
+import javax.inject.Inject;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.SecurityContext;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
 
 @Path("rallye/groups")
 public class Groups {

@@ -1,14 +1,29 @@
+/*
+ * Copyright (c) 2014 Jakob Wenzel, Ramon Wirsch.
+ *
+ * This file is part of RallySoft.
+ *
+ * RallyeSoft is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Foobar is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package de.rallye.admin;
 
-import java.awt.Frame;
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.ws.rs.WebApplicationException;
-
+import de.rallye.db.IDataAdapter;
+import de.rallye.filter.auth.AdminAuthFilter;
+import de.rallye.filter.auth.AdminPrincipal;
+import de.rallye.model.structures.Submission;
+import de.rallye.push.PushWebSocket;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.codehaus.jackson.JsonGenerationException;
@@ -20,18 +35,15 @@ import org.codehaus.jackson.annotate.JsonTypeInfo;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.glassfish.grizzly.http.HttpRequestPacket;
-import org.glassfish.grizzly.websockets.DataFrame;
-import org.glassfish.grizzly.websockets.DefaultWebSocket;
-import org.glassfish.grizzly.websockets.ProtocolHandler;
-import org.glassfish.grizzly.websockets.WebSocket;
-import org.glassfish.grizzly.websockets.WebSocketApplication;
-import org.glassfish.grizzly.websockets.WebSocketListener;
+import org.glassfish.grizzly.websockets.*;
 
-import de.rallye.db.IDataAdapter;
-import de.rallye.filter.auth.AdminAuthFilter;
-import de.rallye.filter.auth.AdminPrincipal;
-import de.rallye.model.structures.Submission;
-import de.rallye.push.PushWebSocket;
+import javax.ws.rs.WebApplicationException;
+import java.awt.*;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class AdminWebsocketApp extends WebSocketApplication {
 	Map<Integer, WebSocket> sockets = new ConcurrentHashMap<Integer, WebSocket>();

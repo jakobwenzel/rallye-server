@@ -1,10 +1,9 @@
 package de.rallye.images;
 
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import java.awt.image.BufferedImage;
-
 import de.rallye.model.structures.Dimension;
+
+import java.awt.*;
+import java.awt.image.BufferedImage;
 
 /**
  * @author FrickelBlog @ http://frickelblog.wordpress.com/2009/06/08/fast-image-scaling-in-java/
