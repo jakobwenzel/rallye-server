@@ -1,33 +1,35 @@
+/*
+ * Copyright (c) 2014 Jakob Wenzel, Ramon Wirsch.
+ *
+ * This file is part of RallySoft.
+ *
+ * RallyeSoft is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Foobar is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package de.rallye.db;
+
+import de.rallye.exceptions.DataException;
+import de.rallye.exceptions.InputException;
+import de.rallye.exceptions.UnauthorizedException;
+import de.rallye.filter.auth.AdminPrincipal;
+import de.rallye.filter.auth.GroupPrincipal;
+import de.rallye.filter.auth.RallyePrincipal;
+import de.rallye.model.structures.*;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import de.rallye.filter.auth.AdminPrincipal;
-import de.rallye.filter.auth.GroupPrincipal;
-import de.rallye.filter.auth.RallyePrincipal;
-import de.rallye.exceptions.DataException;
-import de.rallye.exceptions.InputException;
-import de.rallye.exceptions.UnauthorizedException;
-import de.rallye.model.structures.ChatEntry;
-import de.rallye.model.structures.Chatroom;
-import de.rallye.model.structures.Edge;
-import de.rallye.model.structures.Group;
-import de.rallye.model.structures.GroupUser;
-import de.rallye.model.structures.LoginInfo;
-import de.rallye.model.structures.Node;
-import de.rallye.model.structures.PushConfig;
-import de.rallye.model.structures.PushMode;
-import de.rallye.model.structures.RallyeGameState;
-import de.rallye.model.structures.SimpleChatEntry;
-import de.rallye.model.structures.SimpleSubmission;
-import de.rallye.model.structures.Submission;
-import de.rallye.model.structures.SubmissionScore;
-import de.rallye.model.structures.Task;
-import de.rallye.model.structures.TaskSubmissions;
-import de.rallye.model.structures.UserAuth;
-import de.rallye.model.structures.UserInternal;
 
 public interface IDataAdapter {
 

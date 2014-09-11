@@ -1,12 +1,32 @@
+/*
+ * Copyright (c) 2014 Jakob Wenzel, Ramon Wirsch.
+ *
+ * This file is part of RallySoft.
+ *
+ * RallyeSoft is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Foobar is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package de.rallye.api;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.List;
+import de.rallye.annotations.KnownUserAuth;
+import de.rallye.config.RallyeConfig;
+import de.rallye.db.IDataAdapter;
+import de.rallye.exceptions.DataException;
+import de.rallye.model.structures.PushMode;
+import de.rallye.model.structures.ServerInfo;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.inject.Inject;
 import javax.ws.rs.GET;
@@ -16,16 +36,9 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import de.rallye.annotations.KnownUserAuth;
-import de.rallye.config.RallyeConfig;
-import de.rallye.db.IDataAdapter;
-import de.rallye.exceptions.DataException;
-import de.rallye.model.structures.PushMode;
-import de.rallye.model.structures.ServerInfo;
+import java.io.*;
+import java.util.LinkedHashMap;
+import java.util.List;
 
 @Path("rallye/system")
 public class System {
