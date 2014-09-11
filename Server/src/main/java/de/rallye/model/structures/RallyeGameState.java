@@ -1,20 +1,19 @@
 package de.rallye.model.structures;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonProperty;
-
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import de.rallye.config.RallyeConfig;
 import de.rallye.db.IDataAdapter;
 import de.rallye.exceptions.DataException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Created by wilson on 05.10.13.
  */
 public class RallyeGameState {
 
-	private static final Logger logger =  LogManager.getLogger(RallyeGameState.class);
+	private static final Logger logger = LogManager.getLogger(RallyeGameState.class);
 
 	protected RallyeConfig config;
 	static private RallyeGameState instance;
@@ -31,6 +30,7 @@ public class RallyeGameState {
 
 	/**
 	 * Create a new GameState. Only to be called by DataAdapter
+	 *
 	 * @param showRatingToUsers
 	 */
 	@JsonCreator
@@ -40,15 +40,16 @@ public class RallyeGameState {
 		this.canSubmit = canSubmit;
 
 	}
+
 	public static RallyeGameState getInstance(IDataAdapter data) {
-		if (instance==null) {
+		if (instance == null) {
 			try {
 				instance = data.loadGameState();
 			} catch (DataException e) {
 				logger.error(e);
 				instance = null;
 			}
-			if (instance==null)
+			if (instance == null)
 				instance = new RallyeGameState(false, true);
 		}
 

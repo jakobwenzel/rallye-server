@@ -1,37 +1,29 @@
 package de.rallye.admin;
 
-import java.awt.Frame;
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.ws.rs.WebApplicationException;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.annotate.JsonIgnore;
-import org.codehaus.jackson.annotate.JsonSubTypes;
-import org.codehaus.jackson.annotate.JsonSubTypes.Type;
-import org.codehaus.jackson.annotate.JsonTypeInfo;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.glassfish.grizzly.http.HttpRequestPacket;
-import org.glassfish.grizzly.websockets.DataFrame;
-import org.glassfish.grizzly.websockets.DefaultWebSocket;
-import org.glassfish.grizzly.websockets.ProtocolHandler;
-import org.glassfish.grizzly.websockets.WebSocket;
-import org.glassfish.grizzly.websockets.WebSocketApplication;
-import org.glassfish.grizzly.websockets.WebSocketListener;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.rallye.db.IDataAdapter;
 import de.rallye.filter.auth.AdminAuthFilter;
 import de.rallye.filter.auth.AdminPrincipal;
 import de.rallye.model.structures.Submission;
 import de.rallye.push.PushWebSocket;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.glassfish.grizzly.http.HttpRequestPacket;
+import org.glassfish.grizzly.websockets.*;
+
+import javax.ws.rs.WebApplicationException;
+import java.awt.*;
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class AdminWebsocketApp extends WebSocketApplication {
 	Map<Integer, WebSocket> sockets = new ConcurrentHashMap<Integer, WebSocket>();
@@ -107,7 +99,7 @@ public class AdminWebsocketApp extends WebSocketApplication {
 	
 
 	@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
-	@JsonSubTypes({ @Type(value = LoginMessage.class, name = "login") })
+	@JsonSubTypes({ @JsonSubTypes.Type(value = LoginMessage.class, name = "login") })
 	static abstract class ClientMessage {
 		public String type;
 		@JsonIgnore

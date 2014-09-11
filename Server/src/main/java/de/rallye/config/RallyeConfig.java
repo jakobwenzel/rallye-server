@@ -1,5 +1,8 @@
 package de.rallye.config;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.rallye.api.Game;
 import de.rallye.api.System;
 import de.rallye.api.Tasks;
@@ -7,10 +10,6 @@ import de.rallye.model.structures.MapConfig;
 import de.rallye.model.structures.ServerInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.codehaus.jackson.annotate.JsonCreator;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.codehaus.jackson.annotate.JsonProperty;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.jvnet.hk2.annotations.Service;
 
 import java.io.File;
@@ -182,8 +181,8 @@ public class RallyeConfig {
 		@JsonProperty("imageCacheConfig") ImageCacheConfig imageCacheConfig,
 
 		@JsonProperty("dbConnectionConfig") DbConnectionConfig dbConnectionConfig,
-	@JsonProperty("dataDirectory") String dataDirectory,
-	@JsonProperty("dataRelativeToConfig") Boolean dataRelativeToConfig
+		@JsonProperty("dataDirectory") String dataDirectory,
+		@JsonProperty("dataRelativeToConfig") Boolean dataRelativeToConfig
 	) {
 		this.hostName = (hostname!=null) ? hostname : "";
 		this.restPort = (restPort!=null) ? restPort : 10101;

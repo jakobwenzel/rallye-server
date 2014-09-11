@@ -1,8 +1,17 @@
 package de.rallye.test;
 
-import static de.rallye.test.helper.HttpClient.apiCall;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import de.rallye.exceptions.DataException;
+import de.rallye.model.structures.Group;
+import de.rallye.test.db.MockDataAdapter;
+import de.rallye.test.helper.StartTestServer;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,19 +21,9 @@ import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.util.List;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
-
-import de.rallye.exceptions.DataException;
-import de.rallye.model.structures.Group;
-import de.rallye.test.db.MockDataAdapter;
-import de.rallye.test.helper.StartTestServer;
+import static de.rallye.test.helper.HttpClient.apiCall;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class GroupsTest {
 	

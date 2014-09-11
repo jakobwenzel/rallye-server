@@ -1,10 +1,11 @@
 package de.rallye.model.structures;
 
-import org.codehaus.jackson.annotate.JsonIgnore;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class UserInternal extends User {
 
-	@JsonIgnore final public int pushMode;
+	@JsonIgnore	final public int pushMode;
 	@JsonIgnore final public String pushID;
 
 	public UserInternal(int userID, String name, int pushMode, String pushID) {
