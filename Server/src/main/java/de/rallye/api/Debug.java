@@ -27,6 +27,7 @@ import com.drew.metadata.MetadataException;
 import com.drew.metadata.Tag;
 import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.exif.GpsDirectory;
+import de.rallye.config.RallyeConfig;
 import de.rallye.db.IDataAdapter;
 import de.rallye.exceptions.DataException;
 import de.rallye.model.structures.LatLngAlt;
@@ -36,9 +37,11 @@ import org.apache.logging.log4j.Logger;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 @Path("rallye/debug")
@@ -47,6 +50,68 @@ public class Debug {
 	private final Logger logger = LogManager.getLogger(Debug.class);
 
 	@Inject	IDataAdapter data;
+	@Inject
+	RallyeConfig config;
+
+	@GET
+	@Path("log")
+	@Produces(MediaType.TEXT_HTML)
+	public String getLog() throws FileNotFoundException {
+
+		File f = new File("log/debug.log");
+
+		BufferedReader r = new BufferedReader(new FileReader(f));
+
+		@SuppressWarnings("serial")
+		LinkedHashMap<Integer, String> list = new LinkedHashMap<Integer, String>() {
+			protected boolean removeEldestEntry(java.util.Map.Entry<Integer,String> arg0) {
+				return size() > 50;
+			}
+		};
+
+		int i = 0;
+		String line;
+
+
+		try {
+			while ((line = r.readLine()) != null) {
+				list.put(i++, line);
+			}
+		} catch (IOException e) {
+			logger.error("Could not read Log", e);
+		}
+
+		try {
+			r.close();
+		} catch (IOException e) {
+			logger.error("Could not close Log", e);
+		}
+
+		StringBuilder sb = new StringBuilder("<html><head><title>Log</title></head><body>");
+		for (String l: list.values()) {
+			sb.append(l).append("<br />");
+		}
+		return sb.append("</body></html>").toString();
+	}
+
+	@GET
+	@Path("ping")
+	public String ping(@Context HttpHeaders headers) {
+		if (headers.getHeaderString("blubbel") != null)
+			return "OK (blubbel sent)";
+		else
+			return "OK (no blubbel)";
+	}
+
+	@GET
+	@Path("picture")
+	@Produces("image/jpeg")
+	public File getPicture() throws FileNotFoundException {
+		File picture = new File(config.getDataDirectory()+"game/picture.jpg");
+		if (picture.exists())
+			return picture;
+		else throw new FileNotFoundException("Picture not found");
+	}
 
 	@GET
 	@Path("members/{groupID}")
