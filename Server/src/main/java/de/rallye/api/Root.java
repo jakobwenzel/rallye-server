@@ -40,7 +40,7 @@ public class Root {
 		logger.entry();
 		
 		try {
-			return Response.seeOther(new URI("/client")).build();
+			return Response.seeOther(new URI("/resources/webclient")).build();
 		} catch (URISyntaxException e) {
 			logger.catching(e);
 			return Response.serverError().build();

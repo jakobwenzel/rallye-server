@@ -29,6 +29,7 @@ import de.rallye.model.structures.Picture;
 import de.rallye.model.structures.PictureSize;
 import de.rallye.model.structures.SubmissionPictureLink;
 import de.rallye.push.PushService;
+import de.rallye.util.HttpCacheHandling;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -36,11 +37,12 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Request;
 import javax.ws.rs.core.SecurityContext;
 import java.awt.image.BufferedImage;
 import java.io.File;
 
-@Path("rallye/pics")
+@Path("resources/pics")
 public class Pics {
 	
 	private static final Logger logger =  LogManager.getLogger(Groups.class);
@@ -94,8 +96,10 @@ public class Pics {
 	@GET
 	@Path("{pictureID}")
 	@Produces("image/jpeg")
-	public BufferedImage getPicture(@PathParam("pictureID") int pictureID) {
+	public BufferedImage getPicture(@PathParam("pictureID") int pictureID, @Context Request request) {
 		logger.entry();
+
+		HttpCacheHandling.checkModifiedSince(request, imageRepository.getLastModified(pictureID));
 		
 		BufferedImage res = imageRepository.get(pictureID, PictureSize.Standard);
 		return logger.exit(res);
@@ -104,8 +108,10 @@ public class Pics {
 	@GET
 	@Path("{pictureID}/{size}")
 	@Produces("image/jpeg")
-	public BufferedImage getPicture(@PathParam("pictureID") int pictureID, @PathParam("size") PictureSize.PictureSizeString size) {
+	public BufferedImage getPicture(@PathParam("pictureID") int pictureID, @PathParam("size") PictureSize.PictureSizeString size, @Context Request request) {
 		logger.entry();
+
+		HttpCacheHandling.checkModifiedSince(request, imageRepository.getLastModified(pictureID));
 		
 		BufferedImage res = imageRepository.get(pictureID, size.size);
 		return logger.exit(res);

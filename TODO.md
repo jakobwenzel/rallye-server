@@ -1,7 +1,4 @@
-# TODO
-
-* rename /rallye/chatrooms to /chat/rooms
-* renames:
+# renames:
 ** /chat/rooms
 ** [/debug]
 ** /server
@@ -16,3 +13,13 @@
 ** /users
 ** /groups
 ** /admin
+
+# push shutdown to admins
+
+# revisions for all static content
+** atomic revisions on DB
+** last changed on files
+* push out notifications on revision change
+* on startup push all revisions to all clients
+
+#

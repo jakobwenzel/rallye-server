@@ -40,7 +40,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-@Path("client")
+@Path("resources/webclient")
 public class Client {
 	private static final String RESOURCE_PATH = "webclient/";
 

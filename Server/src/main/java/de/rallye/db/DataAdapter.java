@@ -41,11 +41,15 @@ public class DataAdapter implements IDataAdapter {
 	private static final Logger logger = LogManager.getLogger(DataAdapter.class.getName());
 	
 	private final ComboPooledDataSource dataSource;
+	private String dbName;
 
 	
 	public DataAdapter(ComboPooledDataSource dataSource) throws SQLException {
 		this.dataSource = dataSource;
-		
+
+		Connection connection = dataSource.getConnection();
+		connection.close();
+
 		loadNodes();
 		loadEdges();
 	}
@@ -69,6 +73,7 @@ public class DataAdapter implements IDataAdapter {
 		DataAdapter da = null;
 		try {
 			da = new DataAdapter(dataSource);
+			da.dbName = dbc.connectString.replaceFirst("^[^/]+//[^/]+/([^?]+).*$", "$1");
 		} catch (SQLException e) {
 			logger.error("Could not establish DB connection", e);
 		}
@@ -113,6 +118,47 @@ public class DataAdapter implements IDataAdapter {
 			logger.catching(e);
 		}
 	}
+
+	public long getLastModified(String table) {
+		PreparedStatement st = null;
+		Connection con = null;
+		ResultSet rs = null;
+
+		try {
+			con = dataSource.getConnection();
+			st = con.prepareStatement("SELECT UNIX_TIMESTAMP(UPDATE_TIME) FROM information_schema.tables WHERE TABLE_SCHEMA=? AND TABLE_NAME=?");
+
+			st.setString(1, dbName);
+			st.setString(2, table);
+
+			rs = st.executeQuery();
+
+			long timestamp;
+			rs.first();
+			timestamp = rs.getLong(1);
+
+			return timestamp;
+		} catch (SQLException e) {
+			return 0;
+		} finally {
+			close(con, st, rs);
+		}
+	}
+
+	@Override
+	public long getNodesLastModified() {
+		return getLastModified(Ry.Nodes.TABLE);
+	}
+
+	@Override
+	public long getEdgesLastModified() {
+		return getLastModified(Ry.Edges.TABLE);
+	}
+
+	@Override
+	public long getTasksLastModified() {
+		return getLastModified(Ry.Tasks.TABLE);
+	}
 	
 	private List<Group> groups;
 	
@@ -131,6 +177,7 @@ public class DataAdapter implements IDataAdapter {
 		try {
 			con = dataSource.getConnection();
 			st = con.createStatement();
+
 			if(includePasswords)
 				rs = st.executeQuery("SELECT "+ cols(Ry.Groups.ID, Ry.Groups.NAME, Ry.Groups.DESCRIPTION, Ry.Groups.PASSWORD) +" FROM "+ Ry.Groups.TABLE+" ORDER BY "+Ry.Groups.NAME);
 			else

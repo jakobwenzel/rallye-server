@@ -38,7 +38,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 
-@Path("rallye/game")
+@Path("games")
 public class Game {
 	public static final String API_NAME = "scotlandYard";
 	public static final int API_VERSION = 3;

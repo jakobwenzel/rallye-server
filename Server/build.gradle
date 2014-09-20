@@ -1,15 +1,15 @@
 import java.text.SimpleDateFormat
 
-repositories {
-	mavenCentral()
-	/*maven {
-		url "https://maven.java.net/content/repositories/public"
-	}*/
+plugins {
+	id 'org.hidetake.ssh' version '0.3.12'
+	id 'java'
+	id 'eclipse'
+	id 'application'
 }
 
-apply plugin: 'java'
-apply plugin: 'eclipse'
-apply plugin: 'application'
+repositories {
+	mavenCentral()
+}
 
 mainClassName = "de.rallye.StadtRallye"
 
@@ -60,6 +60,8 @@ task copyToLib(type: Copy) {
     from configurations.runtime
 }
 jar {
+	archiveName 'rallye-server.jar'
+
 	doFirst {
 	 
 		manifest {
@@ -116,3 +118,26 @@ dependencies {
 	
 	compile project(':common:RallyeStructures')
 }
+
+
+//
+//task deploy(type: SshTask, dependsOn: assemble) {
+//	session(remotes.hajoschja) {
+//		execute 'hajoschja.de/rallye/rallye.sh stop'
+//
+//		put "$buildDir/libs/$jar.archiveName", 'hajoschja.de/rallye/server'
+//
+//		execute 'hajoschja.de/rallye/rallye.sh start'
+//	}
+//}
+//
+//task deployLibs(type: SshTask, dependsOn: assemble) {
+//	session(remotes.hajoschja) {
+//		execute 'hajoschja.de/rallye/rallye.sh stop'
+//
+//		execute 'rm -r hajoschja.de/rallye/server/lib'
+//		put "$buildDir/libs/lib", 'hajoschja.de/rallye/server'
+//
+//		execute 'hajoschja.de/rallye/rallye.sh start'
+//	}
+//}

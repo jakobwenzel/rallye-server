@@ -44,7 +44,7 @@ import java.io.*;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-@Path("rallye/debug")
+@Path("debug")
 public class Debug {
 
 	private final Logger logger = LogManager.getLogger(Debug.class);
@@ -101,16 +101,6 @@ public class Debug {
 			return "OK (blubbel sent)";
 		else
 			return "OK (no blubbel)";
-	}
-
-	@GET
-	@Path("picture")
-	@Produces("image/jpeg")
-	public File getPicture() throws FileNotFoundException {
-		File picture = new File(config.getDataDirectory()+"game/picture.jpg");
-		if (picture.exists())
-			return picture;
-		else throw new FileNotFoundException("Picture not found");
 	}
 
 	@GET

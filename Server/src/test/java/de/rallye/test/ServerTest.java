@@ -31,7 +31,7 @@ import java.util.List;
 import static org.junit.Assert.*;
 
 
-public class SystemTest {
+public class ServerTest {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		StartTestServer.getServer(); //Start a server

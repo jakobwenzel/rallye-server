@@ -28,19 +28,17 @@ import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.InputException;
 import de.rallye.filter.auth.RallyePrincipal;
 import de.rallye.model.structures.*;
+import de.rallye.util.HttpCacheHandling;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.*;
 import java.util.Arrays;
 import java.util.List;
 
-@Path("rallye/tasks")
+@Path("games/rallye/tasks")
 public class Tasks {
 
 	public static final int API_VERSION = 5;
@@ -56,8 +54,10 @@ public class Tasks {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@KnownUserOrAdminAuth
-	public List<Task> getTasks(@Context SecurityContext sec) throws DataException {
+	public List<Task> getTasks(@Context SecurityContext sec, @Context Request request) throws DataException {
 		logger.entry();
+
+		HttpCacheHandling.checkModifiedSince(request, data.getTasksLastModified());
 
 		//Group id is only passed to getTasks to include ratings
 		Integer groupID = null;
@@ -88,7 +88,7 @@ public class Tasks {
 	@Path("all/{groupID}")
 	@Produces(MediaType.APPLICATION_JSON)
 	@KnownUserOrAdminAuth
-	public List<TaskSubmissions> getAllSubmissions(@PathParam("groupID") int groupID, @Context SecurityContext sec) throws DataException {
+	public List<TaskSubmissions> getAllSubmissions(@PathParam("groupID") int groupID, @Context SecurityContext sec, @Context Request request) throws DataException {
 		logger.entry();
 
 		boolean includeRatings = true;
@@ -103,6 +103,8 @@ public class Tasks {
 //			logger.warn("admin {} has no access rights taskScoring", p.getAdminID());
 //			throw new WebApplicationException(Response.Status.FORBIDDEN);
 //		}
+
+//		HttpCacheHandling.checkModifiedSince(request, data.getSubmissionsLastModified());//TODO
 		
 		List<TaskSubmissions> res = data.getAllSubmissions(groupID, includeRatings);
 		return logger.exit(res);

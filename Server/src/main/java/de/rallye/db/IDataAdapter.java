@@ -33,6 +33,10 @@ import java.util.Map;
 
 public interface IDataAdapter {
 
+	long getNodesLastModified();
+
+	long getEdgesLastModified();
+
 	public abstract List<Group> getGroups(boolean includePasswords) throws DataException;
 	
 	/**
@@ -133,4 +137,6 @@ public interface IDataAdapter {
 	public abstract AdminPrincipal getAdminPrincipal(String username, String password) throws DataException, InputException;
 
 	void editSubmissionAddPicture(int submissionID, int pictureID)  throws DataException;
+
+	long getTasksLastModified();
 }

@@ -38,7 +38,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import java.util.List;
 
-@Path("rallye/chatrooms")
+@Path("chat/rooms")
 public class Chatrooms {
 	
 	private static final Logger logger =  LogManager.getLogger(Chatrooms.class);

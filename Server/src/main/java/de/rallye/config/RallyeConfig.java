@@ -23,7 +23,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.rallye.api.Game;
-import de.rallye.api.System;
+import de.rallye.api.Server;
 import de.rallye.api.Tasks;
 import de.rallye.model.structures.MapConfig;
 import de.rallye.model.structures.ServerInfo;
@@ -53,6 +53,12 @@ public class RallyeConfig {
 
 	@JsonProperty private String configFileDir = "";
 
+	private long lastModified = 0;
+
+	public long lastModified() {
+		return lastModified;
+	}
+
 	public static class DbConnectionConfig {
 		public String connectString;
 		public String username;
@@ -65,7 +71,7 @@ public class RallyeConfig {
 	@JsonProperty private final boolean dataRelativeToConfig;
 
 	//TODO: read Api versions from modules / manifest
-	private final ServerInfo.Api[] APIS = {new ServerInfo.Api(Tasks.API_NAME, Tasks.API_VERSION), new ServerInfo.Api(Game.API_NAME, Game.API_VERSION), new ServerInfo.Api(System.API_NAME, System.API_VERSION)};
+	private final ServerInfo.Api[] APIS = {new ServerInfo.Api(Tasks.API_NAME, Tasks.API_VERSION), new ServerInfo.Api(Game.API_NAME, Game.API_VERSION), new ServerInfo.Api(Server.API_NAME, Server.API_VERSION)};
 	private String build;
 
 	/**
@@ -88,6 +94,8 @@ public class RallyeConfig {
 				config.configFileDir = parent + File.separator;
 			else
 				config.configFileDir = "";
+
+			config.lastModified = configFile.lastModified();
 
 			config.setGit(git);
 			logger.debug(config.toString());

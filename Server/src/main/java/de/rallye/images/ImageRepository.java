@@ -85,8 +85,12 @@ public class ImageRepository {
 
 		new File(this.repository).mkdirs();
 	}
+
+	public long getLastModified(int pictureID) {//TODO check on a per file basis / group all scaled images, so that rescaling forces a change
+		return getFile(pictureID, PictureSize.Original).lastModified();
+	}
 	
-	public BufferedImage get(int pictureID, PictureSize size) {
+	public BufferedImage get(int pictureID, PictureSize size) {//TODO cache images as byte[]
 		logger.info("Requested "+ pictureID +" in "+ size);
 		BufferedImage img = null;
 		boolean cached = false;

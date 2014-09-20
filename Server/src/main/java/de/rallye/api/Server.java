@@ -25,6 +25,7 @@ import de.rallye.db.IDataAdapter;
 import de.rallye.exceptions.DataException;
 import de.rallye.model.structures.PushMode;
 import de.rallye.model.structures.ServerInfo;
+import de.rallye.util.HttpCacheHandling;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -32,19 +33,21 @@ import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.List;
 
-@Path("rallye/system")
-public class System {
+@Path("server")
+public class Server {
 
 	public static final int API_VERSION = 4;
 	public static final String API_NAME = "server";
 
-	private final Logger logger = LogManager.getLogger(System.class);
+	private final Logger logger = LogManager.getLogger(Server.class);
 	
 	@Inject	RallyeConfig config;
 	@Inject	IDataAdapter data;
@@ -52,7 +55,9 @@ public class System {
 	@GET
 	@Path("info")
 	@Produces(MediaType.APPLICATION_JSON)
-	public ServerInfo getDescription() {
+	public ServerInfo getDescription(@Context Request request) {
+		HttpCacheHandling.checkModifiedSince(request, config.lastModified());
+
 		return config.getServerInfo();
 	}
 
@@ -72,6 +77,19 @@ public class System {
 	
 		List<PushMode> res = data.getPushModes();
 		return logger.exit(res);
+	}
+
+	@GET
+	@Path("picture")
+	@Produces("image/jpeg")
+	public File getPicture(@Context Request request) throws FileNotFoundException {
+		File picture = new File(config.getDataDirectory()+"game/picture.jpg");
+
+		HttpCacheHandling.checkModifiedSince(request, picture.lastModified());
+
+		if (picture.exists())
+			return picture;
+		else throw new FileNotFoundException("Picture not found");
 	}
 	
 	@GET

@@ -24,6 +24,7 @@ import de.rallye.db.IDataAdapter;
 import de.rallye.model.structures.Edge;
 import de.rallye.model.structures.MapConfig;
 import de.rallye.model.structures.Node;
+import de.rallye.util.HttpCacheHandling;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -31,11 +32,13 @@ import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Request;
 import java.util.Collection;
 import java.util.List;
 
-@Path("rallye/map")
+@Path("games/map")
 public class Map {
 	
 	private static final Logger logger =  LogManager.getLogger(Map.class.getName());
@@ -46,8 +49,10 @@ public class Map {
 	@GET
 	@Path("nodes")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Collection<Node> getNodes() {
+	public Collection<Node> getNodes(@Context Request request) {
 		logger.entry();
+
+		HttpCacheHandling.checkModifiedSince(request, data.getNodesLastModified());
 		
 		Collection<Node> res = data.getNodes().values();
 		return logger.exit(res);
@@ -56,8 +61,10 @@ public class Map {
 	@GET
 	@Path("edges")
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Edge> getEdges() {
+	public List<Edge> getEdges(@Context Request request) {
 		logger.entry();
+
+		HttpCacheHandling.checkModifiedSince(request, data.getEdgesLastModified());
 		
 		List<Edge> res = data.getEdges();
 		return logger.exit(res);
@@ -66,8 +73,10 @@ public class Map {
 	@GET
 	@Path("config")
 	@Produces(MediaType.APPLICATION_JSON)
-	public MapConfig getConfig() {
+	public MapConfig getConfig(@Context Request request) {
 		logger.entry();
+
+		HttpCacheHandling.checkModifiedSince(request, config.lastModified());
 
 		MapConfig res = config.getMapConfig();
 		return logger.exit(res);

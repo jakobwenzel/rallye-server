@@ -33,10 +33,10 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
 
-@Path("rallye/users")
+@Path("users")
 public class Users {
 	
-	private final Logger logger = LogManager.getLogger(System.class);
+	private final Logger logger = LogManager.getLogger(Users.class);
 	
 	@Inject	IDataAdapter data;
 	

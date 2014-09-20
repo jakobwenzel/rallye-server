@@ -29,6 +29,7 @@ import de.rallye.exceptions.InputException;
 import de.rallye.filter.auth.GroupPrincipal;
 import de.rallye.filter.auth.RallyePrincipal;
 import de.rallye.model.structures.*;
+import de.rallye.util.HttpCacheHandling;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
@@ -36,16 +37,13 @@ import org.glassfish.jersey.media.multipart.FormDataParam;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-@Path("rallye/groups")
+@Path("groups")
 public class Groups {
 	
 	private static final Logger logger =  LogManager.getLogger(Groups.class);
@@ -88,8 +86,12 @@ public class Groups {
 	@GET
 	@Path("{groupID}/avatar")
 	@Produces("image/jpeg")
-	public File getGroupAvatar(@PathParam("groupID") int groupID) {
-		return new File(config.getDataDirectory()+"game/"+ groupID +"/avatar.jpg");
+	public File getGroupAvatar(@PathParam("groupID") int groupID, @Context Request request) {
+		File avatar = new File(config.getDataDirectory()+"game/"+ groupID +"/avatar.jpg");
+
+		HttpCacheHandling.checkModifiedSince(request, avatar.lastModified());
+
+		return avatar;
 	}
 	
 
