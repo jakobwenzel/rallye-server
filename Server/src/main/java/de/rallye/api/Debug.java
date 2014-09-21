@@ -107,6 +107,12 @@ public class Debug {
 	}
 
 	@GET
+	@Path("purge")
+	public void purge() {
+		data.purgeCache();
+	}
+
+	@GET
 	@Path("check")
 	public Response check() {
 		return Response.ok().build();

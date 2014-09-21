@@ -43,6 +43,15 @@ public class DataAdapter implements IDataAdapter {
 	private final ComboPooledDataSource dataSource;
 	private String dbName;
 
+	/**
+	 * Cache
+	 */
+	private List<Group> groups;
+	private List<GroupUser> allUsers;
+	private List<PushMode> pushModes;
+	private final Map<Integer,List<UserInternal>> members = new HashMap<>();
+	private final Map<Integer,List<UserInternal>> roomMembers = new HashMap<>();
+
 	
 	public DataAdapter(ComboPooledDataSource dataSource) throws SQLException {
 		this.dataSource = dataSource;
@@ -159,8 +168,15 @@ public class DataAdapter implements IDataAdapter {
 	public long getTasksLastModified() {
 		return getLastModified(Ry.Tasks.TABLE);
 	}
-	
-	private List<Group> groups;
+
+	@Override
+	public synchronized void purgeCache() {
+		groups = null;
+		allUsers = null;
+		members.clear();
+		pushModes = null;
+		roomMembers.clear();
+	}
 	
 	/* (non-Javadoc)
 	 * @see de.rallye.db.IDataAdapter#getGroups()
@@ -1023,7 +1039,6 @@ public class DataAdapter implements IDataAdapter {
 		}
 	}
 
-	List<PushMode> pushModes;
 	/* (non-Javadoc)
 	 * @see de.rallye.db.IDataAdapter#getPushModes()
 	 */
@@ -1054,7 +1069,7 @@ public class DataAdapter implements IDataAdapter {
 		}
 	}
 	
-	List<GroupUser> allUsers;
+
 	/* (non-Javadoc)
 	 * @see de.rallye.db.IDataAdapter#getAllUsers()
 	 */
@@ -1085,7 +1100,6 @@ public class DataAdapter implements IDataAdapter {
 		}
 	}
 
-	final Map<Integer,List<UserInternal>> members = new HashMap<Integer,List<UserInternal>>();
 	/* (non-Javadoc)
 	 * @see de.rallye.db.IDataAdapter#getMembers(int)
 	 */
@@ -1127,9 +1141,9 @@ public class DataAdapter implements IDataAdapter {
 		members.clear();
 		roomMembers.clear();
 	}
-	
 
-	final Map<Integer,List<UserInternal>> roomMembers = new HashMap<Integer,List<UserInternal>>();
+
+
 	
 	/* (non-Javadoc)
 	 * @see de.rallye.db.IDataAdapter#getChatroomMembers(int)
@@ -1250,7 +1264,7 @@ public class DataAdapter implements IDataAdapter {
 	}
 
 	@Override
-	public int addGroup(Group group) throws DataException {
+	public synchronized int addGroup(Group group) throws DataException {
 		//Invalidate cached group list
 		groups = null;
 		
@@ -1287,7 +1301,7 @@ public class DataAdapter implements IDataAdapter {
 	}
 
 	@Override
-	public void editGroup(Group group) throws DataException {
+	public synchronized void editGroup(Group group) throws DataException {
 		//Invalidate cached group list
 		groups = null;
 		
@@ -1354,7 +1368,7 @@ public class DataAdapter implements IDataAdapter {
 		}
 	}
 
-	@java.lang.Override
+	@Override
 	public RallyeGameState loadGameState() throws DataException {
 		Connection con = null;
 		PreparedStatement st = null;
@@ -1381,7 +1395,7 @@ public class DataAdapter implements IDataAdapter {
 		}
 	}
 
-	@java.lang.Override
+	@Override
 	public void saveGameState(RallyeGameState gameState) throws DataException {
 		Connection con = null;
 		PreparedStatement st = null;

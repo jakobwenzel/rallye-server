@@ -37,6 +37,8 @@ public interface IDataAdapter {
 
 	long getEdgesLastModified();
 
+	void purgeCache();
+
 	public abstract List<Group> getGroups(boolean includePasswords) throws DataException;
 	
 	/**

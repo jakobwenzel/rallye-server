@@ -61,6 +61,11 @@ public class MockDataAdapter implements IDataAdapter {
 	}
 
 	@Override
+	public void purgeCache() {
+
+	}
+
+	@Override
 	public List<Group> getGroups(boolean includePasswords) throws DataException {
 		List<Group> result = new ArrayList<Group>();
 		result.add(new Group(1, "Gruppe 1", "Beschreibung Gruppe 1"));
