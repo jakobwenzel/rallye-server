@@ -34,7 +34,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import javax.ws.rs.core.Response;
 import java.io.File;
@@ -42,6 +41,7 @@ import java.io.FileNotFoundException;
 import java.util.List;
 
 @Path("server")
+@Produces({"application/x-jackson-smile;qs=0.8", "application/xml;qs=0.9", "application/json;qs=1"})
 public class Server {
 
 	public static final int API_VERSION = 4;
@@ -54,7 +54,6 @@ public class Server {
 	
 	@GET
 	@Path("info")
-	@Produces(MediaType.APPLICATION_JSON)
 	public ServerInfo getDescription(@Context Request request) {
 		HttpCacheHandling.checkModifiedSince(request, config.lastModified());
 
@@ -64,14 +63,12 @@ public class Server {
 	@GET
 	@Path("status")
 	@KnownUserAuth
-	@Produces(MediaType.APPLICATION_JSON)
 	public Response getStatus() {
 		throw new UnsupportedOperationException();//TODO
 	}
 	
 	@GET
 	@Path("pushModes")
-	@Produces(MediaType.APPLICATION_JSON)
 	public List<PushMode> getPushModes() throws DataException {
 		logger.entry();
 	

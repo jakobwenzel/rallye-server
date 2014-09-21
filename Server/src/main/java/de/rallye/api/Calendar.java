@@ -27,7 +27,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import java.awt.*;
 import java.util.ArrayList;
@@ -41,12 +40,12 @@ import static de.rallye.model.calendar.Calendar.getTime;
  * Created by Ramon on 21.09.2014.
  */
 @Path("resources/calendar")
+@Produces({"application/x-jackson-smile;qs=0.8", "application/xml;qs=0.9", "application/json;qs=1"})
 public class Calendar {
 
 	private static final Logger logger =  LogManager.getLogger(Calendar.class.getName());
 
 	@GET
-	@Produces(MediaType.APPLICATION_JSON/*+";charset=utf-8"*/)
 	public de.rallye.model.calendar.ICalendar getCalendar(@Context Request request) {
 		logger.entry();
 //		File file = new File();

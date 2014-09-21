@@ -19,8 +19,9 @@
 
 package de.rallye;
 
+import com.fasterxml.jackson.jaxrs.smile.JacksonSmileProvider;
+import com.fasterxml.jackson.jaxrs.xml.JacksonXMLProvider;
 import de.rallye.admin.AdminWebsocketApp;
-import de.rallye.filter.auth.EnsureMimeType;
 import de.rallye.injection.RallyeBinder;
 import de.rallye.push.PushWebsocketApp;
 import org.apache.logging.log4j.LogManager;
@@ -71,9 +72,11 @@ public class RallyeServer {
 	private HttpServer startServer(URI uri) throws IOException {
 		ResourceConfig rc = new ResourceConfig();
 		rc.packages("de.rallye.api", "de.rallye.filter", "de.rallye.filter.auth","de.rallye.exceptions.mappers");
+		rc.register(JacksonSmileProvider.class);
+		rc.register(JacksonXMLProvider.class);
 		rc.register(JacksonFeature.class);
-		rc.register(EnsureMimeType.class);
-		rc.register(new RallyeBinder());     
+		//rc.register(EnsureMimeType.class);
+		rc.register(new RallyeBinder());
 	    rc.register(MultiPartFeature.class);
 
 		HttpServer serv = createServer(uri, rc); // Do NOT start the server just yet

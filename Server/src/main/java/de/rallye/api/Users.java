@@ -30,10 +30,10 @@ import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.MediaType;
 import java.util.List;
 
 @Path("users")
+@Produces({"application/x-jackson-smile;qs=0.8", "application/xml;qs=0.9", "application/json;qs=1"})
 public class Users {
 	
 	private final Logger logger = LogManager.getLogger(Users.class);
@@ -42,7 +42,6 @@ public class Users {
 	
 	@GET
 	@KnownUserOrAdminAuth
-	@Produces(MediaType.APPLICATION_JSON)
 	public List<GroupUser> getMembers() throws DataException {
 		logger.entry();
 		

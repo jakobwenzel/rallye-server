@@ -44,6 +44,7 @@ import java.io.InputStream;
 import java.util.List;
 
 @Path("groups")
+@Produces({"application/x-jackson-smile;qs=0.8", "application/xml;qs=0.9", "application/json;qs=1"})
 public class Groups {
 	
 	private static final Logger logger =  LogManager.getLogger(Groups.class);
@@ -53,7 +54,6 @@ public class Groups {
 
 
 	@GET
-	@Produces(MediaType.APPLICATION_JSON)
 	public List<Group> getGroups() throws DataException {
 		logger.entry();
 	
@@ -62,9 +62,9 @@ public class Groups {
 	}
 
 	@GET
-	@Produces(MediaType.APPLICATION_JSON)
 	@AdminAuth
 	@Path("admin")
+	@Produces(MediaType.APPLICATION_JSON)
 	public List<Group> getGroupsAdmin() throws DataException {
 		logger.entry();
 
@@ -75,7 +75,6 @@ public class Groups {
 	@GET
 	@Path("{groupID}")
 	@KnownUserAuth
-	@Produces(MediaType.APPLICATION_JSON)
 	public List<? extends User> getMembers(@PathParam("groupID") int groupID) throws DataException {
 		logger.entry();
 	
@@ -131,7 +130,6 @@ public class Groups {
 	@GET
 	@Path("{groupID}/{userID}")
 	@KnownUserAuth
-	@Produces(MediaType.APPLICATION_JSON)
 	public Response getUserInfo(@PathParam("groupID") int groupID, @PathParam("userID") int userID) {
 		throw new UnsupportedOperationException();
 	}
@@ -139,7 +137,6 @@ public class Groups {
 	@GET
 	@Path("{groupID}/{userID}/pushSettings")
 	@KnownUserAuth
-	@Produces(MediaType.APPLICATION_JSON)
 	public PushConfig getPushSettings(@PathParam("groupID") int groupID, @PathParam("userID") int userID, @Context SecurityContext sec) throws DataException {
 		logger.entry();
 		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
@@ -168,7 +165,6 @@ public class Groups {
 	@Path("{groupID}")
 	@NewUserAuth
 	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
 	public UserAuth login(@PathParam("groupID") int groupID, LoginInfo info, @Context SecurityContext sec) throws DataException, InputException {
 		logger.entry();
 		GroupPrincipal p = (GroupPrincipal) sec.getUserPrincipal();
@@ -199,7 +195,7 @@ public class Groups {
 	@PUT
 	@AdminAuth
 	@Consumes(MediaType.APPLICATION_JSON)
-	//@Produces(MediaType.APPLICATION_JSON)
+	@Produces("text/plan")
 	public int addGroup(Group group, @Context SecurityContext sec) throws DataException {
 		logger.entry();
 

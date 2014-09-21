@@ -40,11 +40,13 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.io.*;
 import java.util.LinkedHashMap;
 import java.util.List;
 
 @Path("debug")
+@Produces({"application/x-jackson-smile;qs=0.8", "application/xml;qs=0.9", "application/json;qs=1"})
 public class Debug {
 
 	private final Logger logger = LogManager.getLogger(Debug.class);
@@ -96,6 +98,7 @@ public class Debug {
 
 	@GET
 	@Path("ping")
+	@Produces("text/plain")
 	public String ping(@Context HttpHeaders headers) {
 		if (headers.getHeaderString("blubbel") != null)
 			return "OK (blubbel sent)";
@@ -104,15 +107,19 @@ public class Debug {
 	}
 
 	@GET
+	@Path("check")
+	public Response check() {
+		return Response.ok().build();
+	}
+
+	@GET
 	@Path("members/{groupID}")
-	@Produces(MediaType.APPLICATION_JSON)
 	public List<UserInternal> getMembers(@PathParam("groupID") int groupID) throws DataException {
 		return data.getMembers(groupID);
 	}
 
 	@GET
 	@Path("chatroomMembers/{roomID}")
-	@Produces(MediaType.APPLICATION_JSON)
 	public List<UserInternal> getChatroomMembers(@PathParam("roomID") int roomID) throws DataException {
 		return data.getChatroomMembers(roomID);
 	}
@@ -120,7 +127,6 @@ public class Debug {
 	@PUT
 	@Path("pic2gps")
 	@Consumes("image/*")
-	@Produces(MediaType.APPLICATION_JSON)
 	public LatLngAlt extractGpsLocation(File img) throws ImageProcessingException, IOException {
 		Metadata meta = ImageMetadataReader.readMetadata(img);
 

@@ -94,6 +94,10 @@ dependencies {
 	compile 'com.fasterxml.jackson.core:jackson-annotations:2.4.+'
 	compile 'com.fasterxml.jackson.core:jackson-databind:2.4.+'
 
+	// Jackson Smile support (binary JSON)
+	compile 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-smile-provider:2.4.+'
+	compile 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-xml-provider:2.4.+'
+
 	//MySQL
 	compile 'mysql:mysql-connector-java:5.1.+'
 	compile 'com.mchange:c3p0:0.9.2.+'

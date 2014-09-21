@@ -33,12 +33,12 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import java.util.Collection;
 import java.util.List;
 
 @Path("games/map")
+@Produces({"application/x-jackson-smile;qs=0.8", "application/xml;qs=0.9", "application/json;qs=1"})
 public class Map {
 	
 	private static final Logger logger =  LogManager.getLogger(Map.class.getName());
@@ -48,7 +48,6 @@ public class Map {
 
 	@GET
 	@Path("nodes")
-	@Produces(MediaType.APPLICATION_JSON)
 	public Collection<Node> getNodes(@Context Request request) {
 		logger.entry();
 
@@ -60,7 +59,6 @@ public class Map {
 	
 	@GET
 	@Path("edges")
-	@Produces(MediaType.APPLICATION_JSON)
 	public List<Edge> getEdges(@Context Request request) {
 		logger.entry();
 
@@ -72,7 +70,6 @@ public class Map {
 
 	@GET
 	@Path("config")
-	@Produces(MediaType.APPLICATION_JSON)
 	public MapConfig getConfig(@Context Request request) {
 		logger.entry();
 

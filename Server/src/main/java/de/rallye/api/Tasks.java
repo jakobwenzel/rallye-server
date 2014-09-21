@@ -39,6 +39,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Path("games/rallye/tasks")
+@Produces({"application/x-jackson-smile;qs=0.8", "application/xml;qs=0.9", "application/json;qs=1"})
 public class Tasks {
 
 	public static final int API_VERSION = 5;
@@ -52,7 +53,6 @@ public class Tasks {
 	@Inject java.util.Map<String, SubmissionPictureLink> submissionPictureMap;
 	
 	@GET
-	@Produces(MediaType.APPLICATION_JSON)
 	@KnownUserOrAdminAuth
 	public List<Task> getTasks(@Context SecurityContext sec, @Context Request request) throws DataException {
 		logger.entry();
@@ -73,7 +73,6 @@ public class Tasks {
 	
 	@GET
 	@Path("{taskID}")
-	@Produces(MediaType.APPLICATION_JSON)
 	@KnownUserAuth
 	public List<Submission> getSubmissions(@PathParam("taskID") int taskID, @Context SecurityContext sec) throws DataException {
 		logger.entry();
@@ -86,7 +85,6 @@ public class Tasks {
 	
 	@GET
 	@Path("all/{groupID}")
-	@Produces(MediaType.APPLICATION_JSON)
 	@KnownUserOrAdminAuth
 	public List<TaskSubmissions> getAllSubmissions(@PathParam("groupID") int groupID, @Context SecurityContext sec, @Context Request request) throws DataException {
 		logger.entry();
@@ -112,7 +110,6 @@ public class Tasks {
 	
 	@GET
 	@Path("byTask/{taskID}")
-	@Produces(MediaType.APPLICATION_JSON)
 	@AdminAuth
 	public List<TaskSubmissions> getAllByTask(@PathParam("taskID") int taskID) throws DataException {
 		logger.entry();
@@ -123,7 +120,6 @@ public class Tasks {
 	
 	@GET
 	@Path("unrated")
-	@Produces(MediaType.APPLICATION_JSON)
 	@AdminAuth
 	public List<TaskSubmissions> getUnrated() throws DataException {
 		logger.entry();
@@ -135,7 +131,6 @@ public class Tasks {
 	@PUT
 	@Path("{taskID}")
 	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
 	@KnownUserAuth
 	public Submission submit(SimpleSubmissionWithPictureHash submission, @PathParam("taskID") int taskID, @Context SecurityContext sec) throws DataException, InputException {
 		logger.entry();

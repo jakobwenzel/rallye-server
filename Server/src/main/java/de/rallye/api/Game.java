@@ -33,12 +33,12 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
 
 @Path("games")
+@Produces({"application/x-jackson-smile;qs=0.8", "application/xml;qs=0.9", "application/json;qs=1"})
 public class Game {
 	public static final String API_NAME = "scotlandYard";
 	public static final int API_VERSION = 3;
@@ -53,7 +53,6 @@ public class Game {
 	@GET
 	@KnownUserOrAdminAuth
 	@Path("state")
-	@Produces(MediaType.APPLICATION_JSON)
 	public RallyeGameState getGameState(@Context SecurityContext sec) {
 		logger.entry();
 		return logger.exit(gameState);

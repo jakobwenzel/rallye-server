@@ -39,6 +39,7 @@ import javax.ws.rs.core.SecurityContext;
 import java.util.List;
 
 @Path("chat/rooms")
+@Produces({"application/x-jackson-smile;qs=0.8", "application/xml;qs=0.9", "application/json;qs=1"})
 public class Chatrooms {
 	
 	private static final Logger logger =  LogManager.getLogger(Chatrooms.class);
@@ -49,7 +50,6 @@ public class Chatrooms {
 
 	@GET
 	@KnownUserAuth
-	@Produces(MediaType.APPLICATION_JSON)
 	public List<Chatroom> getChatrooms(@Context SecurityContext sec) throws DataException{
 		logger.entry();
 		
@@ -62,7 +62,6 @@ public class Chatrooms {
 	@GET
 	@KnownUserAuth
 	@Path("{roomID}/since/{timestamp}")
-	@Produces(MediaType.APPLICATION_JSON)
 	public List<ChatEntry> getChats(@PathParam("roomID") int roomID, @PathParam("timestamp") long timestamp, @Context SecurityContext sec) throws DataException {
 		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
 		return getChats(roomID, timestamp, p.getGroupID());
@@ -71,7 +70,6 @@ public class Chatrooms {
 	@GET
 	@KnownUserAuth
 	@Path("{roomID}")
-	@Produces(MediaType.APPLICATION_JSON)
 	public List<ChatEntry> getChats(@PathParam("roomID") int roomID, @Context SecurityContext sec) throws DataException {
 		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
 		return getChats(roomID, 0, p.getGroupID());
@@ -93,7 +91,6 @@ public class Chatrooms {
 	@KnownUserAuth
 	@Path("{roomID}")
 	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces(MediaType.APPLICATION_JSON)
 	public ChatEntry addChat(@PathParam("roomID") int roomID, SimpleChatWithPictureHash chat, @Context SecurityContext sec) throws DataException {
 		logger.entry();
 		
@@ -133,7 +130,6 @@ public class Chatrooms {
 	
 	@GET
 	@Path("{roomID}/members")
-	@Produces(MediaType.APPLICATION_JSON)
 	public List<? extends User> getMembers(@PathParam("roomID") int roomID) throws DataException {
 		logger.entry();
 		
