@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration status="all" strict="true" >
+<configuration status="info" strict="true">
     <properties>
         <property name="log" >log/rallye.log</property>
         <property name="debugLog" >log/debug.log</property>
@@ -11,28 +11,21 @@
             <layout type="PatternLayout" pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36}.%method -  %msg%n%throwable{full}" />
         </appender>
         
-        <appender type="File" name="LogFile" fileName="${log}">
+        <appender type="RollingRandomAccessFile" name="LogFile" fileName="${log}" filePattern="log/rallye %d{dd-MMM-yy, HH-mm-ss}.log">
             <layout type="PatternLayout" pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36}.%method - %msg%n%throwable{10}" />
+			<policies>
+				<OnStartupTriggeringPolicy />
+			</policies>
+			<strategy type="DefaultRolloverStrategy" max="5" />
         </appender>
         
-        <appender type="File" name="DebugLogFile" fileName="${debugLog}">
+        <appender type="RollingRandomAccessFile" name="DebugLogFile" fileName="${debugLog}" filePattern="log/debug %d{dd-MMM-yy, HH-mm-ss}.log">
             <layout type="PatternLayout" pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36}.%method - %msg%n%throwable{10}" />
+			<policies>
+				<OnStartupTriggeringPolicy />
+			</policies>
+			<strategy type="DefaultRolloverStrategy" max="5" />
         </appender>
-        
-         <appender type="List" name="List">
-		</appender>
-        
-        <!--<Console name="ConsoleException" target="System_OUT"> 
-        	<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36}.%method -  %xEx{full}%n" />
-        </Console>
-        
-        <File name="LogFile" fileName="${log}">
-			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n" />
-        </File>
-        
-        <File name="DebugLogFile" fileName="${debugLog}">
-			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n" />
-        </File>-->
         
     </appenders>
 
@@ -46,7 +39,7 @@
         
         <root level="trace" >
 
-            <appender-ref ref="List" />
+
             
         </root>
     </loggers>

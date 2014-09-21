@@ -37,8 +37,8 @@ public class StadtRallye {
 	private final static java.util.logging.Logger COM_LOGGER = java.util.logging.Logger.getLogger("com");
 	private final static java.util.logging.Logger ORG_LOGGER = java.util.logging.Logger.getLogger("org");
 	static {
-		ORG_LOGGER.setLevel(Level.FINE);
-		COM_LOGGER.setLevel(Level.FINE);
+		ORG_LOGGER.setLevel(Level.SEVERE);
+		COM_LOGGER.setLevel(Level.SEVERE);
 	}
 
 	private static final Logger logger = LogManager.getLogger(StadtRallye.class);

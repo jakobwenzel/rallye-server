@@ -102,6 +102,7 @@ dependencies {
 	//Log4j
 	//compile 'org.apache.logging.log4j:log4j-api:2.+'
 	compile 'org.apache.logging.log4j:log4j-core:2.+'
+	//compile 'javax.jmdns:jmdns:3.4.1'// log4j + chainsaw
 
 	// Google Cloud Messaging (deprecated)
 	compile 'com.ganyo:gcm-server:1.+'
