@@ -54,6 +54,7 @@ public class RallyeConfig {
 	@JsonProperty private String configFileDir = "";
 
 	private long lastModified = 0;
+	private GitRepositoryState buildInfo;
 
 	public long lastModified() {
 		return lastModified;
@@ -72,7 +73,6 @@ public class RallyeConfig {
 
 	//TODO: read Api versions from modules / manifest
 	private final ServerInfo.Api[] APIS = {new ServerInfo.Api(Tasks.API_NAME, Tasks.API_VERSION), new ServerInfo.Api(Game.API_NAME, Game.API_VERSION), new ServerInfo.Api(Server.API_NAME, Server.API_VERSION)};
-	private String build;
 
 	/**
 	 * Read Config from Config File if present
@@ -130,15 +130,7 @@ public class RallyeConfig {
 	}
 	
 	private void setGit(GitRepositoryState git) {
-		String build;
-
-		if (git != null) {
-			build = git.getDescription()+", "+git.getBuildTime();
-		} else {
-			build = "No build info";
-		}
-
-		this.build = build;
+		this.buildInfo = git;
 	}
 
 	public String getImageRepositoryPath() {
@@ -189,7 +181,7 @@ public class RallyeConfig {
 	}
 
 	public ServerInfo getServerInfo() {
-		return new ServerInfo(serverName, description, APIS, build);
+		return new ServerInfo(serverName, description, APIS, buildInfo);
 	}
 
 	@Override

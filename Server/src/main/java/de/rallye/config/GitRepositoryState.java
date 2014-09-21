@@ -25,22 +25,27 @@ import java.util.Properties;
 
 public class GitRepositoryState {
 
-	private final String description; // =${git.commit.id.description}
+	private final String branch; // =$(git.commit.branch)
+	private final String revision; // =${git.commit.id.revision}
 	private final String buildTime; // =${git.build.time}
 
 	private GitRepositoryState() throws IOException {
 		Properties properties = new Properties();
-		InputStream str = GitRepositoryState.class.getClassLoader().getResourceAsStream("git.properties");
+		InputStream str = GitRepositoryState.class.getClassLoader().getResourceAsStream("META-INF/buildInfo.properties");
 		if (str !=null) {
 			properties.load(str);
-	
-			Object desc = properties.get("git.commit.id.description");
-			this.description = (desc == null)? "" : desc.toString();
+
+			Object branch = properties.get("git.commit.branch");
+			this.branch = (branch == null)? "" : branch.toString();
+
+			Object desc = properties.get("git.commit.id.revision");
+			this.revision = (desc == null)? "" : desc.toString();
 	
 			Object time = properties.get("git.build.time");
 			this.buildTime = time.toString();
 		} else {
-			this.description="Unknown build";
+			this.branch="Unknown branch";
+			this.revision="Unknown build";
 			this.buildTime="Unknown";
 		}
 	}
@@ -53,8 +58,12 @@ public class GitRepositoryState {
 		}
 	}
 
-	public String getDescription() {
-		return description;
+	public String getBranch() {
+		return branch;
+	}
+
+	public String getRevision() {
+		return revision;
 	}
 
 	public String getBuildTime() {

@@ -14,12 +14,16 @@ repositories {
 mainClassName = "de.rallye.StadtRallye"
 
 task buildInfo {
-	ext.destinationDir = file("$buildDir/gitinfo")
+	ext.destinationDir = file("$buildDir/resources/main/META-INF")
 	doLast {
 		
 		def cmd = "git rev-parse --short HEAD"
 		def proc = cmd.execute()
 		def revision = proc.text.trim()
+
+		cmd = "git rev-parse --abbrev-ref HEAD"
+		proc = cmd.execute()
+		def branch = proc.text.trim()
 
 		cmd = 'git status --porcelain'
 		proc = cmd.execute()
@@ -45,20 +49,20 @@ task buildInfo {
 		destinationDir.mkdirs()
 
 
-		ext.infoFile = file(destinationDir.getAbsolutePath() + '/git.properties')
-		def content = "git.commit.id.description=" + revision + "\ngit.build.time=" + time + "\n"
+		ext.infoFile = file(destinationDir.getAbsolutePath() + '/buildInfo.properties')
+		def content = "git.commit.branch="+ branch +"\ngit.commit.id.revision=" + revision + "\ngit.build.time=" + time + "\n"
 		infoFile.write(content)
 	}
 }
 
 processResources {
 	it.dependsOn buildInfo
-	from buildInfo.destinationDir
+	//from buildInfo.destinationDir
 }
-task copyToLib(type: Copy) {
-    into "$buildDir/libs/lib"
-    from configurations.runtime
-}
+//task copyToLib(type: Copy) {
+//    into "$buildDir/libs/lib"
+//    from configurations.runtime
+//}
 jar {
 	archiveName 'rallye-server.jar'
 
@@ -69,7 +73,7 @@ jar {
 			attributes 'Class-Path': configurations.compile.collect { 'lib/'+it.getName() }.join(' ')
 		}
     }
-	it.dependsOn copyToLib
+	//it.dependsOn copyToLib
 }
 
 sourceCompatibility = 1.7
