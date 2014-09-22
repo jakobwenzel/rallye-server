@@ -55,14 +55,20 @@ task buildInfo {
 	}
 }
 
+task copyLicense(type: Copy) {
+     from '../COPYING'
+     into "$buildDir/resources/main/META-INF"
+ }
+
 processResources {
-	it.dependsOn buildInfo
-	//from buildInfo.destinationDir
+	it.dependsOn buildInfo, copyLicense
 }
+
 //task copyToLib(type: Copy) {
 //    into "$buildDir/libs/lib"
 //    from configurations.runtime
 //}
+
 jar {
 	archiveName 'rallye-server.jar'
 
