@@ -58,16 +58,16 @@ task buildInfo {
 task copyLicense(type: Copy) {
      from '../COPYING'
      into "$buildDir/resources/main/META-INF"
- }
+}
 
 processResources {
 	it.dependsOn buildInfo, copyLicense
 }
 
-//task copyToLib(type: Copy) {
-//    into "$buildDir/libs/lib"
-//    from configurations.runtime
-//}
+task collectDependencies(type: Copy) {
+    into "$buildDir/libs/lib"
+    from configurations.runtime
+}
 
 jar {
 	archiveName 'rallye-server.jar'
@@ -75,11 +75,10 @@ jar {
 	doFirst {
 	 
 		manifest {
-			attributes "Main-Class" : mainClassName
+			attributes 'Main-Class' : mainClassName
 			attributes 'Class-Path': configurations.runtime.collect { 'lib/'+it.getName() }.join(' ')
 		}
     }
-	//it.dependsOn copyToLib
 }
 
 sourceCompatibility = 1.7
