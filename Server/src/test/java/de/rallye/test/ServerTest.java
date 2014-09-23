@@ -19,29 +19,18 @@
 
 package de.rallye.test;
 
-import de.rallye.test.helper.HttpClient;
 import de.rallye.test.helper.StartTestServer;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.util.List;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 
 
 public class ServerTest {
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 		StartTestServer.getServer(); //Start a server
-	}
-	
-	@Test
-	public void testPing() throws IOException {
-		List<String> r = HttpClient.apiCallAsString("rallye/system/ping", 200);
-		assertEquals("Ping should return one line",1,r.size());
-		assertTrue("Ping should return OK",r.get(0).startsWith("OK"));
 	}
 
 	@Test @Ignore

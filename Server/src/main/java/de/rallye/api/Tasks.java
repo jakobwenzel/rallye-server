@@ -74,7 +74,7 @@ public class Tasks {
 	@GET
 	@Path("{taskID}")
 	@KnownUserAuth
-	public List<Submission> getSubmissions(@PathParam("taskID") int taskID, @Context SecurityContext sec) throws DataException {
+	public List<Submission> getSubmissionsForTask(@PathParam("taskID") int taskID, @Context SecurityContext sec) throws DataException {
 		logger.entry();
 		
 		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
@@ -85,8 +85,8 @@ public class Tasks {
 	
 	@GET
 	@Path("all/{groupID}")
-	@KnownUserOrAdminAuth
-	public List<TaskSubmissions> getAllSubmissions(@PathParam("groupID") int groupID, @Context SecurityContext sec, @Context Request request) throws DataException {
+	@KnownUserAuth
+	public List<TaskSubmissions> getAllSubmissionsForGroup(@PathParam("groupID") int groupID, @Context SecurityContext sec, @Context Request request) throws DataException {
 		logger.entry();
 
 		boolean includeRatings = true;

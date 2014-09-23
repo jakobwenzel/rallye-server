@@ -19,18 +19,18 @@
 
 package de.rallye.push;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import de.rallye.config.RallyeConfig;
 import de.rallye.db.IDataAdapter;
 import de.rallye.exceptions.DataException;
 import de.rallye.model.structures.ChatEntry;
-import de.rallye.model.structures.Chatroom;
+import de.rallye.model.structures.PushChatEntry;
 import de.rallye.model.structures.PushEntity.Type;
 import de.rallye.model.structures.PushMode;
 import de.rallye.model.structures.UserInternal;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import javax.inject.Inject;
 import java.util.*;
@@ -48,12 +48,12 @@ public class PushService {
 	private final Map<Integer, IPushAdapter> pushModes = Collections.synchronizedMap(new HashMap<Integer, IPushAdapter>());
 
 	private final IDataAdapter data;
-//	private ObjectMapper mapper;
+	private final ObjectMapper mapper;
 
 	@Inject
 	public PushService(IDataAdapter data, RallyeConfig config) {
 		this.data = data;
-//		this.mapper = new ObjectMapper();
+		this.mapper = new ObjectMapper();
 		
 		try {
 			for (PushMode p: data.getPushModes()) {
@@ -82,7 +82,7 @@ public class PushService {
 			List<UserInternal> users = data.getChatroomMembers(roomID);
 			
 			push(users, toJSON(chat, roomID), Type.messageChanged);
-		} catch (DataException e) {
+		} catch (DataException | JsonProcessingException e) {
 			logger.error(e);
 		}
 	}
@@ -92,27 +92,29 @@ public class PushService {
 			List<UserInternal> users = data.getChatroomMembers(roomID);
 			
 			push(users, toJSON(chat, roomID), Type.newMessage);
-		} catch (DataException e) {
+		} catch (DataException | JsonProcessingException e) {
 			logger.error(e);
 		}
 	}
 	
-	private String toJSON(ChatEntry chat, int roomID) {
-		JSONObject o = new JSONObject();
+	private String toJSON(ChatEntry chat, int roomID) throws JsonProcessingException {
+
+		PushChatEntry push = new PushChatEntry(chat, roomID);
+		return mapper.writeValueAsString(push);
+
+//		JSONObject o = new JSONObject();
 		
-		try {
-			o.put(ChatEntry.CHAT_ID, chat.chatID)
-				.put(ChatEntry.GROUP_ID, chat.groupID)
-				.put(Chatroom.CHATROOM_ID, roomID)
-				.put(ChatEntry.USER_ID, chat.userID)
-				.put(ChatEntry.MESSAGE, chat.message)
-				.put(ChatEntry.PICTURE_ID, chat.pictureID)
-				.put(ChatEntry.TIMESTAMP, chat.timestamp);
-		} catch (JSONException e) {
-			logger.error(e);
-		}
-		
-		return o.toString();
+//		try {
+//			o.put(ChatEntry.CHAT_ID, chat.chatID)
+//				.put(ChatEntry.GROUP_ID, chat.groupID)
+//				.put(Chatroom.CHATROOM_ID, roomID)
+//				.put(ChatEntry.USER_ID, chat.userID)
+//				.put(ChatEntry.MESSAGE, chat.message)
+//				.put(ChatEntry.PICTURE_ID, chat.pictureID)
+//				.put(ChatEntry.TIMESTAMP, chat.timestamp);
+//		} catch (JSONException e) {
+//			logger.error(e);
+//		}
 	}
 	
 	private void push(List<UserInternal> users, String payload, Type type) {

@@ -41,10 +41,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Path("resources/webclient")
-public class Client {
+public class Webclient {
 	private static final String RESOURCE_PATH = "webclient/";
 
-	private static final Logger logger =  LogManager.getLogger(Client.class);
+	private static final Logger logger =  LogManager.getLogger(Webclient.class);
 	
 	private static boolean projectChecked = false;
 	private static String projectDir;

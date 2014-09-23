@@ -59,7 +59,7 @@ public class GroupsTest {
 	public void testGetGroups() throws IOException, DataException {
 		StartTestServer.getServer();
 		
-		HttpResponse c = apiCall("rallye/groups", 200);
+		HttpResponse c = apiCall("groups", 200);
 		List<Group> groups = mapper.readValue(c.getEntity().getContent(), new TypeReference<List<Group>>(){});
 		assertEquals("Returned Groups should be equal to source", data.getGroups(true), groups);
 	}
@@ -104,7 +104,7 @@ public class GroupsTest {
 				return new PasswordAuthentication(String.valueOf(1), "test".toCharArray());
 			}
 		});
-		URL url = new URL("http://127.0.0.1:10111/rallye/groups/1");
+		URL url = new URL("http://127.0.0.1:10111/groups/1");
 		HttpURLConnection conn =  (HttpURLConnection) url.openConnection();
 		conn.setRequestMethod("PUT");
 		

@@ -46,8 +46,8 @@ public class GCMPushAdapter implements IPushAdapter {
 	
 	private final Sender sender;
 	private final IDataAdapter data;
-	
-	
+
+
 	public GCMPushAdapter(String gcmKey, IDataAdapter data) {
 		this.sender = new Sender(gcmKey);
 		this.data = data;

@@ -27,7 +27,7 @@ import org.junit.Test;
 import static org.junit.Assert.fail;
 
 @Ignore
-public class ClientTest {
+public class WebclientTest {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
