@@ -133,27 +133,27 @@ dependencies {
 	compile project(':common:RallyeStructures')
 }
 
-if (file("$rootProject.projectDir/local/remotes.gradle").exists())
+if (file("$rootProject.projectDir/local/remotes.gradle").exists()) {
 	apply from: "$rootProject.projectDir/local/remotes.gradle"
 
-task deploy(type: SshTask, dependsOn: assemble) {
-	session(remotes[0]) {
-		execute './rallye.sh stop'
+	task deploy(type: SshTask, dependsOn: assemble) {
+		session(remotes[0]) {
+			execute './rallye.sh stop'
 
-		put "$buildDir/libs/$jar.archiveName", 'server'
+			put "$buildDir/libs/$jar.archiveName", 'server'
 
-		execute './rallye.sh start'
+			execute './rallye.sh start'
+		}
 	}
-}
+	task deployLibs(type: SshTask, dependsOn: [assemble, collectDependencies]) {
+		session(remotes[0]) {
 
-task deployLibs(type: SshTask, dependsOn: [assemble, collectDependencies]) {
-	session(remotes[0]) {
+			execute './rallye.sh stop'
 
-		execute './rallye.sh stop'
+			execute 'rm -r server/lib; true'
+			put "$buildDir/libs/lib", 'server'
 
-		execute 'rm -r server/lib; true'
-		put "$buildDir/libs/lib", 'server'
-
-		execute './rallye.sh start'
+			execute './rallye.sh start'
+		}
 	}
 }
