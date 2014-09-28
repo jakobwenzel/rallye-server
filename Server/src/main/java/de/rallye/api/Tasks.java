@@ -85,17 +85,11 @@ public class Tasks {
 	
 	@GET
 	@Path("all/{groupID}")
-	@KnownUserAuth
+	@AdminAuth
 	public List<TaskSubmissions> getAllSubmissionsForGroup(@PathParam("groupID") int groupID, @Context SecurityContext sec, @Context Request request) throws DataException {
 		logger.entry();
 
 		boolean includeRatings = true;
-		if (sec.getUserPrincipal() instanceof RallyePrincipal) {
-			RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
-			p.ensureGroupMatches(groupID);
-
-			includeRatings = gameState.isShowRatingToUsers();
-		} //else we are admin and don't need to check group match.
 		
 //		if (!p.hasRightsForTaskScoring()) {
 //			logger.warn("admin {} has no access rights taskScoring", p.getAdminID());
@@ -104,6 +98,23 @@ public class Tasks {
 
 //		HttpCacheHandling.checkModifiedSince(request, data.getSubmissionsLastModified());//TODO
 		
+		List<TaskSubmissions> res = data.getAllSubmissions(groupID, includeRatings);
+		return logger.exit(res);
+	}
+
+	@GET
+	@Path("all")
+	@KnownUserAuth
+	public List<TaskSubmissions> getAllSubmissionsForGroup(@Context SecurityContext sec, @Context Request request) throws DataException {
+		logger.entry();
+
+		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
+		int groupID = p.getGroupID();
+
+		boolean includeRatings = gameState.isShowRatingToUsers();
+
+//		HttpCacheHandling.checkModifiedSince(request, data.getSubmissionsLastModified());//TODO
+
 		List<TaskSubmissions> res = data.getAllSubmissions(groupID, includeRatings);
 		return logger.exit(res);
 	}

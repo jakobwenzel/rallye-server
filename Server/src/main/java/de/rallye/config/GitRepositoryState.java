@@ -69,4 +69,9 @@ public class GitRepositoryState {
 	public String getBuildTime() {
 		return buildTime;
 	}
+
+	@Override
+	public String toString() {
+		return "Git: "+ branch +":"+ revision +" @"+ buildTime;
+	}
 }
