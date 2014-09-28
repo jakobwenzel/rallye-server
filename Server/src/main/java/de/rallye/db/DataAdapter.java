@@ -34,6 +34,7 @@ import org.apache.logging.log4j.Logger;
 import java.beans.PropertyVetoException;
 import java.sql.*;
 import java.util.*;
+import java.util.Map;
 import java.util.Map.Entry;
 
 public class DataAdapter implements IDataAdapter {
