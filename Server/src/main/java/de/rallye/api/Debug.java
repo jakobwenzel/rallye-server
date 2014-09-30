@@ -27,6 +27,7 @@ import com.drew.metadata.MetadataException;
 import com.drew.metadata.Tag;
 import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.exif.GpsDirectory;
+import de.rallye.annotations.AdminAuth;
 import de.rallye.config.RallyeConfig;
 import de.rallye.db.IDataAdapter;
 import de.rallye.exceptions.DataException;
@@ -58,6 +59,7 @@ public class Debug {
 	@GET
 	@Path("log")
 	@Produces(MediaType.TEXT_HTML)
+	@AdminAuth
 	public String getLog() throws FileNotFoundException {
 
 		File f = new File("log/debug.log");
