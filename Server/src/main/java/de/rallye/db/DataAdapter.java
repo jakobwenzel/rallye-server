@@ -208,7 +208,7 @@ public class DataAdapter implements IDataAdapter {
 				}
 			else
 				while (rs.next()) {
-					groups.add(new Group(rs.getInt(1), rs.getString(2), rs.getString(3)));
+					groups.add(new Group(rs.getInt(1), rs.getString(2), rs.getString(3), null));
 				}
 			
 			return groups;
