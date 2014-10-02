@@ -68,8 +68,8 @@ public class MockDataAdapter implements IDataAdapter {
 	@Override
 	public List<Group> getGroups(boolean includePasswords) throws DataException {
 		List<Group> result = new ArrayList<Group>();
-		result.add(new Group(1, "Gruppe 1", "Beschreibung Gruppe 1"));
-		result.add(new Group(2, "Gruppe 2", "Beschreibung Gruppe 2"));
+		result.add(new Group(1, "Gruppe 1", "Beschreibung Gruppe 1", null));
+		result.add(new Group(2, "Gruppe 2", "Beschreibung Gruppe 2", null));
 		return result;
 	}
 

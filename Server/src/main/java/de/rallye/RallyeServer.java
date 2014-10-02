@@ -70,15 +70,7 @@ public class RallyeServer {
 
 
 	private HttpServer startServer(URI uri) throws IOException {
-		ResourceConfig rc = new ResourceConfig();
-		rc.packages("de.rallye.api", "de.rallye.filter", "de.rallye.filter.auth","de.rallye.exceptions.mappers");
-		rc.register(JacksonSmileProvider.class);
-		rc.register(JacksonXMLProvider.class);
-		rc.register(JacksonFeature.class);
-		//rc.register(EnsureMimeType.class);
-		rc.register(new RallyeBinder());
-	    rc.register(MultiPartFeature.class);
-
+		ResourceConfig rc = new RallyeApplication();
 		HttpServer serv = createServer(uri, rc); // Do NOT start the server just yet
 		logger.info("Starting Grizzly server at " + uri);
 
