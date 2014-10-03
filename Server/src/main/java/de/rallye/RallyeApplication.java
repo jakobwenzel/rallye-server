@@ -25,6 +25,8 @@ import de.rallye.injection.RallyeBinder;
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.server.mvc.MvcFeature;
+import org.glassfish.jersey.server.mvc.mustache.MustacheMvcFeature;
 
 import javax.ws.rs.ApplicationPath;
 
@@ -42,5 +44,8 @@ public class RallyeApplication extends ResourceConfig {
 		//register(EnsureMimeType.class);
 		register(new RallyeBinder());
 		register(MultiPartFeature.class);
+
+        property(MvcFeature.TEMPLATE_BASE_PATH, "templates");
+        register(MustacheMvcFeature.class);
 	}
 }
