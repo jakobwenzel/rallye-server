@@ -1,5 +1,4 @@
 ﻿<?xml version="1.0" encoding="UTF-8" ?>
-<?xml-stylesheet href="/qrcode/stundenplan.xsl" type="text/xsl" ?>
 <timetable>
 	<heading>Ophase iST - WS 2014</heading>
 	<timeslots>
@@ -74,7 +73,7 @@
 				<event>
 					<title>Organisatorisches und Kennenlernen</title>
 					<starttime>11:40</starttime>
-					<location>Kleingruppe</location>
+					<location>monday</location>
 					<duration>1.5</duration>
 					<type>kleingruppe</type>
 					<neededrooms>4</neededrooms>
@@ -122,7 +121,7 @@
 				<event>
 					<title>Frühstück</title>
 					<starttime>08:45</starttime>
-					<location>S2|02 Bistro</location>
+					<location>S2|02 LZI</location>
 					<duration>1</duration>
 					<type>other</type>
 					<neededrooms>0</neededrooms>
@@ -130,7 +129,7 @@
 				<event>
 					<title>Studienorganisation und TuCaN</title>
 					<starttime>09:50</starttime>
-					<location>Kleingruppe</location>
+					<location>tuesdayA</location>
 					<duration>2</duration>
 					<type>kleingruppe</type>
 					<neededrooms>4</neededrooms>
@@ -138,7 +137,7 @@
 				<event>
 					<title>Studium allgemein</title>
 					<starttime>11:40</starttime>
-					<location>Kleingruppe</location>
+					<location>tuesdayB</location>
 					<duration>2</duration>
 					<type>kleingruppe</type>
 					<neededrooms>4</neededrooms>
@@ -186,7 +185,7 @@
 				<event>
 					<title>Frühstück</title>
 					<starttime>08:45</starttime>
-					<location>S2|02 Bistro</location>
+					<location>S2|02 LZI</location>
 					<duration>1</duration>
 					<type>other</type>
 					<neededrooms>0</neededrooms>
@@ -242,7 +241,7 @@
 				<event>
 					<title>Frühstück</title>
 					<starttime>08:45</starttime>
-					<location>S2|02 Bistro</location>
+					<location>S2|02 LZI</location>
 					<duration>1</duration>
 					<type>other</type>
 					<neededrooms>0</neededrooms>
@@ -258,7 +257,7 @@
 				<event>
 					<title>Informationsquellen</title>
 					<starttime>11:40</starttime>
-					<location>Kleingruppe</location>
+					<location>thursday</location>
 					<duration>1.5</duration>
 					<type>kleingruppe</type>
 					<neededrooms>4</neededrooms>
@@ -289,7 +288,7 @@
 				</event>
 				<event>
 					<title>Grillen</title>
-					<starttime>tba</starttime>
+					<starttime>17:20</starttime>
 					<location>60,3qm</location>
 					<duration>1.5</duration>
 					<type>evening</type>
@@ -306,7 +305,7 @@
 				<event>
 					<title>Frühstück</title>
 					<starttime>08:45</starttime>
-					<location>S2|02 Bistro</location>
+					<location>S2|02 LZI</location>
 					<duration>1</duration>
 					<type>other</type>
 					<neededrooms>0</neededrooms>
@@ -322,7 +321,7 @@
 				<event>
 					<title>Klausureinsicht</title>
 					<starttime>11:40</starttime>
-					<location>Kleingruppe</location>
+					<location>friday</location>
 					<duration>1.5</duration>
 					<type>kleingruppe</type>
 					<neededrooms>2</neededrooms>
