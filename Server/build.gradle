@@ -5,7 +5,7 @@ plugins {
 	id 'java'
 	id 'eclipse'
 	id 'application'
-	id 'war'
+	//id 'war'
 }
 
 repositories {
@@ -85,10 +85,10 @@ jar {
 		}
     }
 }
-
+/*
 war {
 
-}
+}*/
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7
