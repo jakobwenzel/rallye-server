@@ -21,12 +21,16 @@ package de.rallye;
 
 import com.fasterxml.jackson.jaxrs.smile.JacksonSmileProvider;
 import com.fasterxml.jackson.jaxrs.xml.JacksonXMLProvider;
-import de.rallye.injection.RallyeBinder;
+
 import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.server.mvc.MvcFeature;
+import org.glassfish.jersey.server.mvc.mustache.MustacheMvcFeature;
 
 import javax.ws.rs.ApplicationPath;
+
+import de.rallye.injection.RallyeBinder;
 
 /**
  * Created by Ramon on 02.10.2014.
@@ -42,5 +46,9 @@ public class RallyeApplication extends ResourceConfig {
 		//register(EnsureMimeType.class);
 		register(new RallyeBinder());
 		register(MultiPartFeature.class);
+
+        property(MvcFeature.TEMPLATE_BASE_PATH, "templates");
+		property(MustacheMvcFeature.CACHE_TEMPLATES, false); //TODO enable caching once templates are no longer being modified
+        register(MustacheMvcFeature.class);
 	}
 }
