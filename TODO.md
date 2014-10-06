@@ -14,3 +14,4 @@
 
 # Misc
 * reduce logging in auth filters
+* guarantee Userentry for all chats!! -> NEVER delete users

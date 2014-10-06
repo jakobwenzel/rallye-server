@@ -171,6 +171,8 @@ public class ImageRepository implements IPictureRepository {
 
 	public static LatLngAlt readGps(Metadata meta) {
 		GpsDirectory gps = meta.getDirectory(GpsDirectory.class);
+		if (gps == null)
+			return null;
 
 		int altitude;
 		try {
@@ -194,6 +196,10 @@ public class ImageRepository implements IPictureRepository {
 		StringBuilder sb = new StringBuilder();
 
 		ExifIFD0Directory exif = meta.getDirectory(ExifIFD0Directory.class);
+
+		if (exif == null) {
+			return null;
+		}
 
 		sb.append(exif.getString(ExifIFD0Directory.TAG_MAKE)).append(" - ").append(exif.getString(ExifIFD0Directory.TAG_MODEL));
 
