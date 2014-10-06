@@ -21,9 +21,7 @@ package de.rallye;
 
 import com.fasterxml.jackson.jaxrs.smile.JacksonSmileProvider;
 import com.fasterxml.jackson.jaxrs.xml.JacksonXMLProvider;
-import de.rallye.admin.AdminWebsocketApp;
-import de.rallye.injection.RallyeBinder;
-import de.rallye.push.PushWebsocketApp;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.glassfish.grizzly.http.CompressionConfig;
@@ -38,11 +36,18 @@ import org.glassfish.jersey.jackson.JacksonFeature;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ContainerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
+import org.glassfish.jersey.server.mvc.MvcFeature;
+import org.glassfish.jersey.server.mvc.mustache.MustacheMvcFeature;
+
+import java.io.IOException;
+import java.net.URI;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.UriBuilder;
-import java.io.IOException;
-import java.net.URI;
+
+import de.rallye.admin.AdminWebsocketApp;
+import de.rallye.injection.RallyeBinder;
+import de.rallye.push.PushWebsocketApp;
 
 //import org.glassfish.grizzly.http.CompressionConfig;
 

@@ -1,0 +1,348 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<timetable>
+	<heading>Ophase iST - WS 2014</heading>
+	<timeslots>
+		<timeslot>
+			<from>08:45</from>
+			<to>09:40</to>
+		</timeslot>
+		<timeslot>
+			<from>09.50</from>
+			<to>10:35</to>
+		</timeslot>
+		<timeslot>
+			<from>10:45</from>
+			<to>11:30</to>
+		</timeslot>
+		<timeslot>
+			<from>11:40</from>
+			<to>12:25</to>
+		</timeslot>
+		<timeslot>
+			<from>12:35</from>
+			<to>13:20</to>
+		</timeslot>
+		<timeslot>
+			<from>13:30</from>
+			<to>14:15</to>
+		</timeslot>
+		<timeslot>
+			<from>14:25</from>
+			<to>15:10</to>
+		</timeslot>
+		<timeslot>
+			<from>15:20</from>
+			<to>16:05</to>
+		</timeslot>
+		<timeslot>
+			<from>16:15</from>
+			<to>17:00</to>
+		</timeslot>
+		<timeslot>
+			<from>17:10</from>
+			<to>17:55</to>
+		</timeslot>
+		<timeslot>
+			<from>18:05</from>
+			<to>ENDE</to>
+		</timeslot>
+	</timeslots>
+	<days>
+	
+	
+	
+		<day>
+			<heading>Montag, 06.10.</heading>
+			<events>
+				<event>
+					<title></title>
+					<starttime></starttime>
+					<location></location>
+					<duration>1</duration>
+					<type>spacer</type>
+					<neededrooms>0</neededrooms>
+				</event>
+				<event>
+					<title>Begrüßung</title>
+					<starttime>09:50</starttime>
+					<location>S1|01 A4</location>
+					<duration>2</duration>
+					<type>plenum</type>
+					<neededrooms>1</neededrooms>
+				</event>
+				<event>
+					<title>Organisatorisches und Kennenlernen</title>
+					<starttime>11:40</starttime>
+					<location>monday</location>
+					<duration>1.5</duration>
+					<type>kleingruppe</type>
+					<neededrooms>4</neededrooms>
+				</event>
+				<event>
+					<title>Mittagessen</title>
+					<starttime>13:00</starttime>
+					<location>Mensa</location>
+					<duration>1</duration>
+					<type>mensa</type>
+					<neededrooms>0</neededrooms>
+				</event>
+				<event>
+					<title>Uni- und Stadtrundgang</title>
+					<starttime>14:00</starttime>
+					<location>Campus und DA</location>
+					<duration>2</duration>
+					<type>kleingruppe</type>
+					<neededrooms>0</neededrooms>
+				</event>
+				<!--<event>
+					<title>Fach- &amp; Kurzvorträge (Asta)</title>
+					<starttime>15:30</starttime>
+					<location>S2|06 030</location>
+					<duration>2</duration>
+					<type>plenum</type>
+					<neededrooms>0</neededrooms>
+				</event>-->
+				<event>
+					<title>Café</title>
+					<starttime>16:00</starttime>
+					<location>60,3qm</location>
+					<duration>2</duration>
+					<type>evening</type>
+					<neededrooms>0</neededrooms>
+				</event>
+			</events>
+		</day>
+		
+		
+		
+		<day>
+			<heading>Dienstag, 07.10.</heading>
+			<events>
+				<event>
+					<title>Frühstück</title>
+					<starttime>08:45</starttime>
+					<location>S2|02 LZI</location>
+					<duration>1</duration>
+					<type>other</type>
+					<neededrooms>0</neededrooms>
+				</event>
+				<event>
+					<title>Studienorganisation und TuCaN</title>
+					<starttime>09:50</starttime>
+					<location>tuesdayA</location>
+					<duration>2</duration>
+					<type>kleingruppe</type>
+					<neededrooms>4</neededrooms>
+				</event>
+				<event>
+					<title>Studium allgemein</title>
+					<starttime>11:40</starttime>
+					<location>tuesdayB</location>
+					<duration>2</duration>
+					<type>kleingruppe</type>
+					<neededrooms>4</neededrooms>
+				</event>
+				<event>
+					<title>Mittagessen</title>
+					<starttime>13:30</starttime>
+					<location>Mensa</location>
+					<duration>1</duration>
+					<type>mensa</type>
+					<neededrooms>0</neededrooms>
+				</event>
+				<event>
+					<title>SPZ &amp; HSG</title>
+					<starttime>14:30</starttime>
+					<location>S1|05 122</location>
+					<duration>1</duration>
+					<type>plenum</type>
+					<neededrooms>0</neededrooms>
+				</event>
+				<event>
+					<title>Uni-Rallye</title>
+					<starttime>15:00</starttime>
+					<location>S1|05 122</location>
+					<duration>3</duration>
+					<type>aktiv</type>
+					<neededrooms>0</neededrooms>
+				</event>
+				<event>
+					<title>Filmkreis</title>
+					<starttime>18:00</starttime>
+					<location>S1|01 A1</location>
+					<duration>1</duration>
+					<type>evening</type>
+					<neededrooms>0</neededrooms>
+				</event>
+			</events>
+		</day>
+		
+		
+		
+		<day>
+			<heading>Mittwoch, 08.10.</heading>
+			<events>
+				<event>
+					<title>Frühstück</title>
+					<starttime>08:45</starttime>
+					<location>S2|02 LZI</location>
+					<duration>1</duration>
+					<type>other</type>
+					<neededrooms>0</neededrooms>
+				</event>
+				<event>
+					<title>Fachvorträge</title>
+					<starttime>09:45</starttime>
+					<location>S1|01 A1</location>
+					<duration>2</duration>
+					<type>plenum</type>
+					<neededrooms>0</neededrooms>
+				</event>
+				<event>
+					<title>Mentoring</title>
+					<starttime>11:40</starttime>
+					<location>S3|11 006</location>
+					<duration>1.5</duration>
+					<type>plenum</type>
+					<neededrooms>1</neededrooms>
+				</event>
+				<event>
+					<title>Mittagessen</title>
+					<starttime>13:00</starttime>
+					<location>Mensa</location>
+					<duration>1</duration>
+					<type>mensa</type>
+					<neededrooms>0</neededrooms>
+				</event>
+				<event>
+					<title>Stadt-Rallye</title>
+					<starttime>14:00</starttime>
+					<location>S1|01 karo5</location>
+					<duration>3.5</duration>
+					<type>aktiv</type>
+					<neededrooms>0</neededrooms>
+				</event>
+				<event>
+					<title>Kneipentour</title>
+					<starttime>17:30</starttime>
+					<location>tba</location>
+					<duration>2</duration>
+					<type>evening</type>
+					<neededrooms>0</neededrooms>
+				</event>
+			</events>
+		</day>
+		
+		
+		
+		<day>
+			<heading>Donnerstag, 09.10.</heading>
+			<events>
+				<event>
+					<title>Frühstück</title>
+					<starttime>08:45</starttime>
+					<location>S2|02 LZI</location>
+					<duration>1</duration>
+					<type>other</type>
+					<neededrooms>0</neededrooms>
+				</event>
+				<event>
+					<title>Klausur</title>
+					<starttime>09:50</starttime>
+					<location>S1|01 A5</location>
+					<duration>2</duration>
+					<type>plenum</type>
+					<neededrooms>1</neededrooms>
+				</event>
+				<event>
+					<title>Informationsquellen</title>
+					<starttime>11:40</starttime>
+					<location>thursday</location>
+					<duration>1.5</duration>
+					<type>kleingruppe</type>
+					<neededrooms>4</neededrooms>
+				</event>
+				<event>
+					<title>Mittagessen</title>
+					<starttime>13:00</starttime>
+					<location>Mensa</location>
+					<duration>1</duration>
+					<type>mensa</type>
+					<neededrooms>0</neededrooms>
+				</event>
+				<event>
+					<title>Workshops</title>
+					<starttime>14:00</starttime>
+					<location>siehe Aushang</location>
+					<duration>2</duration>
+					<type>aktiv</type>
+					<neededrooms>0</neededrooms>
+				</event>
+				<event>
+					<title>Workshops</title>
+					<starttime>15:40</starttime>
+					<location>siehe Aushang</location>
+					<duration>2</duration>
+					<type>aktiv</type>
+					<neededrooms>0</neededrooms>
+				</event>
+				<event>
+					<title>Grillen</title>
+					<starttime>17:20</starttime>
+					<location>60,3qm</location>
+					<duration>1.5</duration>
+					<type>evening</type>
+					<neededrooms>0</neededrooms>
+				</event>
+			</events>
+		</day>
+		
+		
+		
+		<day>
+			<heading>Freitag, 10.10.</heading>
+			<events>
+				<event>
+					<title>Frühstück</title>
+					<starttime>08:45</starttime>
+					<location>S2|02 LZI</location>
+					<duration>1</duration>
+					<type>other</type>
+					<neededrooms>0</neededrooms>
+				</event>
+				<event>
+					<title>Workshops</title>
+					<starttime>09:45</starttime>
+					<location>siehe Aushang</location>
+					<duration>2</duration>
+					<type>aktiv</type>
+					<neededrooms>0</neededrooms>
+				</event>
+				<event>
+					<title>Klausureinsicht</title>
+					<starttime>11:40</starttime>
+					<location>friday</location>
+					<duration>1.5</duration>
+					<type>kleingruppe</type>
+					<neededrooms>2</neededrooms>
+				</event>
+				<event>
+					<title>Mittagessen</title>
+					<starttime>13:00</starttime>
+					<location>Mensa</location>
+					<duration>1</duration>
+					<type>mensa</type>
+					<neededrooms>0</neededrooms>
+				</event>
+				<event>
+					<title>Abschluss</title>
+					<starttime>14:00</starttime>
+					<location>S1|01 A5</location>
+					<duration>2</duration>
+					<type>plenum</type>
+					<neededrooms>1</neededrooms>
+				</event>
+			</events>
+		</day>
+	</days>
+</timetable>
