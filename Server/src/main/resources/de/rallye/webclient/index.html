@@ -94,9 +94,9 @@ function load_chatroom(id) {
 			var groupName = group?group.name:chat.groupID;
 			var picture = null;
 			var pictureBig = null
-			if (chat.pictureID) {
-				picture = root+"rallye/pics/"+chat.pictureID+"/thumb";
-				pictureBig = root+"rallye/pics/"+chat.pictureID+"/std";
+			if (chat.pictureHash) {
+				picture = root+"rallye/pics/"+chat.pictureHash+"/thumb";
+				pictureBig = root+"rallye/pics/"+chat.pictureHash+"/std";
 			}
 			var ava = root+"rallye/groups/"+chat.groupID+"/avatar";
 			
@@ -205,9 +205,9 @@ function setup_socket() {
 					var groupName = group?group.name:chat.groupID;
 					var picture = null;
 					var pictureBig = null
-					if (chat.pictureID) {
-						picture = root+"rallye/pics/"+chat.pictureID+"/thumb";
-						pictureBig = root+"rallye/pics/"+chat.pictureID+"/std";
+					if (chat.pictureHash) {
+						picture = root+"rallye/pics/"+chat.pictureHash+"/thumb";
+						pictureBig = root+"rallye/pics/"+chat.pictureHash+"/std";
 					}
 					var ava = root+"rallye/groups/"+chat.groupID+"/avatar";
 			
@@ -237,9 +237,9 @@ function setup_socket() {
 					var groupName = group?group.name:chat.groupID;
 					var picture = null;
 					var pictureBig = null
-					if (chat.pictureID) {
-						picture = root+"rallye/pics/"+chat.pictureID+"/thumb";
-						pictureBig = root+"rallye/pics/"+chat.pictureID+"/std";
+					if (chat.pictureHash) {
+						picture = root+"rallye/pics/"+chat.pictureHash+"/thumb";
+						pictureBig = root+"rallye/pics/"+chat.pictureHash+"/std";
 					}
 					var ava = root+"rallye/groups/"+chat.groupID+"/avatar";
 

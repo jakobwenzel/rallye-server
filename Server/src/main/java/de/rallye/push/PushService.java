@@ -110,7 +110,7 @@ public class PushService {
 //				.put(Chatroom.CHATROOM_ID, roomID)
 //				.put(ChatEntry.USER_ID, chat.userID)
 //				.put(ChatEntry.MESSAGE, chat.message)
-//				.put(ChatEntry.PICTURE_ID, chat.pictureID)
+//				.put(ChatEntry.PICTURE_ID, chat.pictureHash)
 //				.put(ChatEntry.TIMESTAMP, chat.timestamp);
 //		} catch (JSONException e) {
 //			logger.error(e);

@@ -31,6 +31,7 @@ import de.rallye.annotations.AdminAuth;
 import de.rallye.config.RallyeConfig;
 import de.rallye.db.IDataAdapter;
 import de.rallye.exceptions.DataException;
+import de.rallye.images.ImageRepository;
 import de.rallye.model.structures.LatLngAlt;
 import de.rallye.model.structures.UserInternal;
 import org.apache.logging.log4j.LogManager;
@@ -43,8 +44,8 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.*;
-import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.*;
+import java.util.Map;
 
 @Path("debug")
 @Produces({"application/x-jackson-smile;qs=0.8", "application/xml;qs=0.9", "application/json;qs=1"})
@@ -109,6 +110,21 @@ public class Debug {
 	}
 
 	@GET
+	@Path("headers")
+	@Produces("text/plain")
+	public String headers(@Context HttpHeaders headers) {
+		StringBuilder sb = new StringBuilder();
+		for (Map.Entry<String, List<String>> header : headers.getRequestHeaders().entrySet()) {
+			sb.append(header.getKey()).append(": ");
+			for (String val : header.getValue()) {
+				sb.append(val).append(", ");
+			}
+			sb.append('\n');
+		}
+		return sb.toString();
+	}
+
+	@GET
 	@Path("purge")
 	public void purge() {
 		data.purgeCache();
@@ -138,7 +154,7 @@ public class Debug {
 	public LatLngAlt extractGpsLocation(File img) throws ImageProcessingException, IOException {
 		Metadata meta = ImageMetadataReader.readMetadata(img);
 
-		return readGps(meta);
+		return ImageRepository.readGps(meta);
 	}
 
 	@PUT
@@ -148,13 +164,7 @@ public class Debug {
 	public String extractMakeModel(File img) throws ImageProcessingException, IOException {
 		Metadata meta = ImageMetadataReader.readMetadata(img);
 
-		StringBuilder sb = new StringBuilder();
-
-		ExifIFD0Directory exif = meta.getDirectory(ExifIFD0Directory.class);
-
-		sb.append("Make: ").append(exif.getString(ExifIFD0Directory.TAG_MAKE)).append(", Model: ").append(exif.getString(ExifIFD0Directory.TAG_MODEL));
-
-		return sb.toString();
+		return ImageRepository.readMakeModel(meta);
 	}
 
 	@PUT
@@ -173,27 +183,5 @@ public class Debug {
 			}
 		}
 		return sb.toString();
-
-	}
-
-	private LatLngAlt readGps(Metadata meta) {
-		GpsDirectory gps = meta.getDirectory(GpsDirectory.class);
-
-		int altitude;
-		try {
-			altitude = gps.getInt(GpsDirectory.TAG_GPS_ALTITUDE);
-		} catch (MetadataException e) {
-			e.printStackTrace();
-			altitude = 0;
-		}
-
-		LatLngAlt location = null;
-		try {
-			location = new LatLngAlt(gps.getGeoLocation().getLatitude(), gps.getGeoLocation().getLongitude(), altitude);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return location;
 	}
 }

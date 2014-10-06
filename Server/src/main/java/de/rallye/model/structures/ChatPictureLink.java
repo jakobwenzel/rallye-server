@@ -90,9 +90,9 @@ public class ChatPictureLink extends PictureLink<RoomChat> {
 		@Override
 		public void propagateLink(PictureLink<RoomChat> link, Mode mode) {
 			try {
-				data.editChatAddPicture(link.getObj().entry.chatID, link.getPictureID());
+				data.editChatAddPicture(link.getObj().entry.chatID, link.getPicture().getPictureID());// associate the chatENtry directly with a picId, for increased efficiency
 
-				link.getObj().push.chatChanged(link.getObj().entry, link.getObj().roomID);
+//				link.getObj().push.chatChanged(link.getObj().entry, link.getObj().roomID);//To clients to chat did not change
 			} catch (DataException e) {
 				logger.error("{}: Linking failed", this, e);
 			}

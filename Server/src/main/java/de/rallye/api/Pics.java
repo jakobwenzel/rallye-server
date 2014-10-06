@@ -23,6 +23,7 @@ import de.rallye.annotations.KnownUserAuth;
 import de.rallye.db.IDataAdapter;
 import de.rallye.exceptions.DataException;
 import de.rallye.filter.auth.RallyePrincipal;
+import de.rallye.images.IPictureRepository;
 import de.rallye.images.ImageRepository;
 import de.rallye.model.structures.ChatPictureLink;
 import de.rallye.model.structures.Picture;
@@ -37,6 +38,7 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -57,61 +59,86 @@ public class Pics {
 	@Path("{hash}")
 	@KnownUserAuth
 	@Consumes("image/jpeg")
-	public Picture uploadPictureWithHash(File img, @PathParam("hash") String hash, @Context SecurityContext sec) throws DataException {
+	public ImageRepository.Picture uploadPictureWithHash(File img, @PathParam("hash") String hash, @Context SecurityContext sec) throws DataException {
 		logger.entry();
 		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
 		
-		Picture pic = savePicture(img, p);
+		ImageRepository.Picture pic = savePicture(img, hash, p);
 		if (pic != null) {
-			ChatPictureLink.getLink(chatPictureMap, hash, data).setPicture(pic.pictureID);
-			SubmissionPictureLink.getLink(submissionPictureMap, hash, data).setPicture(pic.pictureID);
+			ChatPictureLink.getLink(chatPictureMap, hash, data).setPicture(pic);
+			SubmissionPictureLink.getLink(submissionPictureMap, hash, data).setPicture(pic);
 		}
 
-		logger.debug("Picture {} has hash {}", pic.pictureID, hash);
+		logger.debug("Picture {} has hash {}", pic.pictureHash, hash);
 		
 		return logger.exit(pic);
+	}
+
+	@PUT
+	@Path("{hash}/preview")
+	@KnownUserAuth
+	@Consumes("image/jpeg")
+	public ImageRepository.Picture uploadPreviewWithHash(File img, @PathParam("hash") String hash, @Context SecurityContext sec) throws DataException {
+		logger.entry();
+		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
+
+		ImageRepository.Picture picture = imageRepository.putImagePreview(p.getUserID(), hash, img);
+		if (picture != null) {
+			ChatPictureLink.getLink(chatPictureMap, hash, data).setPicture(picture);
+			SubmissionPictureLink.getLink(submissionPictureMap, hash, data).setPicture(picture);
+		}
+
+		logger.debug("Picture {} has hash {}", picture.pictureHash, hash);
+
+		return logger.exit(picture);
 	}
 	
 	@PUT
 	@KnownUserAuth
 	@Consumes("image/jpeg")
-	public Picture uploadPicture(File img, @Context SecurityContext sec) throws DataException {
+	public ImageRepository.Picture uploadPicture(File img, @Context SecurityContext sec) throws DataException {
 		logger.entry();
-		return logger.exit(savePicture(img, (RallyePrincipal) sec.getUserPrincipal()));
+		return logger.exit(savePicture(img, null, (RallyePrincipal) sec.getUserPrincipal()));
 	}
 	
-	private Picture savePicture(File img, RallyePrincipal p) throws DataException {
+	private ImageRepository.Picture savePicture(File img, String pictureHash, RallyePrincipal p) throws DataException {
 		logger.entry();
-		
-		int pictureID;
-		
-		pictureID = data.assignNewPictureID(p.getUserID());
-		imageRepository.put(pictureID, img);
+
+		if (pictureHash == null) {
+			pictureHash = Integer.toString(img.getAbsolutePath().hashCode());//TODO generate a real hashCode
+		}
+		ImageRepository.Picture picture = imageRepository.putImage(p.getUserID(), pictureHash, img);
 	
-		return logger.exit(new Picture(pictureID));
+		return logger.exit(picture);
 	}
 	
 	@GET
-	@Path("{pictureID}")
+	@Path("{pictureHash}")
 	@Produces("image/jpeg")
-	public BufferedImage getPicture(@PathParam("pictureID") int pictureID, @Context Request request) {
-		logger.entry();
-
-		HttpCacheHandling.checkModifiedSince(request, imageRepository.getLastModified(pictureID));
-		
-		BufferedImage res = imageRepository.get(pictureID, PictureSize.Standard);
-		return logger.exit(res);
+	public Object getPicture(@PathParam("pictureHash") String pictureHash, @Context Request request) {
+		return getPicture(pictureHash, PictureSize.Standard, request);
 	}
 	
 	@GET
-	@Path("{pictureID}/{size}")
+	@Path("{pictureHash}/{size}")
 	@Produces("image/jpeg")
-	public BufferedImage getPicture(@PathParam("pictureID") int pictureID, @PathParam("size") PictureSize.PictureSizeString size, @Context Request request) {
+	public Object getPicture(@PathParam("pictureHash") String pictureHash, @PathParam("size") PictureSize.PictureSizeString size, @Context Request request) {
+		return getPicture(pictureHash, size.size, request);
+	}
+
+	private Object getPicture(String pictureHash, PictureSize size, Request request) {
 		logger.entry();
 
-		HttpCacheHandling.checkModifiedSince(request, imageRepository.getLastModified(pictureID));
-		
-		BufferedImage res = imageRepository.get(pictureID, size.size);
+		IPictureRepository.IPicture picture = imageRepository.getImage(pictureHash);
+
+		HttpCacheHandling.checkModifiedSince(request, picture.lastModified());
+
+		Object res;
+		res = picture.getCached(size);
+		if (res == null) {
+			res = picture.getFile(size);
+		}
+
 		return logger.exit(res);
 	}
 }

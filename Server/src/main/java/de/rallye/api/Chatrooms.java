@@ -25,6 +25,7 @@ import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.InputException;
 import de.rallye.exceptions.UnauthorizedException;
 import de.rallye.filter.auth.RallyePrincipal;
+import de.rallye.images.ImageRepository;
 import de.rallye.model.structures.*;
 import de.rallye.push.PushService;
 import org.apache.logging.log4j.LogManager;
@@ -91,7 +92,7 @@ public class Chatrooms {
 	@KnownUserAuth
 	@Path("{roomID}")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public ChatEntry addChat(@PathParam("roomID") int roomID, SimpleChatWithPictureHash chat, @Context SecurityContext sec) throws DataException {
+	public ChatEntry addChat(@PathParam("roomID") int roomID, PostChat chat, @Context SecurityContext sec) throws DataException {
 		logger.entry();
 		
 		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
@@ -111,16 +112,17 @@ public class Chatrooms {
 		if (chat.pictureHash != null) {
 			ChatPictureLink link = ChatPictureLink.getLink(chatPictureMap, chat.pictureHash, data);
 			
-			Integer picID = link.getPictureID();
-			if (picID != null) {
-				SimpleChatEntry completeChat = new SimpleChatEntry(chat.message, picID);
-				res = data.addChat(completeChat, roomID, groupID, userID);
+			ImageRepository.Picture picture = link.getPicture();
+			if (picture != null) {
+				logger.debug("Resolved pictureHash {} to picID {}", chat.pictureHash, picture.getPictureID());
+				res = data.addChat(chat, picture, roomID, groupID, userID);
 			} else {
-				res = data.addChat(chat, roomID, groupID, userID);
+				res = data.addChat(chat, null, roomID, groupID, userID);
 				link.setChat(res, roomID, push);
+				logger.debug("Unresolved pictureHash");
 			}
 		} else
-			res = data.addChat(chat, roomID, groupID, userID);
+			res = data.addChat(chat, null, roomID, groupID, userID);
 		
 		push.chatAdded(res, roomID);
 		

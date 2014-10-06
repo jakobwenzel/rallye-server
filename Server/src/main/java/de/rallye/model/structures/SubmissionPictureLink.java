@@ -53,8 +53,8 @@ public class SubmissionPictureLink extends PictureLink<Submission>{
 		@Override
 		public void propagateLink(PictureLink<Submission> link, PictureLink.Mode mode) {
 			try {
-				logger.debug("Adding pic {} to submission {}",link.getPictureID(),link.getObj().submissionID);
-				data.editSubmissionAddPicture(link.getObj().submissionID, link.getPictureID());
+				logger.debug("Adding pic {} to submission {}",link.getPicture(),link.getObj().submissionID);
+				data.editSubmissionAddPicture(link.getObj().submissionID, link.getPicture().getPictureID());
 			} catch (DataException e) {
 				logger.error("Error adding picture to submission");
 				e.printStackTrace();

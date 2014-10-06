@@ -1,19 +1,3 @@
-# renames:
-* /chat/rooms
-* [/debug]
-* /server
-* /server/api
-* /games/rallye
-* /games/scotlandYard
-* /games/map
-* / redirect to webclient
-* /resources/webclient
-* /resources/android-app.apk
-* /resources/pics
-* /users
-* /groups
-* /admin
-
 # push shutdown to admins
 
 # revisions for all static content
@@ -22,4 +6,11 @@
 * push out notifications on revision change
 * on startup push all revisions to all clients
 
-#
+# PictureLinks
+* save all links to db, to guarantee consistency
+
+# Database
+* merge messages and chats (the separation might be relational, but only pays off if we scan for existing messages)
+
+# Misc
+* reduce logging in auth filters

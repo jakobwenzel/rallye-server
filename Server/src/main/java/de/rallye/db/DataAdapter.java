@@ -19,6 +19,7 @@
 
 package de.rallye.db;
 
+import com.drew.metadata.Metadata;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import de.rallye.config.RallyeConfig;
 import de.rallye.exceptions.DataException;
@@ -27,6 +28,7 @@ import de.rallye.exceptions.UnauthorizedException;
 import de.rallye.filter.auth.AdminPrincipal;
 import de.rallye.filter.auth.GroupPrincipal;
 import de.rallye.filter.auth.RallyePrincipal;
+import de.rallye.images.ImageRepository;
 import de.rallye.model.structures.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -149,6 +151,7 @@ public class DataAdapter implements IDataAdapter {
 
 			return timestamp;
 		} catch (SQLException e) {
+			logger.error("Failed to read lastModified for table {}", table, e);
 			return 0;
 		} finally {
 			close(con, st, rs);
@@ -213,6 +216,7 @@ public class DataAdapter implements IDataAdapter {
 			
 			return groups;
 		} catch (SQLException e) {
+			logger.error("Failed to list groups", e);
 			throw new DataException(e);
 		} finally {
 			close(con, st, rs);
@@ -263,6 +267,7 @@ public class DataAdapter implements IDataAdapter {
 			
 			return tasks;
 		} catch (SQLException e) {
+			logger.error("Failed to retrieve tasks for {}", groupID, e);
 			throw new DataException(e);
 		} finally {
 			close(con, st, rs);
@@ -281,8 +286,8 @@ public class DataAdapter implements IDataAdapter {
 		try {
 			con = dataSource.getConnection();
 			st = con.prepareStatement("SELECT "+ cols(Ry.Submissions.ID, Ry.Submissions.ID_TASK, Ry.Submissions.ID_GROUP,
-					Ry.Submissions.ID_USER, Ry.Submissions.SUBMIT_TYPE,
-					Ry.Submissions.INT_SUBMISSION, Ry.Submissions.TEXT_SUBMISSION) +" FROM "+ Ry.Submissions.TABLE
+					"sub."+Ry.Submissions.ID_USER, Ry.Submissions.SUBMIT_TYPE, Ry.Pictures.PICTURE_HASH,
+					Ry.Submissions.INT_SUBMISSION, Ry.Submissions.TEXT_SUBMISSION) +" FROM "+ Ry.Submissions.TABLE +" AS sub LEFT JOIN "+ Ry.Pictures.TABLE +" ON ("+ Ry.Pictures.ID +"="+ Ry.Submissions.PIC_SUBMISSION +")"
 					+" WHERE "+ Ry.Submissions.ID_TASK +"=? AND "+ Ry.Submissions.ID_GROUP +"=?");
 			
 			st.setInt(1, taskID);
@@ -290,14 +295,15 @@ public class DataAdapter implements IDataAdapter {
 			
 			rs = st.executeQuery();
 
-			List<Submission> submissions = new ArrayList<Submission>();
+			List<Submission> submissions = new ArrayList<>();
 			
 			while (rs.next()) {
-				submissions.add(new Submission(rs.getInt(1), rs.getInt(5), (Integer)rs.getObject(6), rs.getString(7)));
+				submissions.add(new Submission(rs.getInt(1), rs.getInt(5), rs.getString(6), (Integer)rs.getObject(7), rs.getString(8)));
 			}
 			
 			return submissions;
 		} catch (SQLException e) {
+			logger.error("Failed to retrieve Submissions for task {} by group",taskID, groupID, e);
 			throw new DataException(e);
 		} finally {
 			close(con, st, rs);
@@ -312,11 +318,12 @@ public class DataAdapter implements IDataAdapter {
 	 * 3: group id
 	 * 4: user id
 	 * 5: submit type
-	 * 6: intSubmission
-	 * 7: textSubmission
-	 * 8: score 
-	 * 9: bonus
-	 * 10: outdated
+	 * 6: pictureHash
+	 * 7: intSubmission
+	 * 8: textSubmission
+	 * 9: score
+	 * 10: bonus
+	 * 11: outdated
 	 * Submissions for the same task and group are expected to follow each other in the table.
 	 * @param rs
 	 * @return
@@ -339,19 +346,19 @@ public class DataAdapter implements IDataAdapter {
 			if (taskID != lastTaskID || groupID != lastGroupID) {
 				Integer score = null, bonus = null;
 					if (includeRating) {
-					score = rs.getInt(8);
+					score = rs.getInt(9);
 					if (rs.wasNull()) score = null;
-					bonus = rs.getInt(9);
+					bonus = rs.getInt(10);
 					if (rs.wasNull()) bonus = null;
 				}
 				
-				boolean scoreOutdated = rs.getBoolean(10);
+				boolean scoreOutdated = rs.getBoolean(11);
 				
 				submissions = new ArrayList<Submission>();
 				taskSubmissions.add(new TaskSubmissions(taskID, groupID, submissions, score, bonus, scoreOutdated));
 			}
 			
-			submissions.add(new Submission(rs.getInt(1), rs.getInt(5), (Integer)rs.getObject(6), rs.getString(7)));
+			submissions.add(new Submission(rs.getInt(1), rs.getInt(5), rs.getString(6), (Integer)rs.getObject(7), rs.getString(8)));
 		}
 		return taskSubmissions;
 	}
@@ -368,8 +375,9 @@ public class DataAdapter implements IDataAdapter {
 		try {
 			con = dataSource.getConnection();
 			st = con.prepareStatement("SELECT "+ cols(Ry.Submissions.ID, Ry.Submissions.ID_TASK, Ry.Submissions.ID_GROUP,
-					Ry.Submissions.ID_USER, Ry.Submissions.SUBMIT_TYPE,
-					Ry.Submissions.INT_SUBMISSION, Ry.Submissions.TEXT_SUBMISSION, Ry.Tasks_Groups.SCORE, Ry.Tasks_Groups.BONUS, Ry.Tasks_Groups.OUTDATED) +" FROM "+ Ry.Submissions.TABLE
+					"sub."+Ry.Submissions.ID_USER, Ry.Submissions.SUBMIT_TYPE, Ry.Pictures.PICTURE_HASH,
+					Ry.Submissions.INT_SUBMISSION, Ry.Submissions.TEXT_SUBMISSION, Ry.Tasks_Groups.SCORE, Ry.Tasks_Groups.BONUS, Ry.Tasks_Groups.OUTDATED) +" FROM "+ Ry.Submissions.TABLE +" AS sub"
+					+" LEFT JOIN "+ Ry.Pictures.TABLE +" ON ("+ Ry.Pictures.ID +"="+ Ry.Submissions.PIC_SUBMISSION +")"
 					+" LEFT JOIN "+Ry.Tasks_Groups.TABLE+" USING("+Ry.Tasks_Groups.ID_GROUP+","+Ry.Tasks_Groups.ID_TASK+") WHERE "+ Ry.Submissions.ID_GROUP +"=? ORDER BY "+ Ry.Submissions.ID_TASK +" ASC");
 			
 			st.setInt(1, groupID);
@@ -380,6 +388,7 @@ public class DataAdapter implements IDataAdapter {
 			
 			return convertResultToTaskSubmissions(rs, includeRating);
 		} catch (SQLException e) {
+			logger.error("Failed to retrieve all Submissions for {}", groupID, e);
 			throw new DataException(e);
 		} finally {
 			close(con, st, rs);
@@ -398,8 +407,9 @@ public class DataAdapter implements IDataAdapter {
 		try {
 			con = dataSource.getConnection();
 			st = con.prepareStatement("SELECT "+ cols(Ry.Submissions.ID, Ry.Submissions.ID_TASK, Ry.Submissions.ID_GROUP,
-					Ry.Submissions.ID_USER, Ry.Submissions.SUBMIT_TYPE,
-					Ry.Submissions.INT_SUBMISSION, Ry.Submissions.TEXT_SUBMISSION, Ry.Tasks_Groups.SCORE, Ry.Tasks_Groups.BONUS, Ry.Tasks_Groups.OUTDATED) +" FROM "+ Ry.Submissions.TABLE
+					"sub."+Ry.Submissions.ID_USER, Ry.Submissions.SUBMIT_TYPE, Ry.Pictures.PICTURE_HASH,
+					Ry.Submissions.INT_SUBMISSION, Ry.Submissions.TEXT_SUBMISSION, Ry.Tasks_Groups.SCORE, Ry.Tasks_Groups.BONUS, Ry.Tasks_Groups.OUTDATED) +" FROM "+ Ry.Submissions.TABLE +" AS sub"
+					+" LEFT JOIN "+ Ry.Pictures.TABLE +" ON ("+ Ry.Pictures.ID +"="+ Ry.Submissions.PIC_SUBMISSION +")"
 					+" LEFT JOIN "+Ry.Tasks_Groups.TABLE+" USING("+Ry.Tasks_Groups.ID_GROUP+","+Ry.Tasks_Groups.ID_TASK+") WHERE "+ Ry.Submissions.ID_TASK +"=? ORDER BY "+ Ry.Submissions.ID_GROUP +" ASC");
 			
 			st.setInt(1, taskID);
@@ -410,6 +420,7 @@ public class DataAdapter implements IDataAdapter {
 			
 			return convertResultToTaskSubmissions(rs, includeRating);
 		} catch (SQLException e) {
+			logger.error("Failed to retrieve all Submissions for task {}", taskID, e);
 			throw new DataException(e);
 		} finally {
 			close(con, st, rs);
@@ -425,14 +436,16 @@ public class DataAdapter implements IDataAdapter {
 		try {
 			con = dataSource.getConnection();
 			st = con.prepareStatement("SELECT "+ cols(Ry.Submissions.ID, Ry.Submissions.ID_TASK, Ry.Submissions.ID_GROUP,
-					Ry.Submissions.ID_USER, Ry.Submissions.SUBMIT_TYPE,
-					Ry.Submissions.INT_SUBMISSION, Ry.Submissions.TEXT_SUBMISSION, Ry.Tasks_Groups.SCORE, Ry.Tasks_Groups.BONUS, Ry.Tasks_Groups.OUTDATED) +" FROM "+ Ry.Submissions.TABLE
+					"sub."+Ry.Submissions.ID_USER, Ry.Submissions.SUBMIT_TYPE, Ry.Pictures.PICTURE_HASH,
+					Ry.Submissions.INT_SUBMISSION, Ry.Submissions.TEXT_SUBMISSION, Ry.Tasks_Groups.SCORE, Ry.Tasks_Groups.BONUS, Ry.Tasks_Groups.OUTDATED) +" FROM "+ Ry.Submissions.TABLE +" AS sub"
+					+" LEFT JOIN "+ Ry.Pictures.TABLE +" ON ("+ Ry.Pictures.ID +"="+ Ry.Submissions.PIC_SUBMISSION +")"
 					+" LEFT JOIN "+Ry.Tasks_Groups.TABLE+" USING("+Ry.Tasks_Groups.ID_GROUP+","+Ry.Tasks_Groups.ID_TASK+") WHERE ("+ Ry.Tasks_Groups.SCORE +" IS NULL AND "+ Ry.Tasks_Groups.BONUS +" IS NULL) OR "+ Ry.Tasks_Groups.OUTDATED +"=1 ORDER BY "+ Ry.Submissions.ID_GROUP +" ASC, "+Ry.Submissions.ID_TASK+" ASC");
 			
 			rs = st.executeQuery();
 			
 			return convertResultToTaskSubmissions(rs, includeRating);
 		} catch (SQLException e) {
+			logger.error("Failed to retrieve unrated Submissions", e);
 			throw new DataException(e);
 		} finally {
 			close(con, st, rs);
@@ -443,7 +456,7 @@ public class DataAdapter implements IDataAdapter {
 	 * @see de.rallye.db.IDataAdapter#submit(int, int, int, de.rallye.model.structures.SimpleSubmission)
 	 */
 	@Override
-	public Submission submit(int taskID, int groupID, int userID, SimpleSubmission submission) throws DataException, InputException {
+	public Submission submit(int taskID, int groupID, int userID, PostSubmission submission, ImageRepository.Picture picture) throws DataException, InputException {
 		Connection con = null;
 		PreparedStatement st = null;
 		ResultSet rs = null;
@@ -466,7 +479,7 @@ public class DataAdapter implements IDataAdapter {
 
 			//Insert into db
 			st = con.prepareStatement("INSERT INTO "+ Ry.Submissions.TABLE +" ("+
-					cols(Ry.Submissions.ID_TASK, Ry.Submissions.ID_GROUP, Ry.Submissions.ID_USER, Ry.Submissions.SUBMIT_TYPE, Ry.Submissions.INT_SUBMISSION, Ry.Submissions.TEXT_SUBMISSION)
+					cols(Ry.Submissions.ID_TASK, Ry.Submissions.ID_GROUP, Ry.Submissions.ID_USER, Ry.Submissions.SUBMIT_TYPE, Ry.Submissions.PIC_SUBMISSION, Ry.Submissions.INT_SUBMISSION, Ry.Submissions.TEXT_SUBMISSION)
 					+") VALUES (?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
 			
 			
@@ -474,12 +487,17 @@ public class DataAdapter implements IDataAdapter {
 			st.setInt(2, groupID);
 			st.setInt(3, userID);
 			st.setInt(4, submission.submitType);
-			if (submission.intSubmission != null) {
-				st.setInt(5, submission.intSubmission);
+			if (picture != null) {
+				st.setInt(5, picture.getPictureID());
 			} else {
-				st.setNull(5, java.sql.Types.INTEGER);
+				st.setNull(5, Types.INTEGER);
 			}
-			st.setString(6, submission.textSubmission);
+			if (submission.intSubmission != null) {
+				st.setInt(6, submission.intSubmission);
+			} else {
+				st.setNull(6, Types.INTEGER);
+			}
+			st.setString(7, submission.textSubmission);
 			
 			st.execute();
 			
@@ -499,6 +517,7 @@ public class DataAdapter implements IDataAdapter {
 			
 			return res;
 		} catch (SQLException e) {
+			logger.error("Failed to submit {} for task {} by {}@{}", submission, taskID, userID, groupID, e);
 			throw new DataException(e);
 		} finally {
 			close(con, st, rs);
@@ -606,6 +625,7 @@ public class DataAdapter implements IDataAdapter {
 				throw new UnauthorizedException();
 			}
 		} catch (SQLException e) {
+			logger.error("Failed to authorize known for {}@{}", userID, groupID, e);
 			throw new DataException(e);
 		} finally {
 			close(con, st, rs);
@@ -638,6 +658,7 @@ public class DataAdapter implements IDataAdapter {
 				throw new UnauthorizedException();
 			}
 		} catch (SQLException e) {
+			logger.error("Failed to authorize {}", groupID, e);
 			throw new DataException(e);
 		} finally {
 			close(con, st, rs);
@@ -729,6 +750,7 @@ public class DataAdapter implements IDataAdapter {
 				}
 			}
 		} catch (SQLException e) {
+			logger.error("Failed to login {} into {}", info, groupID, e);
 			throw new DataException(e);
 		} finally {
 			close(con, st, rs);
@@ -766,6 +788,7 @@ public class DataAdapter implements IDataAdapter {
 			
 			return true;
 		} catch (SQLException e) {
+			logger.error("Failed to logout {}@{}", userID, groupID, e);
 			throw new DataException(e);
 		} finally {
 			close(con, st, rs);
@@ -794,6 +817,7 @@ public class DataAdapter implements IDataAdapter {
 			
 			return rs.first();
 		} catch (SQLException e) {
+			logger.error("Failed to retrieve rights for chatroom {} by {}", roomID, groupID, e);
 			throw new DataException(e);
 		} finally {
 			close(con, st, rs);
@@ -825,6 +849,7 @@ public class DataAdapter implements IDataAdapter {
 			
 			return chatrooms;
 		} catch (SQLException e) {
+			logger.error("Failed to list chatrooms", e);
 			throw new DataException(e);
 		} finally {
 			close(con, st, rs);
@@ -844,14 +869,15 @@ public class DataAdapter implements IDataAdapter {
 			con = dataSource.getConnection();
 	
 			//TODO: throw Unauthorized if no rights to access chatroom
-			st = con.prepareStatement("SELECT "+ cols(Ry.Chats.ID, Ry.Messages.MSG, "UNIX_TIMESTAMP("+Ry.Chats.TIMESTAMP+")", Ry.Chats.ID_USER, "chats."+Ry.Chats.ID_GROUP, Ry.Chats.ID_PICTURE)+
+			st = con.prepareStatement("SELECT "+ cols(Ry.Chats.ID, Ry.Messages.MSG, "UNIX_TIMESTAMP(chats."+Ry.Chats.TIMESTAMP+")", "chats."+Ry.Chats.ID_USER, "chats."+Ry.Chats.ID_GROUP, Ry.Pictures.PICTURE_HASH)+
 										" FROM "+ Ry.Chats.TABLE +" AS chats"+
+										" LEFT JOIN "+ Ry.Pictures.TABLE +" AS pic USING ("+ Ry.Pictures.ID +") "+
 										" LEFT JOIN "+ Ry.Messages.TABLE +" AS msg USING ("+ Ry.Chats.ID_MESSAGE +") "+
 										"LEFT JOIN "+ Ry.Groups_Chatrooms.TABLE +" AS gc USING ("+ Ry.Chats.ID_CHATROOM +") "+
 										"WHERE chats."+Ry.Chats.ID_CHATROOM +" =? "+
 										"AND gc."+Ry.Groups_Chatrooms.ID_GROUP +" =? "+
-										"AND "+ Ry.Chats.TIMESTAMP +" >=FROM_UNIXTIME(?) "+
-										"ORDER BY "+ Ry.Chats.TIMESTAMP);
+										"AND chats."+ Ry.Chats.TIMESTAMP +" >=FROM_UNIXTIME(?) "+
+										"ORDER BY chats."+ Ry.Chats.TIMESTAMP);
 
 
 			st.setInt(1, roomID);
@@ -859,10 +885,10 @@ public class DataAdapter implements IDataAdapter {
 			st.setLong(3, timestamp);
 			rs = st.executeQuery();
 
-			List<ChatEntry> chats = new ArrayList<ChatEntry>();
+			List<ChatEntry> chats = new ArrayList<>();
 			
 			while (rs.next()) {
-				chats.add(new ChatEntry(rs.getInt(1), rs.getString(2), rs.getLong(3), rs.getInt(5), rs.getInt(4), rs.getInt(6)));
+				chats.add(new ChatEntry(rs.getInt(1), rs.getString(2), rs.getLong(3), rs.getInt(5), rs.getInt(4), rs.getString(6)));
 			}
 
 			if (chats.size() == 0) {
@@ -882,6 +908,7 @@ public class DataAdapter implements IDataAdapter {
 			
 			return chats;
 		} catch (SQLException e) {
+			logger.error("Failed to retrieve all chats for room {} since {} for ", roomID, timestamp, groupID, e);
 			throw new DataException(e);
 		} finally {
 			close(con, st, rs);
@@ -889,10 +916,10 @@ public class DataAdapter implements IDataAdapter {
 	}
 
 	/* (non-Javadoc)
-	 * @see de.rallye.db.IDataAdapter#addChat(de.rallye.model.structures.SimpleChatEntry, int, int, int)
+	 * @see de.rallye.db.IDataAdapter#addChat(de.rallye.model.structures.PostChat, int, int, int)
 	 */
 	@Override
-	public ChatEntry addChat(SimpleChatEntry chat, int roomID, int groupID, int userID) throws DataException {
+	public ChatEntry addChat(PostChat chat, ImageRepository.Picture picture, int roomID, int groupID, int userID) throws DataException {
 		Connection con = null;
 		PreparedStatement st = null;
 		ResultSet rs = null;
@@ -917,8 +944,7 @@ public class DataAdapter implements IDataAdapter {
 
 			rs.close();
 			st.close();
-			
-			//TODO: check for existance of picture
+
 			//Insert Chat
 			st = con.prepareStatement("INSERT INTO "+ Ry.Chats.TABLE +" ("+
 					cols(Ry.Chats.ID_CHATROOM, Ry.Chats.ID_USER, Ry.Chats.ID_GROUP, Ry.Chats.ID_MESSAGE, Ry.Chats.ID_PICTURE)
@@ -929,8 +955,8 @@ public class DataAdapter implements IDataAdapter {
 			st.setInt(2, userID);
 			st.setInt(3, groupID);
 			st.setInt(4, msgID);
-			if (chat.hasPicture()) {
-				st.setInt(5, chat.pictureID);
+			if (picture != null) {
+				st.setInt(5, picture.getPictureID());
 			} else {
 				st.setNull(5, java.sql.Types.INTEGER);
 			}
@@ -950,13 +976,14 @@ public class DataAdapter implements IDataAdapter {
 			rs.first();
 			long timestamp = rs.getLong(1);
 			
-			ChatEntry newChat = new ChatEntry(chatID, chat.message, timestamp, groupID, userID, chat.pictureID);
+			ChatEntry newChat = new ChatEntry(chatID, chat.message, timestamp, groupID, userID, chat.pictureHash);
 			
 			success = true;
 			//TODO: notifiyNewChatEntry()
 			
 			return newChat;
 		} catch (SQLException e) {
+			logger.error("Failed to add chat {} to {}", chat, roomID, e);
 			throw new DataException(e);
 		} finally {
 			try {
@@ -1003,6 +1030,7 @@ public class DataAdapter implements IDataAdapter {
 				throw new DataException("Push Configuration change failed");
 			}
 		} catch (SQLException e) {
+			logger.error("Failed to setPushConfig {} for {}@{}", push, userID, groupID, e);
 			throw new DataException(e);
 		} finally {
 			close(con, st, rs);
@@ -1034,6 +1062,7 @@ public class DataAdapter implements IDataAdapter {
 
 			return new PushConfig(rs.getString(2), rs.getString(1));
 		} catch (SQLException e) {
+			logger.error("Failed to getPushConfig for {}@{}", userID, groupID, e);
 			throw new DataException(e);
 		} finally {
 			close(con, st, rs);
@@ -1064,6 +1093,7 @@ public class DataAdapter implements IDataAdapter {
 
 			return pushModes;
 		} catch (SQLException e) {
+			logger.error("Failed to getPushModes", e);
 			throw new DataException(e);
 		} finally {
 			close(con, st, rs);
@@ -1095,6 +1125,7 @@ public class DataAdapter implements IDataAdapter {
 
 			return allUsers;
 		} catch (SQLException e) {
+			logger.error("Failed to retrieve all users", e);
 			throw new DataException(e);
 		} finally {
 			close(con, st, rs);
@@ -1130,6 +1161,7 @@ public class DataAdapter implements IDataAdapter {
 			members.put(groupID, users);
 			return users;
 		} catch (SQLException e) {
+			logger.error("Failed to retrieve members for {}", groupID, e);
 			throw new DataException(e);
 		} finally {
 			close(con, st, rs);
@@ -1177,25 +1209,49 @@ public class DataAdapter implements IDataAdapter {
 			roomMembers.put(roomID,users);
 			return users;
 		} catch (SQLException e) {
+			logger.error("Failed to retrieve all members for {}", roomID, e);
 			throw new DataException(e);
 		} finally {
 			close(con, st, rs);
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see de.rallye.db.IDataAdapter#assignNewPictureID(int)
-	 */
 	@Override
-	public int assignNewPictureID(int userID) throws DataException {
+	public int addPicture(int userID, String pictureHash, Metadata meta) throws DataException {
 		PreparedStatement st = null;
 		Connection con = null;
 		ResultSet rs = null;
 
+		LatLngAlt location = null;
+		String makeModel = null;
+		if (meta != null) {
+			try {
+				location = ImageRepository.readGps(meta);
+			} catch (Exception e) {
+				logger.catching(e);
+			}
+			try {
+				makeModel = ImageRepository.readMakeModel(meta);
+			} catch (Exception e) {
+				logger.catching(e);
+			}
+		}
+
 		try {
 			con = dataSource.getConnection();
-			st = con.prepareStatement("INSERT INTO "+ Ry.Pictures.TABLE +" ("+ cols(Ry.Pictures.ID_USER) +") VALUES (?)", Statement.RETURN_GENERATED_KEYS);
+			st = con.prepareStatement("INSERT INTO "+ Ry.Pictures.TABLE +" ("+ cols(Ry.Pictures.ID_USER, Ry.Pictures.PICTURE_HASH, Ry.Pictures.LONGITUDE, Ry.Pictures.LATITUDE, Ry.Pictures.ALTITUDE, Ry.Pictures.MAKE_MODEL) +") VALUES (?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
 			st.setInt(1, userID);
+			st.setString(2, pictureHash);
+			if (location != null) {
+				st.setDouble(3, location.longitude);
+				st.setDouble(4, location.latitude);
+				st.setDouble(5, location.altitude);
+			} else {
+				st.setNull(3, Types.DOUBLE);
+				st.setNull(4, Types.DOUBLE);
+				st.setNull(5, Types.DOUBLE);
+			}
+			st.setString(6, makeModel);
 			
 			st.execute();
 			
@@ -1207,6 +1263,7 @@ public class DataAdapter implements IDataAdapter {
 				throw new DataException("No new ID assigned by DB");
 			}
 		} catch (SQLException e) {
+			logger.error("Failed to add Picture {}", pictureHash, e);
 			throw new DataException(e);
 		} finally {
 			close(con, st, rs);
@@ -1231,6 +1288,7 @@ public class DataAdapter implements IDataAdapter {
 			if (st.executeUpdate() <= 0)
 				throw new DataException("Failed to add picture to Chat");
 		} catch (SQLException e) {
+			logger.error("Failed to edit chat {} with picture {}", chatID, pictureID, e);
 			throw new DataException(e);
 		} finally {
 			close(con, st, rs);
@@ -1258,6 +1316,7 @@ public class DataAdapter implements IDataAdapter {
 				st.executeUpdate();
 			}
 		} catch (SQLException e) {
+			logger.error("Failed to update pushIds {}", changes, e);
 			throw new DataException(e);
 		} finally {
 			close(con, st, rs);
@@ -1295,6 +1354,7 @@ public class DataAdapter implements IDataAdapter {
 			}
 			
 		} catch (SQLException e) {
+			logger.error("Failed to radd Group {}", group, e);
 			throw new DataException(e);
 		} finally {
 			close(con, st, rs);
@@ -1324,6 +1384,7 @@ public class DataAdapter implements IDataAdapter {
 			st.execute();
 			
 		} catch (SQLException e) {
+			logger.error("Failed to edit group {}", group, e);
 			throw new DataException(e);
 		} finally {
 			close(con, st, rs);
@@ -1362,6 +1423,7 @@ public class DataAdapter implements IDataAdapter {
 			}
 			
 		} catch (SQLException e) {
+			logger.error("Failed to get scores", e);
 			throw new DataException(e);
 		} finally {
 			close(null,delSt,null);
@@ -1390,6 +1452,7 @@ public class DataAdapter implements IDataAdapter {
 
 			return res;
 		} catch (SQLException e) {
+			logger.error("Failed to load gameState", e);
 			throw new DataException(e);
 		} finally {
 			close(con, st, rs);
@@ -1423,6 +1486,7 @@ public class DataAdapter implements IDataAdapter {
 
 			con.commit();
 		} catch (SQLException e) {
+			logger.error("Failed to save game state", e);
 			try {
 				con.rollback(transaction);
 			} catch (SQLException e1) {
@@ -1469,6 +1533,7 @@ public class DataAdapter implements IDataAdapter {
 				return null;
 			}
 		} catch (SQLException e) {
+			logger.error("Failed to get Admin", e);
 			throw new DataException(e);
 		} finally {
 			close(con, st, rs);
@@ -1483,7 +1548,7 @@ public class DataAdapter implements IDataAdapter {
 
 		try {
 			con = dataSource.getConnection();
-			st = con.prepareStatement("UPDATE "+ Ry.Submissions.TABLE +" SET "+ Ry.Submissions.INT_SUBMISSION +"=? WHERE "+ Ry.Submissions.ID +"=?");
+			st = con.prepareStatement("UPDATE "+ Ry.Submissions.TABLE +" SET "+ Ry.Submissions.PIC_SUBMISSION +"=? WHERE "+ Ry.Submissions.ID +"=?");
 			st.setInt(1, pictureID);
 			st.setInt(2, submissionID);
 
@@ -1492,6 +1557,7 @@ public class DataAdapter implements IDataAdapter {
 			else
 				throw new DataException("Failed to add picture to Submission");
 		} catch (SQLException e) {
+			logger.error("Failed to edit submission {} with picture {}", submissionID, pictureID, e);
 			throw new DataException(e);
 		} finally {
 			close(con, st, rs);

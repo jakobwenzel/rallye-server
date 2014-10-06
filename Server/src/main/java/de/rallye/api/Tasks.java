@@ -27,6 +27,7 @@ import de.rallye.db.IDataAdapter;
 import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.InputException;
 import de.rallye.filter.auth.RallyePrincipal;
+import de.rallye.images.ImageRepository;
 import de.rallye.model.structures.*;
 import de.rallye.util.HttpCacheHandling;
 import org.apache.logging.log4j.LogManager;
@@ -143,7 +144,7 @@ public class Tasks {
 	@Path("{taskID}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@KnownUserAuth
-	public Submission submit(SimpleSubmissionWithPictureHash submission, @PathParam("taskID") int taskID, @Context SecurityContext sec) throws DataException, InputException {
+	public Submission submit(PostSubmission submission, @PathParam("taskID") int taskID, @Context SecurityContext sec) throws DataException, InputException {
 		logger.entry();
 
 		if (!gameState.isCanSubmit())
@@ -153,25 +154,20 @@ public class Tasks {
 
 		Submission res;
 
-		if (submission.pictureHash!=null) {
-			logger.debug("Has Picture hash");
-			SubmissionPictureLink link = SubmissionPictureLink.getLink(submissionPictureMap, submission.pictureHash, data);
+		if (submission.picSubmission!=null) {
+			SubmissionPictureLink link = SubmissionPictureLink.getLink(submissionPictureMap, submission.picSubmission, data);
 
-			Integer picID = link.getPictureID();
-			if (picID != null) {
-				logger.debug("We have a pic id {}, has hash {} ",picID,submission.pictureHash);
-				SimpleSubmission completeSubmission = new SimpleSubmission(submission.submitType,picID,submission.textSubmission);
-				res = data.submit(taskID, p.getGroupID(), p.getUserID(), completeSubmission);
+			ImageRepository.Picture picture = link.getPicture();
+			if (picture != null) {
+				logger.debug("Resolved pictureHash {} to picID {}", submission.picSubmission, picture.getPictureID());
+				res = data.submit(taskID, p.getGroupID(), p.getUserID(), submission, picture);
 			} else {
-
-				res = data.submit(taskID, p.getGroupID(), p.getUserID(), submission);
+				res = data.submit(taskID, p.getGroupID(), p.getUserID(), submission, null);
 				link.setObject(res);
-
-				logger.debug("submission {} has hash {}",res.submissionID,submission.pictureHash);
-
+				logger.debug("Unresolved pictureHash");
 			}
 		} else
-			res = data.submit(taskID, p.getGroupID(), p.getUserID(), submission);
+			res = data.submit(taskID, p.getGroupID(), p.getUserID(), submission, null);
 
 		AdminWebsocketApp.getInstance().newSubmission(p.getGroupID(),p.getUserID(),taskID,res);
 		return logger.exit(res);

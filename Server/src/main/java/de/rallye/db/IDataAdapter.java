@@ -19,12 +19,14 @@
 
 package de.rallye.db;
 
+import com.drew.metadata.Metadata;
 import de.rallye.exceptions.DataException;
 import de.rallye.exceptions.InputException;
 import de.rallye.exceptions.UnauthorizedException;
 import de.rallye.filter.auth.AdminPrincipal;
 import de.rallye.filter.auth.GroupPrincipal;
 import de.rallye.filter.auth.RallyePrincipal;
+import de.rallye.images.ImageRepository;
 import de.rallye.model.structures.*;
 
 import java.util.HashMap;
@@ -75,7 +77,7 @@ public interface IDataAdapter {
 	List<TaskSubmissions> getUnratedSubmissions(boolean includeRating) throws DataException;
 
 	public abstract Submission submit(int taskID, int groupID, int userID,
-			SimpleSubmission submission) throws DataException, InputException;
+									  PostSubmission submission, ImageRepository.Picture picture) throws DataException, InputException;
 
 	public abstract Map<Integer, Node> getNodes();
 
@@ -103,8 +105,8 @@ public interface IDataAdapter {
 	public abstract List<ChatEntry> getChats(int roomID, long timestamp,
 			int groupID) throws DataException, UnauthorizedException;
 
-	public abstract ChatEntry addChat(SimpleChatEntry chat, int roomID,
-			int groupID, int userID) throws DataException;
+	public abstract ChatEntry addChat(PostChat chat, ImageRepository.Picture picture, int roomID,
+									  int groupID, int userID) throws DataException;
 
 	public abstract void setPushConfig(int groupID, int userID, PushConfig push)
 			throws DataException;
@@ -121,8 +123,6 @@ public interface IDataAdapter {
 
 	public abstract List<UserInternal> getChatroomMembers(int roomID)
 			throws DataException;
-
-	public abstract int assignNewPictureID(int userID) throws DataException;
 
 	public abstract void editChatAddPicture(int chatID, int pictureID)
 			throws DataException;
@@ -141,4 +141,6 @@ public interface IDataAdapter {
 	void editSubmissionAddPicture(int submissionID, int pictureID)  throws DataException;
 
 	long getTasksLastModified();
+
+	int addPicture(int userID, String pictureHash, Metadata meta) throws DataException;
 }

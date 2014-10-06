@@ -19,6 +19,7 @@
 
 package de.rallye.model.structures;
 
+import de.rallye.images.ImageRepository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -28,7 +29,7 @@ public class PictureLink<T> {
 	
 	public enum Mode {EditObjectWhenUploaded, PictureUploaded }
 	
-	private Integer pictureID;
+	private ImageRepository.Picture picture;
 	private T linkableObject;
 
 	
@@ -45,10 +46,10 @@ public class PictureLink<T> {
 	}
 	
 	
-	public void setPicture(int pictureID) {
-		this.pictureID = pictureID;
+	public void setPicture(ImageRepository.Picture picture) {
+		this.picture = picture;
 		
-		logger.info("{}: attached picture {}", this, pictureID);
+		logger.info("{}: attached picture {}", this, picture);
 		
 		checkLinkComplete();
 	}
@@ -61,8 +62,8 @@ public class PictureLink<T> {
 		checkLinkComplete();
 	}
 	
-	public Integer getPictureID() {
-		return pictureID;
+	public ImageRepository.Picture getPicture() {
+		return picture;
 	}
 	
 	public T getObj() {
@@ -70,10 +71,10 @@ public class PictureLink<T> {
 	}
 	
 	private void checkLinkComplete() {
-		if (pictureID != null && pictureID > 0 && linkableObject != null && mode == Mode.EditObjectWhenUploaded) {
+		if (picture != null && linkableObject != null && mode == Mode.EditObjectWhenUploaded) {
 			callback.propagateLink(this, mode);
 			logger.info("{}: complete -> edit obj", this);
-		} else if (pictureID != null && pictureID > 0) {
+		} else if (picture != null) {
 			mode = Mode.PictureUploaded;
 			logger.info("{}: set mode {}", this, mode);
 		} else if (linkableObject!=null) {

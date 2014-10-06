@@ -19,10 +19,19 @@
 
 package de.rallye.images;
 
+import com.drew.imaging.ImageMetadataReader;
+import com.drew.imaging.ImageProcessingException;
+import com.drew.metadata.Metadata;
+import com.drew.metadata.MetadataException;
+import com.drew.metadata.exif.ExifIFD0Directory;
+import com.drew.metadata.exif.GpsDirectory;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import de.rallye.config.ImageCacheConfig;
 import de.rallye.config.RallyeConfig;
+import de.rallye.db.IDataAdapter;
 import de.rallye.exceptions.DataException;
 import de.rallye.model.structures.Dimension;
+import de.rallye.model.structures.LatLngAlt;
 import de.rallye.model.structures.PictureSize;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,6 +40,7 @@ import org.jvnet.hk2.annotations.Service;
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import javax.inject.Singleton;
+import javax.ws.rs.WebApplicationException;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.LinkedHashMap;
@@ -39,7 +49,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 @Singleton
 @Service
-public class ImageRepository {
+public class ImageRepository implements IPictureRepository {
 	
 	
 	private static final PictureSize THUMB = PictureSize.Thumbnail;
@@ -52,9 +62,145 @@ public class ImageRepository {
 	private final ImageCache miniCache;
 	
 	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-	
-	
-	private static class ImageCache extends LinkedHashMap<Integer, BufferedImage> {
+	private final IDataAdapter data;
+
+	@Inject
+	public ImageRepository(RallyeConfig config, IDataAdapter data) {
+		this.repository = config.getImageRepositoryPath();
+		this.data = data;
+		ImageCacheConfig cacheConfig = config.getImageCacheConfig();
+		this.thumbCache = new ImageCache(cacheConfig.maxThumbEntries);
+		this.miniCache = new ImageCache(cacheConfig.maxMiniEntries);
+
+		new File(this.repository).mkdirs();
+	}
+
+	@Override
+	public Picture getImage(String pictureHash) {
+		return new Picture(pictureHash);
+	}
+
+	@Override
+	public Picture putImage(int userID, String pictureHash, File file) throws DataException {
+		return putImage(userID, pictureHash, file, PictureSize.Original);
+	}
+
+	private void scalePreemptively(File src, String pictureHash, PictureSize exclude) {
+		for (PictureSize s: PictureSize.values()) {
+			if (s == exclude)
+				continue;
+
+			try {
+				scalePicture(src, pictureHash, s);
+			} catch (IOException e) {
+				logger.error("Failed to scale picture to {}", s, e);
+			}
+		}
+	}
+
+	@Override
+	public Picture putImagePreview(int userID, String pictureHash, File file) throws DataException {
+		return putImage(userID, pictureHash, file, PictureSize.Preview);
+	}
+
+	private Picture putImage(int userID, String pictureHash, File file, PictureSize size) throws DataException {
+		logger.info("Adding {} to repository as {}", size, pictureHash);
+		lock.writeLock().lock();
+		try {
+
+			Metadata meta = null;
+			try {
+				meta = ImageMetadataReader.readMetadata(file);
+			} catch (ImageProcessingException e) {
+				logger.error("Failed to extract Meta information", e);
+			}
+			int pictureID = data.addPicture(userID, pictureHash, meta);
+
+			BufferedImage iOut;
+			File fOut;
+
+			fOut = getFile(pictureHash, PictureSize.Original);
+			FileInputStream inStream = new FileInputStream(file);
+			FileOutputStream outStream = new FileOutputStream(fOut);
+
+			copy(inStream, outStream);
+
+			outStream.close();
+			inStream.close();
+
+//			scalePreemptively(fOut, pictureHash, size);
+			return new Picture(pictureHash, pictureID);
+		} catch (FileNotFoundException e) {
+			final String msg = "Lost uploaded file"+ file.toString();
+			logger.error(msg, e);
+			throw new WebApplicationException(msg);
+		} catch (IOException e) {
+			final String msg = "Could not read/write";
+			logger.error(msg, e);
+			throw new WebApplicationException(msg, e);
+		} finally {
+			lock.writeLock().unlock();
+		}
+	}
+
+	private static void copy(InputStream inStream, OutputStream outStream) throws IOException {
+		byte[] buffer = new byte[ 0xFFFF ];
+		for ( int len; (len = inStream.read(buffer)) != -1; ) {
+			outStream.write( buffer, 0, len );
+		}
+	}
+
+	@Override
+	public void remove(String pictureHash) {
+		logger.info("Removing all variants of "+ pictureHash);
+
+		lock.writeLock().lock();
+		try {
+			thumbCache.remove(pictureHash);
+			miniCache.remove(pictureHash);
+
+			for (PictureSize s: PictureSize.values()) {
+				File f = getFile(pictureHash, s);
+				f.delete();
+			}
+		} finally {
+			lock.writeLock().unlock();
+		}
+	}
+
+
+	public static LatLngAlt readGps(Metadata meta) {
+		GpsDirectory gps = meta.getDirectory(GpsDirectory.class);
+
+		int altitude;
+		try {
+			altitude = gps.getInt(GpsDirectory.TAG_GPS_ALTITUDE);
+		} catch (MetadataException e) {
+			e.printStackTrace();
+			altitude = 0;
+		}
+
+		LatLngAlt location = null;
+		try {
+			location = new LatLngAlt(gps.getGeoLocation().getLatitude(), gps.getGeoLocation().getLongitude(), altitude);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return location;
+	}
+
+	public static String readMakeModel(Metadata meta) {
+		StringBuilder sb = new StringBuilder();
+
+		ExifIFD0Directory exif = meta.getDirectory(ExifIFD0Directory.class);
+
+		sb.append(exif.getString(ExifIFD0Directory.TAG_MAKE)).append(" - ").append(exif.getString(ExifIFD0Directory.TAG_MODEL));
+
+		return sb.toString();
+	}
+
+	private static class ImageCache extends LinkedHashMap<String, byte[]> {
 		
 		private static final long serialVersionUID = 1L;
 		
@@ -66,156 +212,161 @@ public class ImageRepository {
 		}
 		
 		@Override
-		protected boolean removeEldestEntry(Map.Entry<Integer, BufferedImage> eldest) {
+		protected boolean removeEldestEntry(Map.Entry<String, byte[]> eldest) {
 			return size() > maxCacheEntries;
 		}
 
 	}
 	
-	private File getFile(int pictureID, PictureSize size) {
-		return new File(repository, pictureID +"_"+ size.toShortString() +".jpg");
-	}
-
-	@Inject
-	public ImageRepository(RallyeConfig config) {
-		this.repository = config.getImageRepositoryPath();
-		ImageCacheConfig cacheConfig = config.getImageCacheConfig();
-		this.thumbCache = new ImageCache(cacheConfig.maxThumbEntries);
-		this.miniCache = new ImageCache(cacheConfig.maxMiniEntries);
-
-		new File(this.repository).mkdirs();
-	}
-
-	public long getLastModified(int pictureID) {//TODO check on a per file basis / group all scaled images, so that rescaling forces a change
-		return getFile(pictureID, PictureSize.Original).lastModified();
+	private File getFile(String pictureHash, PictureSize size) {
+		return new File(repository, pictureHash +"_"+ size.toShortString() +".jpg");
 	}
 	
-	public BufferedImage get(int pictureID, PictureSize size) {//TODO cache images as byte[]
-		logger.info("Requested "+ pictureID +" in "+ size);
-		BufferedImage img = null;
-		boolean cached = false;
-		ImageCache cache = null;
-		
-		if (size == THUMB)
-			cache = thumbCache;
-		else if (size == MINI)
-			cache = miniCache;
-		
-		lock.readLock().lock();
+	private void scalePicture(File src, String pictureHash, PictureSize size) throws IOException {
+		lock.writeLock().lock();
 		try {
-			if (cache != null) {
-				img = cache.get(pictureID);
-				cached = (img != null);
-			}
-			
-			if (!cached) {
-				logger.info("Loading {} from File", pictureID);
-				try {
-					File f = getFile(pictureID, size);
-					if (f.exists()) {
-						img = ImageIO.read(f);
-					} else {
-						logger.info("Size {} does not exist, scaling from Original", size);
-						f = getFile(pictureID, PictureSize.Original);
-						BufferedImage org = ImageIO.read(f);
-						img = scalePicture(org, pictureID, size);
-					}
-				} catch (IOException e) {
-					logger.error("Picture does not exist", e);
+			Dimension d = size.getDimension();
+
+			BufferedImage base = ImageIO.read(src);
+
+			BufferedImage out = ImageScaler.scaleImage(base, d);
+
+			File f = getFile(pictureHash, size);
+
+
+			if (size == PictureSize.Mini || size == PictureSize.Thumbnail) {
+				ByteArrayOutputStream bStream = new ByteArrayOutputStream();
+				ImageIO.write(out, "jpg", bStream);
+
+				if (size == PictureSize.Thumbnail) {
+					thumbCache.put(pictureHash, bStream.toByteArray());
+				} else if (size == PictureSize.Mini) {
+					miniCache.put(pictureHash, bStream.toByteArray());
 				}
+
+				ByteArrayInputStream iStream = new ByteArrayInputStream(bStream.toByteArray());
+				BufferedOutputStream outStream = new BufferedOutputStream(new FileOutputStream(f));
+				copy(iStream, outStream);
+				iStream.close();
+				outStream.close();
+
+				bStream.close();
+			} else {
+				ImageIO.write(out, "jpg", f);
 			}
+
+			logger.info("Scaled {} to {} from ({}x{})", pictureHash, size, base.getWidth(), base.getHeight());
 		} finally {
-			lock.readLock().unlock();
+			lock.writeLock().unlock();
 		}
-		
-		if (cache != null && !cached) {
-			lock.writeLock().lock();
+	}
+
+	public class Picture extends de.rallye.model.structures.Picture implements IPicture {
+
+		private int pictureID = -1;
+
+		public Picture(String pictureHash) {
+			super(pictureHash);
+		}
+
+		public Picture(String pictureHash, int pictureID) {
+			super(pictureHash);
+			this.pictureID = pictureID;
+		}
+
+		@JsonIgnore
+		@Override
+		public int getPictureID() {
+			return pictureID;
+		}
+
+		@Override
+		public long lastModified() {
+			return getMostOrgFile().lastModified();
+		}
+
+		private File getMostOrgFile() {
+			lock.readLock().lock();
 			try {
-				cache.put(pictureID, img);
+				File f = ImageRepository.this.getFile(pictureHash, PictureSize.Original);
+				if (f.exists())
+					return f;
+				else {
+					f = ImageRepository.this.getFile(pictureHash, PictureSize.Preview);
+					if (f.exists())
+						return f;
+					else
+						return null;
+				}
 			} finally {
-				lock.writeLock().unlock();
+				lock.readLock().unlock();
 			}
 		}
-		return img;
-	}
-	
-	public void put(int pictureID, File fIn) throws DataException {
-		logger.info("Adding {} to repository", pictureID);
-		//TODO: save Meta-Data to DB ? location? provide API for displaying pictures in Map?
-		
-		lock.writeLock().lock();
-		try {
-			BufferedImage iOut;
-			File fOut;
-			
-			fOut = getFile(pictureID, PictureSize.Original);
-			FileInputStream inStream = new FileInputStream(fIn);
-			FileOutputStream outStream = new FileOutputStream(fOut);
-			
-			byte[] buffer = new byte[ 0xFFFF ];
-		    for ( int len; (len = inStream.read(buffer)) != -1; ) {
-		      outStream.write( buffer, 0, len );
-		    }
-		    outStream.close();
-		    inStream.close();
-		    
-		    BufferedImage iIn = ImageIO.read(fIn);
-		    
-		    logger.info("Original saved ({}x{})", iIn.getWidth(), iIn.getHeight());
-			
-			for (PictureSize s: PictureSize.values()) {
-				if (s == PictureSize.Original)
-					continue;
-				
-				iOut = scalePicture(iIn, pictureID, s);
-				
-				if (s == THUMB)
-					thumbCache.put(pictureID, iOut);
-				else if (s == MINI)
-					miniCache.put(pictureID, iOut);
+
+		@Override
+		public boolean isAvailable(PictureSize size) {
+			return isCached(size) || getFile(size).exists();
+		}
+
+		@Override
+		public File getFile(PictureSize size) {
+			File target = ImageRepository.this.getFile(pictureHash, size);
+			if (target.exists())
+				return target;
+
+			File org = getMostOrgFile();
+
+			try {
+				scalePicture(org, pictureHash, size);
+			} catch (IOException e) {
+				logger.error("Failed to scale picture", e);
 			}
-			
-		} catch (FileNotFoundException e) {
-			final String msg = "Could not find file"+ fIn.toString();
-			logger.error(msg, e);
-			throw new DataException(msg, e);
-		} catch (IOException e) {
-			final String msg = "Could not read/write";
-			logger.error(msg, e);
-			throw new DataException(msg, e);
-		} finally {
-			lock.writeLock().unlock();
+
+			return target;
+		}
+
+		@Override
+		public boolean isCached(PictureSize size) {
+			lock.readLock().lock();
+			try {
+				switch (size) {
+					case Thumbnail:
+						return thumbCache.containsKey(pictureHash);
+					case Mini:
+						return miniCache.containsKey(pictureHash);
+					default:
+						return false;
+				}
+			} finally {
+				lock.readLock().unlock();
+			}
+		}
+
+		@Override
+		public byte[] getCached(PictureSize size) {
+			lock.readLock().lock();
+			try {
+				switch (size) {
+					case Thumbnail:
+						return thumbCache.get(pictureHash);
+					case Mini:
+						return miniCache.get(pictureHash);
+					default:
+						return null;
+				}
+			} finally {
+				lock.readLock().unlock();
+			}
+		}
+
+		@Override
+		public InputStream getInputStream(PictureSize size) throws FileNotFoundException {
+			byte[] cached = getCached(size);
+			if (cached != null) {
+				return new ByteArrayInputStream(cached);
+			} else {
+				return new BufferedInputStream(new FileInputStream(getFile(size)));
+			}
 		}
 	}
-	
-	private BufferedImage scalePicture(BufferedImage base, int pictureID, PictureSize size) throws IOException {
-		Dimension d = size.getDimension();
-		
-		BufferedImage out = ImageScaler.scaleImage(base, d);
-		
-		File f = getFile(pictureID, size);
-		
-		ImageIO.write(out, "jpg", f);
-		
-		logger.info("Scaled {} to {}", pictureID, size);
-		
-		return out;
-	}
-	
-	public void remove(int pictureID) {
-		logger.info("Removing all variants of "+ pictureID);
-		
-		lock.writeLock().lock();
-		try {
-			thumbCache.remove(pictureID);
-			
-			for (PictureSize s: PictureSize.values()) {
-				File f = getFile(pictureID, s);
-				f.delete();
-			}
-		} finally {
-			lock.writeLock().unlock();
-		}
-	}	
-	
 }

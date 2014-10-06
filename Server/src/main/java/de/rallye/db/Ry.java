@@ -85,6 +85,11 @@ public class Ry {
 		public static final String ID = "pictureID";
 		public static final String ID_USER = Users.ID;
 		public static final String TIMESTAMP = "timestamp";
+		public static final String PICTURE_HASH = "pictureHash";
+		public static final String LONGITUDE = "longitude";
+		public static final String LATITUDE = "latitude";
+		public static final String ALTITUDE = "altitude";
+		public static final String MAKE_MODEL = "makeModel";
 	}
 	
 	public static class Chats {
@@ -123,6 +128,7 @@ public class Ry {
 		public static final String SUBMIT_TYPE = "submitType";
 		public static final String INT_SUBMISSION = "intSubmission";
 		public static final String TEXT_SUBMISSION = "textSubmission";
+		public static final String PIC_SUBMISSION = "picSubmission";
 	}
 	
 	public static class Tasks_Groups {

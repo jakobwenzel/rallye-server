@@ -19,6 +19,7 @@
 
 package de.rallye.test.db;
 
+import com.drew.metadata.Metadata;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,6 +30,7 @@ import de.rallye.exceptions.UnauthorizedException;
 import de.rallye.filter.auth.AdminPrincipal;
 import de.rallye.filter.auth.GroupPrincipal;
 import de.rallye.filter.auth.RallyePrincipal;
+import de.rallye.images.ImageRepository;
 import de.rallye.model.structures.*;
 
 import java.io.IOException;
@@ -95,7 +97,7 @@ public class MockDataAdapter implements IDataAdapter {
 
 	@Override
 	public Submission submit(int taskID, int groupID, int userID,
-			SimpleSubmission submission) throws DataException, InputException {
+							 PostSubmission submission, ImageRepository.Picture picture) throws DataException, InputException {
 		fail("Method not implemented");
 		return null;
 	}
@@ -179,8 +181,8 @@ public class MockDataAdapter implements IDataAdapter {
 	}
 
 	@Override
-	public ChatEntry addChat(SimpleChatEntry chat, int roomID, int groupID,
-			int userID) throws DataException {
+	public ChatEntry addChat(PostChat chat, ImageRepository.Picture picture, int roomID, int groupID,
+							 int userID) throws DataException {
 		fail("Method not implemented");
 		return null;
 	}
@@ -225,7 +227,7 @@ public class MockDataAdapter implements IDataAdapter {
 	}
 
 	@Override
-	public int assignNewPictureID(int userID) throws DataException {
+	public int addPicture(int userID, String pictureHash, Metadata meta) throws DataException {
 		fail("Method not implemented");
 		return 0;
 	}
