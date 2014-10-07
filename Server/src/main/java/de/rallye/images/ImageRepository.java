@@ -304,6 +304,7 @@ public class ImageRepository implements IPictureRepository {
 			}
 		}
 
+        @JsonIgnore
         @Override
         public File getUpToStdFile() {
             lock.readLock().lock();
