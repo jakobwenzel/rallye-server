@@ -19,7 +19,9 @@
 
 package de.rallye.exceptions;
 
-public class NodeNotFoundException extends WebAppExcept{
+import javax.ws.rs.WebApplicationException;
+
+public class NodeNotFoundException extends WebApplicationException{
 
 	public NodeNotFoundException() {
 		super("Node not found", 404);

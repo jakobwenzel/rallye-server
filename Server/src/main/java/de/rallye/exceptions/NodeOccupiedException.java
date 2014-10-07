@@ -19,7 +19,9 @@
 
 package de.rallye.exceptions;
 
-public class NodeOccupiedException extends WebAppExcept {
+import javax.ws.rs.WebApplicationException;
+
+public class NodeOccupiedException extends WebApplicationException {
 
 	/**
 	 * 

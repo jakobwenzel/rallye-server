@@ -134,7 +134,7 @@ function invalidateResources() {
 }
 
 function getUsers(callback) {
-	getResource("users",root+"rallye/users",callback, function (arr) {
+	getResource("users",root+"users",callback, function (arr) {
 		var res = {};
 		arr.forEach(function (elem) {
 			res[elem.userID] = elem;
@@ -145,7 +145,7 @@ function getUsers(callback) {
 
 
 function getGroupsAsArray(callback) {
-	var url = root+"rallye/groups";
+	var url = root+"groups";
 	if (clientName=="admin")
 		url = url+"/admin";
 	getResource("groupsArray",url,callback, function (arr) {
@@ -154,7 +154,7 @@ function getGroupsAsArray(callback) {
 }
 
 function getGroups(callback) {
-	var url = root+"rallye/groups";
+	var url = root+"groups";
 	if (clientName=="admin")
 		url = url+"/admin";
 	getResource("groups",url,callback, function (arr) {
@@ -168,13 +168,13 @@ function getGroups(callback) {
 
 
 function getTasksAsArray(callback) {
-	getResource("tasksArray",root+"rallye/tasks",callback, function (arr) {
+	getResource("tasksArray",root+"games/rallye/tasks",callback, function (arr) {
 		return arr;
 	});
 }
 
 function getTasks(callback) {
-	getResource("tasks",root+"rallye/tasks",callback, function (arr) {
+	getResource("tasks",root+"games/rallye/tasks",callback, function (arr) {
 		var res = {};
 		arr.forEach(function (elem) {
 			res[elem.taskID] = elem;
@@ -279,7 +279,7 @@ function kill_auth() {
 
 function get_system_info(callback) {
 	$.ajax({
-		url: root+"rallye/system/info",
+		url: root+"server/info",
 		dataType: "json",
 	}).done(callback);
 }
@@ -307,7 +307,7 @@ function formatTime(unixTimestamp) {
 
 function get_nodes(callback) {
 	$.ajax({
-		url: root+"rallye/map/nodes",
+		url: root+"games/map/nodes",
 		dataType: "json"
 	}).done(callback);
 }

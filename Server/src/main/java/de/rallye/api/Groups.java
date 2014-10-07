@@ -195,7 +195,7 @@ public class Groups {
 	@PUT
 	@AdminAuth
 	@Consumes(MediaType.APPLICATION_JSON)
-	@Produces("text/plan")
+	@Produces("text/plain")
 	public int addGroup(Group group, @Context SecurityContext sec) throws DataException {
 		logger.entry();
 

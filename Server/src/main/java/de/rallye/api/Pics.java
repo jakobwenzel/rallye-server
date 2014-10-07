@@ -116,7 +116,7 @@ public class Pics {
 	@Path("{pictureHash}")
 	@Produces("image/jpeg")
 	public Object getPicture(@PathParam("pictureHash") String pictureHash, @Context Request request) {
-		return getPicture(pictureHash, PictureSize.Standard, request);
+		return getPicture(pictureHash, (PictureSize)null, request);
 	}
 	
 	@GET
@@ -134,10 +134,14 @@ public class Pics {
 		HttpCacheHandling.checkModifiedSince(request, picture.lastModified());
 
 		Object res;
-		res = picture.getCached(size);
-		if (res == null) {
-			res = picture.getFile(size);
-		}
+        if (size==null) {
+            res = picture.getUpToStdFile();
+        } else {
+            res = picture.getCached(size);
+            if (res == null) {
+                res = picture.getFile(size);
+            }
+        }
 
 		return logger.exit(res);
 	}

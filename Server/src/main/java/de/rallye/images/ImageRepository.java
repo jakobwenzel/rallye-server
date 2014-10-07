@@ -85,9 +85,9 @@ public class ImageRepository implements IPictureRepository {
 		return putImage(userID, pictureHash, file, PictureSize.Original);
 	}
 
-	private void scalePreemptively(File src, String pictureHash, PictureSize exclude) {
+	private void scalePreemptively(File src, String pictureHash, PictureSize supplied) {//TODO exclude everything larger than the supplied size
 		for (PictureSize s: PictureSize.values()) {
-			if (s == exclude)
+			if (s == supplied)
 				continue;
 
 			try {
@@ -119,7 +119,7 @@ public class ImageRepository implements IPictureRepository {
 			BufferedImage iOut;
 			File fOut;
 
-			fOut = getFile(pictureHash, PictureSize.Original);
+			fOut = getFile(pictureHash, size);
 			FileInputStream inStream = new FileInputStream(file);
 			FileOutputStream outStream = new FileOutputStream(fOut);
 
@@ -294,16 +294,54 @@ public class ImageRepository implements IPictureRepository {
 		private File getMostOrgFile() {
 			lock.readLock().lock();
 			try {
+				File f = getOrgFile();
+				if (f == null) {
+					f = getPreviewFile();
+				}
+				return f;
+			} finally {
+				lock.readLock().unlock();
+			}
+		}
+
+        @JsonIgnore
+        @Override
+        public File getUpToStdFile() {
+            lock.readLock().lock();
+            try {
+                File f = null;
+                try {
+                    f = getFile(PictureSize.Standard);
+                } catch (WebApplicationException e) { //thrown if there is no org uploaded yet
+                    f = getPreviewFile();
+                }
+                return f;
+            } finally {
+                lock.readLock().unlock();
+            }
+        }
+
+		private File getPreviewFile() {
+			lock.readLock().lock();
+			try {
+				File f = ImageRepository.this.getFile(pictureHash, PictureSize.Preview);
+				if (f.exists())
+					return f;
+				else
+					return null;
+			} finally {
+				lock.readLock().unlock();
+			}
+		}
+
+		private File getOrgFile() {
+			lock.readLock().lock();
+			try {
 				File f = ImageRepository.this.getFile(pictureHash, PictureSize.Original);
 				if (f.exists())
 					return f;
-				else {
-					f = ImageRepository.this.getFile(pictureHash, PictureSize.Preview);
-					if (f.exists())
-						return f;
-					else
-						return null;
-				}
+				else
+					return null;
 			} finally {
 				lock.readLock().unlock();
 			}
@@ -316,18 +354,33 @@ public class ImageRepository implements IPictureRepository {
 
 		@Override
 		public File getFile(PictureSize size) {
-			File target = ImageRepository.this.getFile(pictureHash, size);
-			if (target.exists())
-				return target;
+			lock.readLock().lock();
+			File target;
+			File org;
+			try {
+				target = ImageRepository.this.getFile(pictureHash, size);
+				if (target.exists())
+					return target;
 
-			File org = getMostOrgFile();
+				org = getOrgFile();
+				PictureSize avail = PictureSize.Original;
 
+				if (org == null) {
+					org = getPreviewFile();
+					avail = PictureSize.Preview;
+				}
+
+				if (!isScalableFrom(avail, size)) {
+					throw new WebApplicationException("only a preview has been uploaded yet, you should fall back to preview and smaller", 409);
+				}
+			} finally {
+				lock.readLock().unlock();
+			}
 			try {
 				scalePicture(org, pictureHash, size);
 			} catch (IOException e) {
 				logger.error("Failed to scale picture", e);
 			}
-
 			return target;
 		}
 
@@ -374,5 +427,14 @@ public class ImageRepository implements IPictureRepository {
 				return new BufferedInputStream(new FileInputStream(getFile(size)));
 			}
 		}
+	}
+
+	private boolean isScalableFrom(PictureSize source, PictureSize target) {
+		if (source == PictureSize.Original)
+			return true;
+		else if (source == PictureSize.Preview) {
+			return target == PictureSize.Mini || target == PictureSize.Thumbnail;
+		} else
+			return false;// we only support scaling from preview / org, everything else does not seem sensible
 	}
 }
