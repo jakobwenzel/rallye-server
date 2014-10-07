@@ -300,6 +300,7 @@ function transformSubmission(sub) {
 		res.picture = root+"resources/pics/"+sub.picSubmission+"/mini";
 		res.pictureBig = root+"resources/pics/"+sub.picSubmission;
 	}
+	res.time = formatTime(sub.timestamp);
     for (var attrname in sub) { res[attrname] = sub[attrname]; }
 	return res;							
 }
@@ -646,6 +647,7 @@ body {
 
 <script id="templ_submission" type="text/template">
 <tr> <td>
+At {{time}}:<br>
 {{#isBarcode}}
 Barcode not implemented<br>
 {{/isBarcode}}

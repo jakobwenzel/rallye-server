@@ -129,6 +129,7 @@ public class Ry {
 		public static final String INT_SUBMISSION = "intSubmission";
 		public static final String TEXT_SUBMISSION = "textSubmission";
 		public static final String PIC_SUBMISSION = "picSubmission";
+        public static final String TIMESTAMP = "timestamp";
 	}
 	
 	public static class Tasks_Groups {

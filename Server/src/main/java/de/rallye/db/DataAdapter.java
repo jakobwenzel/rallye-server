@@ -287,7 +287,7 @@ public class DataAdapter implements IDataAdapter {
 			con = dataSource.getConnection();
 			st = con.prepareStatement("SELECT "+ cols(Ry.Submissions.ID, Ry.Submissions.ID_TASK, Ry.Submissions.ID_GROUP,
 					"sub."+Ry.Submissions.ID_USER, Ry.Submissions.SUBMIT_TYPE, Ry.Pictures.PICTURE_HASH,
-					Ry.Submissions.INT_SUBMISSION, Ry.Submissions.TEXT_SUBMISSION) +" FROM "+ Ry.Submissions.TABLE +" AS sub LEFT JOIN "+ Ry.Pictures.TABLE +" ON ("+ Ry.Pictures.ID +"="+ Ry.Submissions.PIC_SUBMISSION +")"
+					Ry.Submissions.INT_SUBMISSION, Ry.Submissions.TEXT_SUBMISSION, "UNIX_TIMESTAMP(sub."+Ry.Submissions.TIMESTAMP+")") +" FROM "+ Ry.Submissions.TABLE +" AS sub LEFT JOIN "+ Ry.Pictures.TABLE +" ON ("+ Ry.Pictures.ID +"="+ Ry.Submissions.PIC_SUBMISSION +")"
 					+" WHERE "+ Ry.Submissions.ID_TASK +"=? AND "+ Ry.Submissions.ID_GROUP +"=?");
 			
 			st.setInt(1, taskID);
@@ -298,7 +298,7 @@ public class DataAdapter implements IDataAdapter {
 			List<Submission> submissions = new ArrayList<>();
 			
 			while (rs.next()) {
-				submissions.add(new Submission(rs.getInt(1), rs.getInt(5), rs.getString(6), (Integer)rs.getObject(7), rs.getString(8)));
+				submissions.add(new Submission(rs.getInt(1), rs.getInt(5), rs.getString(6), (Integer)rs.getObject(7), rs.getString(8), rs.getLong(9)));
 			}
 			
 			return submissions;
@@ -358,7 +358,7 @@ public class DataAdapter implements IDataAdapter {
 				taskSubmissions.add(new TaskSubmissions(taskID, groupID, submissions, score, bonus, scoreOutdated));
 			}
 			
-			submissions.add(new Submission(rs.getInt(1), rs.getInt(5), rs.getString(6), (Integer)rs.getObject(7), rs.getString(8)));
+			submissions.add(new Submission(rs.getInt(1), rs.getInt(5), rs.getString(6), (Integer)rs.getObject(7), rs.getString(8), rs.getLong(12)));
 		}
 		return taskSubmissions;
 	}
@@ -376,7 +376,7 @@ public class DataAdapter implements IDataAdapter {
 			con = dataSource.getConnection();
 			st = con.prepareStatement("SELECT "+ cols(Ry.Submissions.ID, Ry.Submissions.ID_TASK, Ry.Submissions.ID_GROUP,
 					"sub."+Ry.Submissions.ID_USER, Ry.Submissions.SUBMIT_TYPE, Ry.Pictures.PICTURE_HASH,
-					Ry.Submissions.INT_SUBMISSION, Ry.Submissions.TEXT_SUBMISSION, Ry.Tasks_Groups.SCORE, Ry.Tasks_Groups.BONUS, Ry.Tasks_Groups.OUTDATED) +" FROM "+ Ry.Submissions.TABLE +" AS sub"
+					Ry.Submissions.INT_SUBMISSION, Ry.Submissions.TEXT_SUBMISSION, Ry.Tasks_Groups.SCORE, Ry.Tasks_Groups.BONUS, Ry.Tasks_Groups.OUTDATED, "UNIX_TIMESTAMP(sub."+Ry.Submissions.TIMESTAMP+")") +" FROM "+ Ry.Submissions.TABLE +" AS sub"
 					+" LEFT JOIN "+ Ry.Pictures.TABLE +" ON ("+ Ry.Pictures.ID +"="+ Ry.Submissions.PIC_SUBMISSION +")"
 					+" LEFT JOIN "+Ry.Tasks_Groups.TABLE+" USING("+Ry.Tasks_Groups.ID_GROUP+","+Ry.Tasks_Groups.ID_TASK+") WHERE "+ Ry.Submissions.ID_GROUP +"=? ORDER BY "+ Ry.Submissions.ID_TASK +" ASC");
 			
@@ -408,7 +408,7 @@ public class DataAdapter implements IDataAdapter {
 			con = dataSource.getConnection();
 			st = con.prepareStatement("SELECT "+ cols(Ry.Submissions.ID, Ry.Submissions.ID_TASK, Ry.Submissions.ID_GROUP,
 					"sub."+Ry.Submissions.ID_USER, Ry.Submissions.SUBMIT_TYPE, Ry.Pictures.PICTURE_HASH,
-					Ry.Submissions.INT_SUBMISSION, Ry.Submissions.TEXT_SUBMISSION, Ry.Tasks_Groups.SCORE, Ry.Tasks_Groups.BONUS, Ry.Tasks_Groups.OUTDATED) +" FROM "+ Ry.Submissions.TABLE +" AS sub"
+					Ry.Submissions.INT_SUBMISSION, Ry.Submissions.TEXT_SUBMISSION, Ry.Tasks_Groups.SCORE, Ry.Tasks_Groups.BONUS, Ry.Tasks_Groups.OUTDATED, "UNIX_TIMESTAMP(sub."+Ry.Submissions.TIMESTAMP+")") +" FROM "+ Ry.Submissions.TABLE +" AS sub"
 					+" LEFT JOIN "+ Ry.Pictures.TABLE +" ON ("+ Ry.Pictures.ID +"="+ Ry.Submissions.PIC_SUBMISSION +")"
 					+" LEFT JOIN "+Ry.Tasks_Groups.TABLE+" USING("+Ry.Tasks_Groups.ID_GROUP+","+Ry.Tasks_Groups.ID_TASK+") WHERE "+ Ry.Submissions.ID_TASK +"=? ORDER BY "+ Ry.Submissions.ID_GROUP +" ASC");
 			
@@ -437,7 +437,7 @@ public class DataAdapter implements IDataAdapter {
 			con = dataSource.getConnection();
 			st = con.prepareStatement("SELECT "+ cols(Ry.Submissions.ID, Ry.Submissions.ID_TASK, Ry.Submissions.ID_GROUP,
 					"sub."+Ry.Submissions.ID_USER, Ry.Submissions.SUBMIT_TYPE, Ry.Pictures.PICTURE_HASH,
-					Ry.Submissions.INT_SUBMISSION, Ry.Submissions.TEXT_SUBMISSION, Ry.Tasks_Groups.SCORE, Ry.Tasks_Groups.BONUS, Ry.Tasks_Groups.OUTDATED) +" FROM "+ Ry.Submissions.TABLE +" AS sub"
+					Ry.Submissions.INT_SUBMISSION, Ry.Submissions.TEXT_SUBMISSION, Ry.Tasks_Groups.SCORE, Ry.Tasks_Groups.BONUS, Ry.Tasks_Groups.OUTDATED, "UNIX_TIMESTAMP(sub."+Ry.Submissions.TIMESTAMP+")") +" FROM "+ Ry.Submissions.TABLE +" AS sub"
 					+" LEFT JOIN "+ Ry.Pictures.TABLE +" ON ("+ Ry.Pictures.ID +"="+ Ry.Submissions.PIC_SUBMISSION +")"
 					+" LEFT JOIN "+Ry.Tasks_Groups.TABLE+" USING("+Ry.Tasks_Groups.ID_GROUP+","+Ry.Tasks_Groups.ID_TASK+") WHERE ("+ Ry.Tasks_Groups.SCORE +" IS NULL AND "+ Ry.Tasks_Groups.BONUS +" IS NULL) OR "+ Ry.Tasks_Groups.OUTDATED +"=1 ORDER BY "+ Ry.Submissions.ID_GROUP +" ASC, "+Ry.Submissions.ID_TASK+" ASC");
 			
@@ -480,7 +480,7 @@ public class DataAdapter implements IDataAdapter {
 			//Insert into db
 			st = con.prepareStatement("INSERT INTO "+ Ry.Submissions.TABLE +" ("+
 					cols(Ry.Submissions.ID_TASK, Ry.Submissions.ID_GROUP, Ry.Submissions.ID_USER, Ry.Submissions.SUBMIT_TYPE, Ry.Submissions.PIC_SUBMISSION, Ry.Submissions.INT_SUBMISSION, Ry.Submissions.TEXT_SUBMISSION)
-					+") VALUES (?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+					+") VALUES (?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
 			
 			
 			st.setInt(1, taskID);
@@ -500,12 +500,22 @@ public class DataAdapter implements IDataAdapter {
 			st.setString(7, submission.textSubmission);
 			
 			st.execute();
-			
+
 			rs = st.getGeneratedKeys();
 			rs.next();
 			int submissionID = rs.getInt(1);
+
+
+
+            st = con.prepareStatement("SELECT UNIX_TIMESTAMP("+ Ry.Chats.TIMESTAMP +") FROM "+ Ry.Chats.TABLE +" WHERE "+ Ry.Chats.ID +"=?");
+            st.setInt(1, submissionID);
+            rs = st.executeQuery();
+            rs.first();
+            long timestamp = rs.getLong(1);
+
 			
-			Submission res = new Submission(submissionID, submission);
+			Submission res = new Submission(submissionID, timestamp, submission);
+
 			
 			
 			//Invalidate existing score
