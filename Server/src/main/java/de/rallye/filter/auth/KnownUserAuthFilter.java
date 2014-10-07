@@ -31,6 +31,7 @@ import javax.annotation.Priority;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
@@ -50,9 +51,9 @@ public class KnownUserAuthFilter extends BaseAuthFilter implements IManualAuthen
 	
 	protected Response getUnauthorized(String message) {
 		if (message!=null)
-			return Response.status(Status.UNAUTHORIZED).entity(message).header("WWW-Authenticate", "Basic realm=\"RallyeAuth\"").build();
+			return Response.status(Status.UNAUTHORIZED).entity(message).header(HttpHeaders.WWW_AUTHENTICATE, "Basic realm=\"RallyeAuth\"").build();
 		else
-			return Response.status(Status.UNAUTHORIZED).header("WWW-Authenticate", "Basic realm=\"RallyeAuth\"").build();
+			return Response.status(Status.UNAUTHORIZED).header(HttpHeaders.WWW_AUTHENTICATE, "Basic realm=\"RallyeAuth\"").build();
 	}
 	
 	protected Response getUnauthorized() {
@@ -99,9 +100,9 @@ public class KnownUserAuthFilter extends BaseAuthFilter implements IManualAuthen
 		}
 		
 		if (containerRequest != null)
-			containerRequest.setSecurityContext(new RallyeSecurityContext<RallyePrincipal>(principal));
+			containerRequest.setSecurityContext(new RallyeSecurityContext<>(principal));
 		
-        logger.info("Authorized: {}:{} for group {}", userID, principal.getName(), groupID);
+        logger.trace("Authorized: {}:{} for group {}", userID, principal.getName(), groupID);
         return principal;
     }
 }

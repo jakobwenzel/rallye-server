@@ -43,7 +43,6 @@ public class StadtRallye {
 	private static final Logger logger = LogManager.getLogger(StadtRallye.class);
 
 	public static void main(String[] args) {
-
 		logger.info("Starting RallyeServer");
 
 		//Init resources
@@ -61,6 +60,6 @@ public class StadtRallye {
 			ServerConsole console = new ServerConsole(config.getConsolePort(), server);
 			console.start();
 		} else 
-			logger.error("Please provide a valid config file. Exiting.");
+			logger.fatal("Please provide a valid config file. Exiting.");
 	}
 }

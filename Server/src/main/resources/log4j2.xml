@@ -30,17 +30,19 @@
     </appenders>
 
     <loggers>
-        
-        <logger name ="de.rallye" level="trace" additivity="false" > 
-        	<appender-ref ref="STDOUT" />
-        	<appender-ref ref="LogFile" level="warn" />
-            <appender-ref ref="DebugLogFile" level="trace" />
-        </logger>
-        
-        <root level="trace" >
 
+		<logger name="de.rallye.api" level="trace" additivity="false">
+			<appender-ref ref="DebugLogFile" />
+		</logger>
 
-            
+		<logger name="de.rallye" level="debug" additivity="false">
+			<appender-ref ref="DebugLogFile" />
+		</logger>
+        
+        <root level="info">
+			<appender-ref ref="STDOUT" />
+			<appender-ref ref="LogFile" level="warn" />
+			<appender-ref ref="DebugLogFile" />
         </root>
     </loggers>
 

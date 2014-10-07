@@ -47,7 +47,7 @@ import java.io.File;
 @Produces({"application/x-jackson-smile;qs=0.8", "application/xml;qs=0.9", "application/json;qs=1"})
 public class Pics {
 	
-	private static final Logger logger =  LogManager.getLogger(Groups.class);
+	private static final Logger logger =  LogManager.getLogger(Pics.class);
 
 	@Inject	IDataAdapter data;
 	@Inject java.util.Map<String, ChatPictureLink> chatPictureMap;
@@ -87,8 +87,6 @@ public class Pics {
 			ChatPictureLink.getLink(chatPictureMap, hash, data).setPicture(picture);
 			SubmissionPictureLink.getLink(submissionPictureMap, hash, data).setPicture(picture);
 		}
-
-		logger.debug("Picture {} has hash {}", picture.pictureHash, hash);
 
 		return logger.exit(picture);
 	}

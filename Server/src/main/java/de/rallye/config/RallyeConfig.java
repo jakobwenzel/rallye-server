@@ -85,7 +85,7 @@ public class RallyeConfig {
 			logger.error("No config file found.");
 			return null;
 		}
-		logger.info("Loading config file from {}/{}", configFile.getParent(), configFile);
+		logger.info("Loading config file from {}", configFile);
 		ObjectMapper mapper = new ObjectMapper();
 		try {
 			config = mapper.readValue(configFile, RallyeConfig.class);
@@ -97,8 +97,11 @@ public class RallyeConfig {
 
 			config.lastModified = configFile.lastModified();
 
-			config.setGit(git);
-			logger.debug(config.toString());
+			if (git != null) {
+				config.setGit(git);
+				logger.info("Current Build:\n\t{}", git);
+			}
+
 			return config;
 		} catch ( IOException e) {
 			logger.error("Config invalid.", e);

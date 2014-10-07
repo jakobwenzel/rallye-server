@@ -31,6 +31,7 @@ import javax.annotation.Priority;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
@@ -45,7 +46,7 @@ public class AdminAuthFilter extends BaseAuthFilter {
 
 	@Override
 	protected Response getUnauthorized() {
-		return Response.status(Status.UNAUTHORIZED).header("WWW-Authenticate", "Basic realm=\"AdminAuth\"").build();
+		return Response.status(Status.UNAUTHORIZED).header(HttpHeaders.WWW_AUTHENTICATE, "Basic realm=\"AdminAuth\"").build();
 	}
 	
 	
@@ -86,8 +87,8 @@ public class AdminAuthFilter extends BaseAuthFilter {
 		}
         
 		if (containerRequest!=null)
-			containerRequest.setSecurityContext(new RallyeSecurityContext<AdminPrincipal>(principal));
-        logger.info("Authorized: {}:{}", principal.getAdminID(), principal.getName());
+			containerRequest.setSecurityContext(new RallyeSecurityContext<>(principal));
+        logger.trace("Authorized: {}:{}", principal.getAdminID(), principal.getName());
         return principal;
 	}
 

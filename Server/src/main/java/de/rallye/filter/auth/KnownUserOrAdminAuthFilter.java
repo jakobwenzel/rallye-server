@@ -27,6 +27,7 @@ import javax.annotation.Priority;
 import javax.ws.rs.Priorities;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
@@ -37,11 +38,12 @@ import java.security.Principal;
 @Priority(Priorities.AUTHENTICATION)
 public class KnownUserOrAdminAuthFilter extends BaseAuthFilter{
 	private static final Logger logger = LogManager.getLogger(KnownUserOrAdminAuthFilter.class);
+
 	protected Response getUnauthorized(String message) {
 		if (message!=null)
-			return Response.status(Status.UNAUTHORIZED).entity(message).header("WWW-Authenticate", "Basic realm=\"RallyeAuth\"").build();
+			return Response.status(Status.UNAUTHORIZED).entity(message).header(HttpHeaders.WWW_AUTHENTICATE, "Basic realm=\"RallyeAuth\"").build();
 		else
-			return Response.status(Status.UNAUTHORIZED).header("WWW-Authenticate", "Basic realm=\"RallyeAuth\"").build();
+			return Response.status(Status.UNAUTHORIZED).header(HttpHeaders.WWW_AUTHENTICATE, "Basic realm=\"RallyeAuth\"").build();
 	}
 	
 	protected Response getUnauthorized() {
@@ -61,7 +63,7 @@ public class KnownUserOrAdminAuthFilter extends BaseAuthFilter{
 			ContainerRequestContext containerRequest, String[] login) {
 		if (data==null)
 			logger.warn("Data is null");
-		else logger.info("Data ok");
+
 		try {
 			return (new KnownUserAuthFilter(data)).checkAuthentication(containerRequest, login);
 		} catch (WebApplicationException e) {

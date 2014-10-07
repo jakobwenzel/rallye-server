@@ -40,7 +40,7 @@ public class ConfigTools {
 		logger.entry();
 		//If we are not runnig from a jar, we are in the classes subdir
 		String location = getClassesDir();
-		logger.info("location is "+location);
+		logger.trace("location is "+location);
 		//We are either in build/classes/main/
 		if (location.endsWith("build/classes/main/")) {
 			location = location.substring(0,location.length()-19);	
@@ -52,7 +52,7 @@ public class ConfigTools {
 			location = location.substring(0,location.length()-4);
 		//If not, we are not running in project dir
 		} else {
-			logger.debug("not in any subdir known.");
+			logger.warn("not in any subdir known.");
 			return null;
 		}
 
@@ -67,7 +67,7 @@ public class ConfigTools {
 				return null;
 			}
 		} catch (Exception e) {
-			logger.debug(e);
+			logger.catching(e);
 			return null;
 		}
 		//We are now sure this is the correct location
@@ -99,11 +99,10 @@ public class ConfigTools {
 	 * @return the first Config found
 	 */
 	public static File findConfigFile() {
-		logger.info("locating config file");
 
 		//Try current dir
 		File config = new File("config.json");
-		logger.info("Checking locally for '{}'", config);
+		logger.trace("Checking locally for '{}'", config);
 		if (config.exists())
 			return config;
 
@@ -114,7 +113,7 @@ public class ConfigTools {
 			logger.error(e);
 			config = null;
 		}
-		logger.info("Checking in jar dir for '{}'", config);
+		logger.trace("Checking in jar dir for '{}'", config);
 		if (config!=null && config.exists())
 			return config;
 
@@ -125,15 +124,14 @@ public class ConfigTools {
 			logger.error(e);
 			config = null;
 		}
-		logger.info("Checking project dir for '{}'", config);
+		logger.trace("Checking project dir for '{}'", config);
 		if (config!=null && config.exists())
 			return config;
 
 		//Try homedir
 		String homedir = java.lang.System.getProperty("user.home");
 		config = new File(homedir+"/.rallyeserv-config.json");
-		logger.info("Checking home dir for '{}'", config);
-		//logger.info("Homedir location:)
+		logger.trace("Checking home dir for '{}'", config);
 		if (config.exists())
 			return config;
 

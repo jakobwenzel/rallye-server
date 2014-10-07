@@ -27,6 +27,7 @@ import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 import java.security.Principal;
 
@@ -44,14 +45,14 @@ public abstract class BaseAuthFilter implements ContainerRequestFilter {
     @Override
     public void filter(ContainerRequestContext containerRequest) throws WebApplicationException {
     	logger.entry();
-    	logger.info("We are a {}",this.getClass().getName());
-    	logger.info(containerRequest.getUriInfo().getRequestUri());
+//    	logger.info("We are a {}",this.getClass().getName());
+//    	logger.info(containerRequest.getUriInfo().getRequestUri());
 
-        String auth = containerRequest.getHeaderString("authorization");
+        String auth = containerRequest.getHeaderString(HttpHeaders.AUTHORIZATION);
  
         // No Basic Auth was provided
         if(auth == null){
-        	logger.info("No auth at all");
+        	logger.debug("No auth at all");
             throw new WebApplicationException(getUnauthorized());
         }
  
@@ -59,7 +60,7 @@ public abstract class BaseAuthFilter implements ContainerRequestFilter {
  
         // Not matching Basic auth conventions:  user:password
         if(login == null || login.length != 2){
-        	logger.info("Auth invalid");
+        	logger.warn("Auth invalid");
         	throw new WebApplicationException(getUnauthorized());
         }
         

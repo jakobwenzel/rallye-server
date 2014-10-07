@@ -46,7 +46,7 @@ task buildInfo {
 
 
 		def sdf = new SimpleDateFormat()
-		sdf.applyPattern("dd.MM.yyyy '@' HH\\:mm\\:ss z")
+		sdf.applyPattern("dd.MM.yyyy '-' HH\\:mm\\:ss z")
 		def time = sdf.format(new Date())
 
 

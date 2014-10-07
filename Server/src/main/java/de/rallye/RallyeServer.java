@@ -49,15 +49,11 @@ import de.rallye.admin.AdminWebsocketApp;
 import de.rallye.injection.RallyeBinder;
 import de.rallye.push.PushWebsocketApp;
 
-//import org.glassfish.grizzly.http.CompressionConfig;
-
 public class RallyeServer {
 	
 	private static final Logger logger = LogManager.getLogger(RallyeServer.class);
 
 	public RallyeServer(String host, int port) {
-		logger.entry();
-
 		// create URI
 		URI uri = UriBuilder.fromUri("http://" + host + "/").port(port).build();
 		
@@ -67,10 +63,8 @@ public class RallyeServer {
 		try {
 			startServer(uri);
 		} catch (IOException e) {
-			logger.catching(e);
+			logger.fatal(e);
 		}
-		
-		logger.exit();
 	}
 
 
@@ -82,7 +76,7 @@ public class RallyeServer {
 		//Register Websocket Stuff
 		WebSocketAddOn addon = new WebSocketAddOn();
 		for(org.glassfish.grizzly.http.server.NetworkListener listener : serv.getListeners()) {
-			logger.info("registering websocket on "+listener);
+			logger.info("Registering websocket on "+listener);
 			listener.registerAddOn(addon);
 		}
 		PushWebsocketApp.setData(RallyeBinder.data); //TODO: Remove this ugliness.
@@ -94,7 +88,6 @@ public class RallyeServer {
 		return serv;
 	}
 
-	@SuppressWarnings("unused")
 	private HttpServer createServer(URI uri, ResourceConfig configuration) {
 		GrizzlyHttpContainer handler = ContainerFactory.createContainer(GrizzlyHttpContainer.class, configuration);
 		boolean secure = false;
