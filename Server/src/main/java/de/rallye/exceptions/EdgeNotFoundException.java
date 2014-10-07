@@ -19,7 +19,9 @@
 
 package de.rallye.exceptions;
 
-public class EdgeNotFoundException extends WebAppExcept {
+import javax.ws.rs.WebApplicationException;
+
+public class EdgeNotFoundException extends WebApplicationException {
 
 	/**
 	 * 

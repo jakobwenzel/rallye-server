@@ -1354,7 +1354,7 @@ public class DataAdapter implements IDataAdapter {
 			}
 			
 		} catch (SQLException e) {
-			logger.error("Failed to radd Group {}", group, e);
+			logger.error("Failed to add Group {}", group, e);
 			throw new DataException(e);
 		} finally {
 			close(con, st, rs);

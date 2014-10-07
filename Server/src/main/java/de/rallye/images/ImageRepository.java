@@ -304,6 +304,22 @@ public class ImageRepository implements IPictureRepository {
 			}
 		}
 
+        @Override
+        public File getUpToStdFile() {
+            lock.readLock().lock();
+            try {
+                File f = null;
+                try {
+                    f = getFile(PictureSize.Standard);
+                } catch (WebApplicationException e) { //thrown if there is no org uploaded yet
+                    f = getPreviewFile();
+                }
+                return f;
+            } finally {
+                lock.readLock().unlock();
+            }
+        }
+
 		private File getPreviewFile() {
 			lock.readLock().lock();
 			try {

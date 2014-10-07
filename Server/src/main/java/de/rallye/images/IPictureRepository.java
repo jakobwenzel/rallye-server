@@ -40,7 +40,10 @@ public interface IPictureRepository {
 
 	interface IPicture {
 			long lastModified();
-		boolean isAvailable(PictureSize size);
+
+        File getUpToStdFile();
+
+        boolean isAvailable(PictureSize size);
 		File getFile(PictureSize size);
 		boolean isCached(PictureSize size);
 		byte[] getCached(PictureSize size);

@@ -22,14 +22,14 @@
 <head>
 	<meta charset="utf-8">
 <title>Rallye admin</title>
-<script type="text/javascript" src="/client/jquery.min.js"></script>
-<script type="text/javascript" src="/client/mustache.js"></script>
-<script type="text/javascript" src="/client/qrcode.min.js"></script>
+<script type="text/javascript" src="/resources/webclient/jquery.min.js"></script>
+<script type="text/javascript" src="/resources/webclient/mustache.js"></script>
+<script type="text/javascript" src="/resources/webclient/qrcode.min.js"></script>
 
 <script type="text/javascript">
 var clientName = "admin";
 </script>
-<script type="text/javascript" src="/client/client.js"></script>
+<script type="text/javascript" src="/resources/webclient/client.js"></script>
 <script type="text/javascript">
 
 var socket_open = false;
@@ -52,8 +52,8 @@ function new_submission(sub) {
 		var message = "von "+group.name+" ("+user.name+") in "+task.name;
 
 		console.log(message);
-		playSound("/client/sound");
-		sendNotification("/client/new_submission.png","Neue Abgabe",message,8000);
+		playSound("/resources/webclient/sound");
+		sendNotification("/resources/webclient/new_submission.png","Neue Abgabe",message,8000);
 		
 	})})});
 }
@@ -129,7 +129,7 @@ function display_group_selection(callback,header,footerlink)  {
 				name : group.name,
 				description: group.description,
 				groupID: group.groupID,
-				avatar: root+"rallye/groups/"+group.groupID+"/avatar",
+				avatar: root+"groups/"+group.groupID+"/avatar",
 				callback: callback
 			}
 		});
@@ -159,7 +159,7 @@ function save_ava(groupID, callback) {
     	console.log("deleting ava");
         authajax({
             type: "DELETE",
-            url:  root+"rallye/groups/"+groupID+"/avatar"
+            url:  root+"groups/"+groupID+"/avatar"
         }, function () {
             callback(groupID);
         }, function () {
@@ -173,7 +173,7 @@ function save_ava(groupID, callback) {
     var file = new FormData($('#fileform').get(0));
     authajax({
         type: "POST",
-        url:  root+"rallye/groups/"+groupID+"/avatar",
+        url:  root+"groups/"+groupID+"/avatar",
 		contentType: false,
         data: file,
         processData: false
@@ -198,7 +198,7 @@ function edit_group_save() {
 	}
 	
 	authajax({
-		url: root+"rallye/groups/"+editingID,
+		url: root+"groups/"+editingID,
 		method: "POST",
 		contentType: "application/json",
 		data: JSON.stringify(group)
@@ -213,11 +213,11 @@ function edit_group_save() {
 var editingID;
 function edit_group(id,restore) {
 	if(!id){
-		if (!restore) history.pushState(null, "", root+"client/admin.html?editgroup");
+		if (!restore) history.pushState(null, "", root+"resources/webclient/admin.html?editgroup");
 		display_group_selection("edit_group","Zu bearbeitende Gruppe auswählen","new_group");
 		return false;
 	}
-	if (!restore) history.pushState(null, "", root+"client/admin.html?editgroup="+id);
+	if (!restore) history.pushState(null, "", root+"resources/webclient/admin.html?editgroup="+id);
 	getGroups(function(groups) {
 
 		var group = groups[id];
@@ -263,21 +263,21 @@ function new_group_save() {
 	}
 	
 	authajax({
-		url: root+"rallye/groups",
+		url: root+"groups",
 		method: "PUT",
 		contentType: "application/json",
 		data: JSON.stringify(group)
 	},function(res){ //Success
 		invalidateResources();
 		console.log(res);
-		save_ava(res,edit_group);
+		save_ava(res,edit_group); //TODO this does not work right now
 	},function() { //Error
 		alert("could not add group.");
 	});
 }
 
 function new_group(blah,restore) {
-	if (!restore) history.pushState(null, "", root+"client/admin.html?newgroup");
+	if (!restore) history.pushState(null, "", root+"resources/webclient/admin.html?newgroup");
 	var template = $('#templ_group_edit').html();
 	var data = {
 			callback: "new_group_save"
@@ -297,8 +297,8 @@ function transformSubmission(sub) {
 			isBarcode: sub.submitType & 16,
 		}
 	if (res.isPicture) {
-		res.picture = root+"rallye/pics/"+sub.intSubmission+"/mini";
-		res.pictureBig = root+"rallye/pics/"+sub.intSubmission+"/std";
+		res.picture = root+"resources/pics/"+sub.picSubmission+"/mini";
+		res.pictureBig = root+"resources/pics/"+sub.picSubmission;
 	}
     for (var attrname in sub) { res[attrname] = sub[attrname]; }
 	return res;							
@@ -324,12 +324,12 @@ function transformSubmissions(submissions, showGroup, showTask, groups,tasks) {
 
 function list_by_group(id,restore) {
 	if (!id) {
-		if (!restore) history.pushState(null, "", root+"client/admin.html?group");
+		if (!restore) history.pushState(null, "", root+"resources/webclient/admin.html?group");
 		display_group_selection("list_by_group","Abgaben nach Gruppe anzeigen");
 		return false;
 	}
 
-	if (!restore) history.pushState(null, "", root+"client/admin.html?group="+id);
+	if (!restore) history.pushState(null, "", root+"resources/webclient/admin.html?group="+id);
 	
 	getGroups(function(groups) {getTasks(function(tasks) {
 
@@ -338,7 +338,7 @@ function list_by_group(id,restore) {
 			$('#main').html("A group with this id does not exist: "+Mustache.escape(id));
 		} else {
 			authajax({
-				url: root+"rallye/tasks/all/"+id
+				url: root+"games/rallye/tasks/all/"+id
 			},function(submissions){ //Success
 				console.log(submissions);
 				var submissionsDisplay = transformSubmissions(submissions, false, true, groups, tasks);
@@ -346,7 +346,7 @@ function list_by_group(id,restore) {
 					name : group.name,
 					description: group.description,
 					groupID: group.groupID,
-					avatar: root+"rallye/groups/"+group.groupID+"/avatar",
+					avatar: root+"groups/"+group.groupID+"/avatar",
 					tasks: submissionsDisplay,
 					hasTasks: submissionsDisplay.length>0
 				}
@@ -372,11 +372,11 @@ function display_task_selection() {
 
 function list_by_task(id,restore) {
 	if (!id) {
-		if (!restore) history.pushState(null, "", root+"client/admin.html?task");
+		if (!restore) history.pushState(null, "", root+"resources/webclient/admin.html?task");
 		display_task_selection();
 		return false;
 	}
-	if (!restore) history.pushState(null, "", root+"client/admin.html?task="+id);
+	if (!restore) history.pushState(null, "", root+"resources/webclient/admin.html?task="+id);
 	
 	getGroups(function(groups) {getTasks(function(tasks) {
 
@@ -385,7 +385,7 @@ function list_by_task(id,restore) {
 			$('#main').html("A task with this id does not exist: "+Mustache.escape(id));
 		} else {
 			authajax({
-				url: root+"rallye/tasks/byTask/"+id
+				url: root+"games/rallye/tasks/byTask/"+id
 			},function(submissions){ //Success
 				console.log(submissions);
 				var submissionsDisplay = transformSubmissions(submissions, true, false, groups, tasks);
@@ -411,13 +411,13 @@ function list_by_task(id,restore) {
 
 
 function list_unrated(restore) {
-	if (!restore) history.pushState(null, "", root+"client/admin.html?unrated");
+	if (!restore) history.pushState(null, "", root+"resources/webclient/admin.html?unrated");
 	
 	getGroups(function(groups) {getTasks(function(tasks) {
 
 
 		authajax({
-			url: root+"rallye/tasks/unrated"
+			url: root+"games/rallye/tasks/unrated"
 		},function(submissions){ //Success
 			console.log(submissions);
 			var submissionsDisplay = transformSubmissions(submissions, true, true, groups, tasks);
@@ -501,7 +501,7 @@ function save_score() {
 	});
 	console.log(res);
 	authajax({
-		url: root+"rallye/tasks/score",
+		url: root+"games/rallye/tasks/score",
 		method: "POST",
 		contentType: "application/json",
 		data: JSON.stringify(res)
@@ -515,9 +515,9 @@ function save_score() {
 
 function gamestate(restore) {
 
-	if (!restore) history.pushState(null, "", root+"client/admin.html?gamestate");
+	if (!restore) history.pushState(null, "", root+"resources/webclient/admin.html?gamestate");
 	authajax({
-			url: root+"rallye/game/state"
+			url: root+"games/rallye/game/state"
 		},function(state){ //Success
 			console.log(state);
 			var template = $('#templ_gamestate').html();
@@ -537,7 +537,7 @@ function submit_gamestate() {
 	}
 	console.log(data);
 	authajax({
-		url: root+"rallye/game/state",
+		url: root+"games/rallye/game/state",
 		method: "POST",
 		contentType: "application/json",
 		data: JSON.stringify(data)
@@ -551,10 +551,8 @@ function submit_gamestate() {
 }
 
 $(function () {
-	var loaded = true;
 	var initial = false;
 	window.onpopstate = function() {
-		if (loaded && initial) return;
 
 		load_querystring();
 		
@@ -574,7 +572,6 @@ $(function () {
 		if (!parameterDispatch("unrated",list_unrated))
 		if (!parameterDispatch("gamestate",gamestate))
 			$('#main').html('');
-		loaded = true;
 	}
 
 	partials = {
@@ -589,7 +586,7 @@ $(function () {
 
 
 	get_system_info(function(res) {
-		$("#servername").html("<b>"+Mustache.escape(res.name)+"</b><br>"+Mustache.escape(res.description)+"<br>"+Mustache.escape(res.build));
+		$("#servername").html("<b>"+Mustache.escape(res.name)+"</b><br>"+Mustache.escape(res.description)+"<br>"+Mustache.escape(res.build.revision+" on "+res.build.branch+" at "+res.build.buildTime));
 		document.title="Admin on "+res.name;
 	});
 	
