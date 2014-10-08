@@ -99,8 +99,8 @@ public class Chatrooms {
 		int groupID = p.getGroupID();
 		int userID = p.getUserID();
 		
-		if (chat.message.isEmpty())
-			throw new WebApplicationException(new InputException("Message must not be empty"), Response.Status.BAD_REQUEST);
+//		if (chat.message.isEmpty())
+//			throw new WebApplicationException(new InputException("Message must not be empty"), Response.Status.BAD_REQUEST);
 
 		if (!p.hasRightsForChatroom(roomID)) {
 			logger.warn("group "+ groupID +" has no access rights for chatroom "+ roomID);
