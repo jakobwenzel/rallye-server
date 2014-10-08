@@ -20,21 +20,21 @@
 package de.rallye.api;
 
 import de.rallye.annotations.AdminAuth;
+import de.rallye.annotations.KnownUserAuth;
 import de.rallye.annotations.KnownUserOrAdminAuth;
 import de.rallye.db.IDataAdapter;
 import de.rallye.exceptions.DataException;
+import de.rallye.filter.auth.RallyePrincipal;
 import de.rallye.model.structures.RallyeGameState;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.inject.Inject;
-import javax.ws.rs.GET;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
+import java.util.*;
 
 
 @Path("games")
@@ -48,6 +48,22 @@ public class Game {
 	@Inject RallyeGameState gameState;
 	@Inject
 	IDataAdapter data;
+
+	@PUT
+	@KnownUserAuth
+	@Path("rallye/location")
+	public void reportLocation(@Context SecurityContext sec, java.util.Map<String, String> location) {
+		logger.entry();
+
+		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
+		int userID = p.getUserID();
+
+
+		//TODO save it to DB
+		logger.info("Client {} reported its location as: {}", userID, location);
+
+		logger.exit();
+	}
 
 
 	@GET

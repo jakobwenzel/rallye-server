@@ -355,7 +355,7 @@ public class DataAdapter implements IDataAdapter {
 				boolean scoreOutdated = rs.getBoolean(11);
 				
 				submissions = new ArrayList<Submission>();
-				taskSubmissions.add(new TaskSubmissions(taskID, groupID, submissions, score, bonus, scoreOutdated));
+				taskSubmissions.add(new TaskSubmissions(taskID, groupID, submissions, score, bonus, scoreOutdated, null));//TODO read the primary Submission so the clients can highlight them (only tasks with multipleSubmits=false have primaries)
 			}
 			
 			submissions.add(new Submission(rs.getInt(1), rs.getInt(5), rs.getString(6), (Integer)rs.getObject(7), rs.getString(8), rs.getLong(12)));

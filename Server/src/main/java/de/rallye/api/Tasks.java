@@ -71,6 +71,20 @@ public class Tasks {
 		
 		return logger.exit(res);
 	}
+
+	@PUT
+	@Path("{taskID}/primary")
+	@KnownUserAuth
+	public PrimarySubmissionConfig setPrimarySubmission(@Context SecurityContext sec, @PathParam("taskID") int taskID, PrimarySubmissionConfig primary) {
+		logger.entry();
+
+		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
+		logger.warn("#Primary Submission for group {}, task {} is now submission {}", p.getGroupID(), taskID, primary);
+
+//		primary = data.setPrimarySubmission(p.getGroupID(), taskID, primary);//TODO
+
+		return logger.exit(primary);
+	}
 	
 	@GET
 	@Path("{taskID}")
@@ -144,13 +158,15 @@ public class Tasks {
 	@Path("{taskID}")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@KnownUserAuth
-	public Submission submit(PostSubmission submission, @PathParam("taskID") int taskID, @Context SecurityContext sec) throws DataException, InputException {
+	public Submission submit(GeoPostSubmission submission, @PathParam("taskID") int taskID, @Context SecurityContext sec) throws DataException, InputException {
 		logger.entry();
 
 		if (!gameState.isCanSubmit())
 			throw new InputException("Submitting disabled.");
 		
 		RallyePrincipal p = (RallyePrincipal) sec.getUserPrincipal();
+
+		logger.info("Received submission from location: {}", submission.location);//TODO save to submission table
 
 		Submission res;
 
