@@ -8,13 +8,13 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Foobar is distributed in the hope that it will be useful,
+ * RallyeSoft is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Rallyesoft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package de.rallye.api;
@@ -26,7 +26,6 @@ import de.rallye.filter.auth.RallyePrincipal;
 import de.rallye.images.IPictureRepository;
 import de.rallye.images.ImageRepository;
 import de.rallye.model.structures.ChatPictureLink;
-import de.rallye.model.structures.Picture;
 import de.rallye.model.structures.PictureSize;
 import de.rallye.model.structures.SubmissionPictureLink;
 import de.rallye.push.PushService;
@@ -38,9 +37,7 @@ import javax.inject.Inject;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Request;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
-import java.awt.image.BufferedImage;
 import java.io.File;
 
 @Path("resources/pics")

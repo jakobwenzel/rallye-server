@@ -8,13 +8,13 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Foobar is distributed in the hope that it will be useful,
+ * RallyeSoft is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Rallyesoft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package de.rallye.api;
@@ -23,10 +23,7 @@ import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
 import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
-import com.drew.metadata.MetadataException;
 import com.drew.metadata.Tag;
-import com.drew.metadata.exif.ExifIFD0Directory;
-import com.drew.metadata.exif.GpsDirectory;
 import de.rallye.annotations.AdminAuth;
 import de.rallye.config.RallyeConfig;
 import de.rallye.db.IDataAdapter;
@@ -34,6 +31,7 @@ import de.rallye.exceptions.DataException;
 import de.rallye.images.ImageRepository;
 import de.rallye.model.structures.LatLngAlt;
 import de.rallye.model.structures.UserInternal;
+import de.rallye.push.PushService;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -44,7 +42,8 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.io.*;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 @Path("debug")
@@ -53,9 +52,17 @@ public class Debug {
 
 	private final Logger logger = LogManager.getLogger(Debug.class);
 
+	@Inject	PushService push;
 	@Inject	IDataAdapter data;
-	@Inject
-	RallyeConfig config;
+	@Inject	RallyeConfig config;
+
+	@PUT
+	@Path("pingLocation")
+	@Consumes("application/json")
+	@AdminAuth
+	public void pingLocation(List<Integer> clients) {
+		push.pingLocation(clients);
+	}
 
 	@GET
 	@Path("log")

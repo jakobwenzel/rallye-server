@@ -8,13 +8,13 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Foobar is distributed in the hope that it will be useful,
+ * RallyeSoft is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Rallyesoft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package de.rallye.model.structures;
@@ -46,7 +46,7 @@ public class PictureLink<T> {
 	}
 	
 	
-	public void setPicture(ImageRepository.Picture picture) {
+	public synchronized void setPicture(ImageRepository.Picture picture) {
 		this.picture = picture;
 		
 		logger.info("{}: attached picture {}", this, picture);
@@ -54,7 +54,7 @@ public class PictureLink<T> {
 		checkLinkComplete();
 	}
 	
-	public void setObject(T obj) {
+	public synchronized void setObject(T obj) {
 		this.linkableObject = obj;
 		
 		logger.info("{}: attached object {}", this, obj.toString());
@@ -62,15 +62,15 @@ public class PictureLink<T> {
 		checkLinkComplete();
 	}
 	
-	public ImageRepository.Picture getPicture() {
+	public synchronized ImageRepository.Picture getPicture() {
 		return picture;
 	}
 	
-	public T getObj() {
+	public synchronized T getObj() {
 		return linkableObject;
 	}
 	
-	private void checkLinkComplete() {
+	private synchronized void checkLinkComplete() {
 		if (picture != null && linkableObject != null && mode == Mode.EditObjectWhenUploaded) {
 			callback.propagateLink(this, mode);
 			logger.info("{}: complete -> edit obj", this);

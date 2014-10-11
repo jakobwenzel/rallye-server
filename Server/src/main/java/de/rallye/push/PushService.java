@@ -8,13 +8,13 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Foobar is distributed in the hope that it will be useful,
+ * RallyeSoft is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Rallyesoft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package de.rallye.push;
@@ -96,6 +96,25 @@ public class PushService {
 			logger.error(e);
 		}
 	}
+
+	public void pingLocation(List<Integer> clientIDs) {
+		List<UserInternal> users = new ArrayList<>();
+		for (int clientID : clientIDs) {
+			UserInternal user = null;
+			try {
+				user = data.resolveClient(clientID);
+			} catch (DataException e) {
+				logger.catching(e);
+			}
+			if (user != null)
+				users.add(user);
+		}
+		push(users, null, Type.pingLocation);
+	}
+
+//	public void pingLocation(int groupID) {
+//
+//	}
 	
 	private String toJSON(ChatEntry chat, int roomID) throws JsonProcessingException {
 

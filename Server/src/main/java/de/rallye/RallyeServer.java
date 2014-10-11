@@ -8,20 +8,20 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Foobar is distributed in the hope that it will be useful,
+ * RallyeSoft is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Rallyesoft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package de.rallye;
 
-import com.fasterxml.jackson.jaxrs.smile.JacksonSmileProvider;
-import com.fasterxml.jackson.jaxrs.xml.JacksonXMLProvider;
-
+import de.rallye.admin.AdminWebsocketApp;
+import de.rallye.injection.RallyeBinder;
+import de.rallye.push.PushWebsocketApp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.glassfish.grizzly.http.CompressionConfig;
@@ -32,22 +32,13 @@ import org.glassfish.grizzly.ssl.SSLEngineConfigurator;
 import org.glassfish.grizzly.websockets.WebSocketAddOn;
 import org.glassfish.grizzly.websockets.WebSocketEngine;
 import org.glassfish.jersey.grizzly2.httpserver.GrizzlyHttpContainer;
-import org.glassfish.jersey.jackson.JacksonFeature;
-import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ContainerFactory;
 import org.glassfish.jersey.server.ResourceConfig;
-import org.glassfish.jersey.server.mvc.MvcFeature;
-import org.glassfish.jersey.server.mvc.mustache.MustacheMvcFeature;
-
-import java.io.IOException;
-import java.net.URI;
 
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.core.UriBuilder;
-
-import de.rallye.admin.AdminWebsocketApp;
-import de.rallye.injection.RallyeBinder;
-import de.rallye.push.PushWebsocketApp;
+import java.io.IOException;
+import java.net.URI;
 
 public class RallyeServer {
 	

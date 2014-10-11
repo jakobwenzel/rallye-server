@@ -8,13 +8,13 @@
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * Foobar is distributed in the hope that it will be useful,
+ * RallyeSoft is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with Rallyesoft.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package de.rallye.db;
@@ -1274,6 +1274,34 @@ public class DataAdapter implements IDataAdapter {
 			}
 		} catch (SQLException e) {
 			logger.error("Failed to add Picture {}", pictureHash, e);
+			throw new DataException(e);
+		} finally {
+			close(con, st, rs);
+		}
+	}
+
+	@Override
+	public UserInternal resolveClient(int clientID) throws DataException {
+		PreparedStatement st = null;
+		Connection con = null;
+		ResultSet rs = null;
+
+		try {
+			con = dataSource.getConnection();
+			st = con.prepareStatement("SELECT "+ cols(Ry.Users.ID, Ry.Users.NAME, Ry.Users.ID_PUSH_MODE, Ry.Users.PUSH_ID) +" FROM "+ Ry.Users.TABLE +" WHERE "+ Ry.Users.ID +"=?");
+			st.setInt(1, clientID);
+
+			rs = st.executeQuery();
+
+			UserInternal user = null;
+
+			if (rs.next()) {
+				user = new UserInternal(rs.getInt(1), rs.getString(2), rs.getInt(3), rs.getString(4));
+			}
+
+			return user;
+		} catch (SQLException e) {
+			logger.error("Failed to resolve clientID {}", clientID, e);
 			throw new DataException(e);
 		} finally {
 			close(con, st, rs);
