@@ -20,7 +20,7 @@
 import java.text.SimpleDateFormat
 
 plugins {
-	id 'org.hidetake.ssh' version '0.4.5'
+	id 'org.hidetake.ssh' version '1.0.1'
 	id 'java'
 	id 'eclipse'
 	id 'application'
@@ -113,12 +113,12 @@ sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
 ext {
-	jerseyVersion = 2.13
+	jerseyVersion = 2.15
 }
 
 dependencies {
 
-	compile 'com.drewnoakes:metadata-extractor:2.6.+'
+	compile 'com.drewnoakes:metadata-extractor:2.7.+'
 
 	compile "org.glassfish.jersey.containers:jersey-container-grizzly2-http:$jerseyVersion" // For standalone deployment (!There are code dependencies, inside the code that is not used for servlets...)
 //	compile "org.glassfish.jersey.containers:jersey-container-servlet:$jerseyVersion" // For servlet based deployment
@@ -137,16 +137,16 @@ dependencies {
             
 
 	//Jackson
-	compile 'com.fasterxml.jackson.core:jackson-annotations:2.4.+'
-	compile 'com.fasterxml.jackson.core:jackson-databind:2.4.+'
+	compile 'com.fasterxml.jackson.core:jackson-annotations:2.5.+'
+	compile 'com.fasterxml.jackson.core:jackson-databind:2.5.+'
 
 	// Jackson Smile support (binary JSON)
-	compile 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-smile-provider:2.4.+'
-	compile 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-xml-provider:2.4.+'
+	compile 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-smile-provider:2.5.+'
+	compile 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-xml-provider:2.5.+'
 
 	//MySQL
 	compile 'mysql:mysql-connector-java:5.1.+'
-	compile 'com.mchange:c3p0:0.9.2.+'
+	compile 'com.mchange:c3p0:0.9.5'
 
 
 	//Log4j
@@ -158,7 +158,7 @@ dependencies {
 	compile 'com.ganyo:gcm-server:1.+'
 
 	// Primitive JSON (used in Push service)
-	compile 'org.json:json:20140107'
+	compile 'org.json:json:20141113'
 	
 	compile 'commons-io:commons-io:2.4'
 	//compile 'com.google.inject:guice:3.0'
@@ -170,7 +170,7 @@ dependencies {
     compile 'org.jdom:jdom:2.0.2'
 
     //Testing
-	testCompile 'junit:junit:4.11'
+	testCompile 'junit:junit:4.12'
 	testCompile 'org.apache.httpcomponents:httpclient:4.3.+'	
 	
 	compile project(':common:RallyeStructures')

@@ -176,7 +176,7 @@ public class ImageRepository implements IPictureRepository {
 
 		int altitude;
 		try {
-			altitude = gps.getInt(GpsDirectory.TAG_GPS_ALTITUDE);
+			altitude = gps.getInt(GpsDirectory.TAG_ALTITUDE);
 		} catch (MetadataException e) {
 			e.printStackTrace();
 			altitude = 0;
