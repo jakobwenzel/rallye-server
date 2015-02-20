@@ -20,7 +20,7 @@
 import java.text.SimpleDateFormat
 
 plugins {
-	id 'org.hidetake.ssh' version '1.0.1'
+	id 'org.hidetake.ssh' version '1.0.5'
 	id 'java'
 	id 'eclipse'
 	id 'application'
@@ -113,7 +113,7 @@ sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
 ext {
-	jerseyVersion = 2.15
+	jerseyVersion = 2.16
 }
 
 dependencies {
@@ -171,7 +171,7 @@ dependencies {
 
     //Testing
 	testCompile 'junit:junit:4.12'
-	testCompile 'org.apache.httpcomponents:httpclient:4.3.+'	
+	testCompile 'org.apache.httpcomponents:httpclient:4.4'
 	
 	compile project(':common:RallyeStructures')
 }
