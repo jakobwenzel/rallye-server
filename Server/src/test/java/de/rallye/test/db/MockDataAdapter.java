@@ -233,6 +233,12 @@ public class MockDataAdapter implements IDataAdapter {
 	}
 
 	@Override
+	public UserInternal resolveClient(int clientID) throws DataException {
+		fail("Method not implemented");
+		return null;
+	}
+
+	@Override
 	public void editChatAddPicture(int chatID, int pictureID)
 			throws DataException {
 		fail("Method not implemented");
