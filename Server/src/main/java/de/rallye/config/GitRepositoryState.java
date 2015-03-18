@@ -19,11 +19,15 @@
 
 package de.rallye.config;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
 public class GitRepositoryState {
+	private final Logger logger = LogManager.getLogger(GitRepositoryState.class);
 
 	private final String branch; // =$(git.commit.branch)
 	private final String revision; // =${git.commit.id.revision}
@@ -33,6 +37,7 @@ public class GitRepositoryState {
 		Properties properties = new Properties();
 		InputStream str = GitRepositoryState.class.getClassLoader().getResourceAsStream("META-INF/buildInfo.properties");
 		if (str !=null) {
+			logger.trace("Found buildInfo.properties");
 			properties.load(str);
 
 			Object branch = properties.get("git.commit.branch");
@@ -44,6 +49,7 @@ public class GitRepositoryState {
 			Object time = properties.get("git.build.time");
 			this.buildTime = time.toString();
 		} else {
+			logger.trace("No buildInfo.properties");
 			this.branch="Unknown branch";
 			this.revision="Unknown build";
 			this.buildTime="Unknown";

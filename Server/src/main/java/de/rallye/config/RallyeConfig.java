@@ -68,7 +68,7 @@ public class RallyeConfig {
 
 	@JsonProperty private final DbConnectionConfig dbConnectionConfig;
 	@JsonProperty private final String dataDirectory;
-	@JsonProperty private final boolean dataRelativeToConfig;
+	@JsonProperty private boolean dataRelativeToConfig;
 
 	//TODO: read Api versions from modules / manifest
 	private final ServerInfo.Api[] APIS = {new ServerInfo.Api(Tasks.API_NAME, Tasks.API_VERSION), new ServerInfo.Api(Game.API_NAME, Game.API_VERSION), new ServerInfo.Api(Server.API_NAME, Server.API_VERSION)};
@@ -108,7 +108,7 @@ public class RallyeConfig {
 		}
 	}
 
-	public static RallyeConfig fromStream(InputStream stream) {
+	public static RallyeConfig fromStream(InputStream stream, GitRepositoryState git) {
 		if (stream==null) {
 			logger.warn("No config stream. Using Default Config");
 			return new RallyeConfig();
@@ -119,10 +119,15 @@ public class RallyeConfig {
 			RallyeConfig config = mapper.readValue(stream, RallyeConfig.class);
 			
 			if (config.isDataRelativeToConfig()) {
-				logger.warn("Data relative to config is not supported for Stream Config. Falling back to default config");
+				logger.warn("Data relative to config is not supported for Stream Config. Disabling...");
+				config.setDataRelativeToConfig(false);
 			}
-				
-			logger.debug(config.toString());
+
+			if (git != null) {
+				config.setGit(git);
+				logger.info("Current Build:\n\t{}", git);
+			}
+
 			return config;
 		} catch ( IOException e) {
 			logger.error("Falling back to default config", e);
@@ -146,14 +151,14 @@ public class RallyeConfig {
 		}
 	}
 	
-//	public String getRawDataDirectory() {
-//		return dataDirectory;
-//	}
-	
 	public boolean isDataRelativeToConfig() {
 		return dataRelativeToConfig;
 	}
-	
+
+	public void setDataRelativeToConfig(boolean dataRelativeToConfig) {
+		this.dataRelativeToConfig = dataRelativeToConfig;
+	}
+
 	public String getHostName() {
 		return hostName;
 	}

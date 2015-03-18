@@ -40,7 +40,7 @@ public class ConfigTools {
 		logger.entry();
 		//If we are not runnig from a jar, we are in the classes subdir
 		String location = getClassesDir();
-		logger.trace("location is "+location);
+		logger.trace("ClassDir is {}", location);
 		//We are either in build/classes/main/
 		if (location.endsWith("build/classes/main/")) {
 			location = location.substring(0,location.length()-19);	
@@ -52,7 +52,7 @@ public class ConfigTools {
 			location = location.substring(0,location.length()-4);
 		//If not, we are not running in project dir
 		} else {
-			logger.warn("not in any subdir known.");
+			logger.info("no project dir");
 			return null;
 		}
 
@@ -119,7 +119,10 @@ public class ConfigTools {
 
 		//Try project dir
 		try {
-			config = new File(new URL(ConfigTools.getProjectDir()+"config.json").toURI());
+			String projectDir = ConfigTools.getProjectDir();
+			if (projectDir != null) {
+				config = new File(new URL(projectDir + "config.json").toURI());
+			}
 		} catch (Exception e) {
 			logger.error(e);
 			config = null;
@@ -130,12 +133,15 @@ public class ConfigTools {
 
 		//Try homedir
 		String homedir = java.lang.System.getProperty("user.home");
-		config = new File(homedir+"/.rallyeserv-config.json");
-		logger.trace("Checking home dir for '{}'", config);
-		if (config.exists())
-			return config;
+		if (homedir != null) {
+			config = new File(homedir + "/.rallyeserv-config.json");
+			logger.trace("Checking home dir for '{}'", config);
+			if (config.exists())
+				return config;
+		}
 
 		//Not found.
+		logger.warn("No Config found");
 		return null;
 	}
 }

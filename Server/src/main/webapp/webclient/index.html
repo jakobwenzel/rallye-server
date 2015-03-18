@@ -70,7 +70,7 @@ function load_map() {
 
 function get_chatrooms(callback) {
 	authajax({
-		url: root+"rallye/chatrooms",
+		url: root+"chat/rooms",
 		dataType: "json"
 	},callback);
 }
@@ -78,7 +78,7 @@ var roomID;
 function load_chatroom(id) {
 	
 	authajax({
-		url: root+"rallye/chatrooms/"+id,
+		url: root+"chat/rooms/"+id,
 		dataType: "json"
 	},function (res) {getUsers(function(users) {getGroups(function(groups) {
 		roomID = id;
@@ -95,10 +95,10 @@ function load_chatroom(id) {
 			var picture = null;
 			var pictureBig = null
 			if (chat.pictureHash) {
-				picture = root+"rallye/pics/"+chat.pictureHash+"/thumb";
-				pictureBig = root+"rallye/pics/"+chat.pictureHash+"/std";
+				picture = root+"resources/pics/"+chat.pictureHash+"/thumb";
+				pictureBig = root+"resources/pics/"+chat.pictureHash+"/std";
 			}
-			var ava = root+"rallye/groups/"+chat.groupID+"/avatar";
+			var ava = root+"groups/"+chat.groupID+"/avatar";
 			
 			return { name: name, message: chat.message, picture: picture, pictureBig: pictureBig,
 				avatar: ava, time: formatTime(chat.timestamp), group: groupName, chatID: chat.chatID};
@@ -120,7 +120,7 @@ function submit_message() {
 	var message = $("#message").val();
 	
 	authajax({
-		url: root+"rallye/chatrooms/"+roomID,
+		url: root+"chat/rooms/"+roomID,
 		method: "PUT",
 		contentType: "application/json",
 		data: JSON.stringify({
@@ -206,10 +206,10 @@ function setup_socket() {
 					var picture = null;
 					var pictureBig = null
 					if (chat.pictureHash) {
-						picture = root+"rallye/pics/"+chat.pictureHash+"/thumb";
-						pictureBig = root+"rallye/pics/"+chat.pictureHash+"/std";
+						picture = root+"resources/pics/"+chat.pictureHash+"/thumb";
+						pictureBig = root+"resources/pics/"+chat.pictureHash+"/std";
 					}
-					var ava = root+"rallye/groups/"+chat.groupID+"/avatar";
+					var ava = root+"groups/"+chat.groupID+"/avatar";
 			
 					var content =  { name: name, message: chat.message, picture: picture, pictureBig: pictureBig,
 						avatar: ava, time: formatTime(chat.timestamp), group: groupName, chatID: chat.chatID};
@@ -238,10 +238,10 @@ function setup_socket() {
 					var picture = null;
 					var pictureBig = null
 					if (chat.pictureHash) {
-						picture = root+"rallye/pics/"+chat.pictureHash+"/thumb";
-						pictureBig = root+"rallye/pics/"+chat.pictureHash+"/std";
+						picture = root+"resources/pics/"+chat.pictureHash+"/thumb";
+						pictureBig = root+"resources/pics/"+chat.pictureHash+"/std";
 					}
-					var ava = root+"rallye/groups/"+chat.groupID+"/avatar";
+					var ava = root+"groups/"+chat.groupID+"/avatar";
 
 					var content =  { name: name, message: chat.message, picture: picture, pictureBig: pictureBig,
 						avatar: ava, time: formatTime(chat.timestamp), group: groupName, chatID: chat.chatID};

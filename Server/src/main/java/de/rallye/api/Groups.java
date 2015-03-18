@@ -75,11 +75,16 @@ public class Groups {
 	@GET
 	@Path("{groupID}")
 	@KnownUserAuth
-	public List<? extends User> getMembers(@PathParam("groupID") int groupID) throws DataException {
+	public GenericEntity<List<? extends User>> getMembers(@PathParam("groupID") int groupID) {
 		logger.entry();
-	
-		List<? extends User> res = data.getMembers(groupID);
-		return logger.exit(res);
+
+		List<? extends User> res = null;
+		try {
+			res = data.getMembers(groupID);
+		} catch (DataException e) {
+			throw new WebApplicationException("db Exception", e);
+		}
+		return logger.exit(new GenericEntity<List<? extends User>>(res){});
 	}
 	
 	@GET

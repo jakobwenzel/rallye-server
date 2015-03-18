@@ -56,7 +56,7 @@ public class StartTestServer {
 
 
 		//Init resources
-		RallyeConfig config = RallyeConfig.fromStream(stream);
+		RallyeConfig config = RallyeConfig.fromStream(stream, null);
 		RallyeBinder.config = config;
 		RallyeBinder.data = MockDataAdapter.getInstance();
 		RallyeBinder.gameState = RallyeGameState.getInstance(RallyeBinder.data);

@@ -133,8 +133,9 @@ public class Debug {
 
 	@GET
 	@Path("purge")
-	public void purge() {
+	public Response purge() {
 		data.purgeCache();
+		return Response.ok().build();
 	}
 
 	@GET

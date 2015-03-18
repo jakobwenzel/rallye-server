@@ -19,8 +19,12 @@
 
 package de.rallye.servlet;
 
+import de.rallye.admin.AdminWebsocketApp;
+import de.rallye.config.GitRepositoryState;
 import de.rallye.config.RallyeConfig;
 import de.rallye.injection.RallyeBinder;
+import de.rallye.push.PushWebsocketApp;
+import org.glassfish.grizzly.websockets.WebSocketEngine;
 
 import javax.servlet.ServletContainerInitializer;
 import javax.servlet.ServletContext;
@@ -35,13 +39,17 @@ public class ServletInitializer implements ServletContainerInitializer {
 	@Override
 	public void onStartup(Set<Class<?>> c, ServletContext ctx) throws ServletException {
 		try {
-			InputStream stream = ctx.getResourceAsStream("/WEB-INF/config.json");
+			InputStream stream = ctx.getResourceAsStream("/config.json");
 			if (stream == null) {
-				System.err.println(ctx.getResource("/WEB-INF/config.json").toString() + " not found");
+				System.err.println(ctx.getResource("/config.json").toString() + " not found");
 			}
-			RallyeBinder.config = RallyeConfig.fromStream(stream);
+			RallyeBinder.config = RallyeConfig.fromStream(stream, GitRepositoryState.getState());
+			RallyeBinder.isServlet = true;
 		} catch (Exception e) {
 			System.err.println("Failed loading config from ServletContainer");
 		}
+
+		WebSocketEngine.getEngine().register("/rallye", "/push", PushWebsocketApp.getInstance());
+		WebSocketEngine.getEngine().register("/rallye", "/admin", AdminWebsocketApp.getInstance());
 	}
 }

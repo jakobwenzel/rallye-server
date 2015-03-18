@@ -54,12 +54,6 @@ public class PushWebsocketApp extends WebSocketApplication implements
 
 	}
 
-	
-	@Override
-public boolean isApplicationRequest(HttpRequestPacket request) {
-	logger.info("check for uri "+request.getRequestURI());
-    return "/rallye/push".equals(request.getRequestURI());
-}
 	private static PushWebsocketApp instance = new PushWebsocketApp();
 
 	public static PushWebsocketApp getInstance() {

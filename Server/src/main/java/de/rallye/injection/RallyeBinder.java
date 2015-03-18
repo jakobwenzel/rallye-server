@@ -19,6 +19,8 @@
 
 package de.rallye.injection;
 
+import de.rallye.admin.AdminWebsocketApp;
+import de.rallye.config.ConfigTools;
 import de.rallye.config.GitRepositoryState;
 import de.rallye.config.RallyeConfig;
 import de.rallye.db.DataAdapter;
@@ -29,12 +31,14 @@ import de.rallye.model.structures.GameState;
 import de.rallye.model.structures.RallyeGameState;
 import de.rallye.model.structures.SubmissionPictureLink;
 import de.rallye.push.PushService;
+import de.rallye.push.PushWebsocketApp;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.glassfish.hk2.api.TypeLiteral;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
 
 import javax.inject.Singleton;
+import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -51,6 +55,7 @@ public class RallyeBinder extends AbstractBinder {
 	public static IDataAdapter data;
 	public static RallyeConfig config;
 	public static RallyeGameState gameState;
+	public static boolean isServlet = false;
 
 
 	private static class ChatPictureMap extends TypeLiteral<Map<String, ChatPictureLink>> {
@@ -64,16 +69,36 @@ public class RallyeBinder extends AbstractBinder {
 
 	@Override
 	protected void configure() {
-		if (config == null) {
-			System.err.println("Instantiating RallyeBinder without RallyeConfig");
+		if (config == null || isServlet) {
+			File cfgFile = ConfigTools.findConfigFile();
+
+			if (isServlet && cfgFile != null) {
+				logger.info("Overriding static config with user config");
+				config = null;
+			}
+
+			if (config == null) {
+				config = RallyeConfig.fromFile(cfgFile, GitRepositoryState.getState());
+			}
+
+			if (config == null)
+				throw new RuntimeException("Instantiating RallyeBinder without RallyeConfig");
 		}
+		logger.info("RallyeConfig initialized to {}", config);
 		if (data == null) {
+			logger.info("No DataAdapter yet...");
 			data = DataAdapter.getInstance(config);
+			PushWebsocketApp.setData(data);
+			AdminWebsocketApp.setData(data);
 		}
+		logger.info("Data initialized to {}", data);
 		if (gameState == null) {
+			logger.info("No GameState yet");
 			gameState = RallyeGameState.getInstance(data);
 		}
+		logger.info("GameState initialized to {}", gameState);
 
+		bind(isServlet).named("IsServlet");
 
 		bind(GitRepositoryState.class).to(GitRepositoryState.class);
 		bind(config).to(RallyeConfig.class);

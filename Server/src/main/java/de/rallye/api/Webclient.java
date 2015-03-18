@@ -26,6 +26,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.inject.Inject;
+import javax.inject.Named;
+import javax.servlet.ServletContext;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -49,7 +51,7 @@ public class Webclient {
 	private static boolean projectChecked = false;
 	private static String projectDir;
 	
-	private static final Map<String,String> mime = new HashMap<String,String>();
+	private static final Map<String,String> mime = new HashMap<>();
 	static {
 		mime.put("js","application/javascript");
 		mime.put("html","text/html");
@@ -58,6 +60,17 @@ public class Webclient {
 	}
 
 	@Inject	RallyeConfig config;
+	private boolean isServlet;
+	@Context ServletContext servletContext;
+
+	@Inject
+	public Webclient(@Named("IsServlet") Boolean isServlet) {
+		this.isServlet = isServlet;
+		if (!projectChecked & !isServlet) {
+			projectDir = ConfigTools.getProjectDir();
+			projectChecked = true;
+		}
+	}
 
 	@GET
 	@Path("{path}")
@@ -66,26 +79,26 @@ public class Webclient {
 		if (path.contains("/"))
 			throw new WebApplicationException("Path invalid", 404);
 		
-		logger.debug("Trying to load "+RESOURCE_PATH+path);
-		
-		//If we are running from project dir, always load files from src directory to avoid recompiles during development
-		if (!projectChecked) {
-			projectDir = ConfigTools.getProjectDir();
-			projectChecked = true;
-		}
-		
+		logger.debug("Trying to load {}", "/"+RESOURCE_PATH+path);
+
 		InputStream stream;
-		if (projectDir!=null) {
-			logger.debug("serving from project dir");
-			try {
-				stream = new FileInputStream(new File(new URL(projectDir+"Server/src/main/resources/de/rallye/"+RESOURCE_PATH+path).toURI()));
-			} catch(Exception e) {
-				throw new WebApplicationException(e);
-			}
+
+		if (isServlet) {
+			logger.debug("serving from war");
+			stream = servletContext.getResourceAsStream("/"+RESOURCE_PATH + path);
 		} else {
-		
-			logger.debug("serving from jar");
-			stream = StadtRallye.class.getResourceAsStream(RESOURCE_PATH+path);
+			//If we are running from project dir, always load files from src directory to avoid recompiles during development
+			if (projectDir != null) {
+				logger.debug("serving from project dir");
+				try {
+					stream = new FileInputStream(new File(new URL(projectDir + "Server/src/main/resources/de/rallye/" + RESOURCE_PATH + path).toURI()));
+				} catch (Exception e) {
+					throw new WebApplicationException(e);
+				}
+			} else {
+				logger.debug("serving from jar");
+				stream = StadtRallye.class.getResourceAsStream(RESOURCE_PATH + path);
+			}
 		}
 		
 		if (stream==null) {

@@ -52,12 +52,7 @@ public class AdminWebsocketApp extends WebSocketApplication {
 			.getLogger(AdminWebsocketApp.class);
 	
 	Set<AdminWebSocket> activeSockets = new HashSet<AdminWebSocket>();
-	
-	@Override
-	public boolean isApplicationRequest(HttpRequestPacket request) {
-		logger.info("check for uri "+request.getRequestURI());
-	    return "/rallye/push".equals(request.getRequestURI());
-	}
+
 	private static AdminWebsocketApp instance = new AdminWebsocketApp();
 
 	public static AdminWebsocketApp getInstance() {

@@ -37,6 +37,8 @@ applicationDefaultJvmArgs = ["-Dfile.encoding=UTF-8"]
 mainClassName = "de.rallye.StadtRallye"
 
 task buildInfo {
+	group "Build"
+	description "Add Build info (git infos) to buildDir"
 	ext.destinationDir = file("$buildDir/resources/main/META-INF")
 	doLast {
 		
@@ -79,8 +81,10 @@ task buildInfo {
 }
 
 task copyLicense(type: Copy) {
-     from '../COPYING'
-     into "$buildDir/resources/main/META-INF"
+	group "Build"
+	description "Add License Information to buildDir"
+	from '../COPYING'
+	into "$buildDir/resources/main/META-INF"
 }
 
 processResources {
@@ -88,9 +92,13 @@ processResources {
 }
 
 task collectDependencies(type: Copy) {
+	group "Other"
+	description "Collect all library jars required to run the Server inside buildDir/libs/lib"
     into "$buildDir/libs/lib"
     from configurations.runtime
 }
+
+jar.dependsOn processResources
 
 jar {
 	archiveName 'rallye-server.jar'
@@ -104,6 +112,7 @@ jar {
     }
 }
 
+war.dependsOn processResources
 
 war {
 
@@ -122,56 +131,57 @@ ext {
  */
 dependencies {
 
-	compile 'com.drewnoakes:metadata-extractor:2.7.+'
+	providedCompile 'com.drewnoakes:metadata-extractor:2.7.+'
 
-	compile "org.glassfish.jersey.containers:jersey-container-grizzly2-http:$jerseyVersion" // For standalone deployment (!There are code dependencies, inside the code that is not used for servlets...)
-	compile "org.glassfish.jersey.containers:jersey-container-servlet:$jerseyVersion" // For servlet based deployment
-	compile "org.glassfish.jersey.media:jersey-media-json-jackson:$jerseyVersion"
-	compile "org.glassfish.jersey.media:jersey-media-multipart:$jerseyVersion"
+	providedCompile "org.glassfish.jersey.containers:jersey-container-grizzly2-http:$jerseyVersion" // For standalone deployment (!There are code dependencies, inside the code that is not used for servlets...)
+	providedCompile "org.glassfish.jersey.containers:jersey-container-servlet:$jerseyVersion" // For servlet based deployment
+	providedCompile "org.glassfish.jersey.media:jersey-media-json-jackson:$jerseyVersion"
+	providedCompile "org.glassfish.jersey.media:jersey-media-multipart:$jerseyVersion"
 
-	compile "org.glassfish.jersey.ext:jersey-mvc-mustache:$jerseyVersion"
+	providedCompile "org.glassfish.jersey.ext:jersey-mvc-mustache:$jerseyVersion"
 
-	compile 'org.glassfish.grizzly:grizzly-http-server:2.3.+' // For standalone
+	providedCompile 'org.glassfish.grizzly:grizzly-http-server:2.3.+' // For standalone
 	
-	compile 'org.glassfish.grizzly:grizzly-websockets:2.3.+' // For standalone
+	providedCompile 'org.glassfish.grizzly:grizzly-websockets:2.3.+' // For standalone
 
-	compile 'org.glassfish.grizzly:grizzly-http-servlet:2.3.+' //Needed for websockets (standalone)
-	compile 'org.apache.tomcat:tomcat-servlet-api:8.0.+' //Needed for websockets
-            
+	//compile 'org.glassfish.grizzly:grizzly-http-servlet:2.3.+' //Needed for websockets (standalone)
+	providedCompile 'javax.servlet:javax.servlet-api:3.1.0'
+
 
 	//Jackson
-	compile 'com.fasterxml.jackson.core:jackson-annotations:2.5.+'
-	compile 'com.fasterxml.jackson.core:jackson-databind:2.5.+'
+	providedCompile 'com.fasterxml.jackson.core:jackson-annotations:2.5.+'
+	providedCompile 'com.fasterxml.jackson.core:jackson-databind:2.5.+'
+	providedCompile 'com.fasterxml.jackson.module:jackson-module-jaxb-annotations:2.5.+'
 
 	// Jackson Smile support (binary JSON)
-	compile 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-smile-provider:2.5.+'
-	compile 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-xml-provider:2.5.+'
+	providedCompile 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-smile-provider:2.5.+'
+	providedCompile 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-xml-provider:2.5.+'
 
 	//MySQL
-	compile 'mysql:mysql-connector-java:5.1.+'
-	compile 'com.mchange:c3p0:0.9.5'
+	providedCompile 'mysql:mysql-connector-java:5.1.+'
+	providedCompile 'com.mchange:c3p0:0.9.5'
 
 
 	//Log4j
 	//compile 'org.apache.logging.log4j:log4j-api:2.+'
-	compile 'org.apache.logging.log4j:log4j-core:2.+'
-	compile 'org.apache.logging.log4j:log4j-web:2.+'
+	providedCompile 'org.apache.logging.log4j:log4j-core:2.+'
+	providedCompile 'org.apache.logging.log4j:log4j-web:2.+'
 	//compile 'javax.jmdns:jmdns:3.4.1'// log4j + chainsaw
 
 	// Google Cloud Messaging (deprecated)
-	compile 'com.ganyo:gcm-server:1.+'
+	providedCompile 'com.ganyo:gcm-server:1.+'
 
 	// Primitive JSON (used in Push service)
-	compile 'org.json:json:20141113'
-	
-	compile 'commons-io:commons-io:2.4'
+	providedCompile 'org.json:json:20141113'
+
+	providedCompile 'commons-io:commons-io:2.4'
 	//compile 'com.google.inject:guice:3.0'
 
-	compile 'org.apache.xmlgraphics:batik-codec:1.7'
-	compile ('org.apache.xmlgraphics:batik-rasterizer:1.7') {
+	providedCompile 'org.apache.xmlgraphics:batik-codec:1.7'
+	providedCompile ('org.apache.xmlgraphics:batik-rasterizer:1.7') {
 		exclude group: 'fop', module: 'fop'
 	}
-	compile 'org.jdom:jdom:2.0.2'
+	providedCompile 'org.jdom:jdom:2.0.2'
 
 	//Testing
 	testCompile 'junit:junit:4.12'

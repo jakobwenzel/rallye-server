@@ -32,10 +32,7 @@ import org.apache.logging.log4j.Logger;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.*;
 import java.util.List;
 
 @Path("chat/rooms")
@@ -131,11 +128,16 @@ public class Chatrooms {
 	
 	@GET
 	@Path("{roomID}/members")
-	public List<? extends User> getMembers(@PathParam("roomID") int roomID) throws DataException {
+	public GenericEntity<List<? extends User>> getMembers(@PathParam("roomID") int roomID) {
 		logger.entry();
-		
-		List<? extends User> res = data.getChatroomMembers(roomID);
-		return logger.exit(res);
+
+		List<? extends User> res = null;
+		try {
+			res = data.getChatroomMembers(roomID);
+		} catch (DataException e) {
+			throw new WebApplicationException("db Exception", e);
+		}
+		return logger.exit(new GenericEntity<List<? extends User>>(res){});
 		
 	}
 	

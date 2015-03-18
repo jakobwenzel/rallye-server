@@ -54,7 +54,7 @@
 			<appender-ref ref="DebugLogFile" />
 		</logger>
 
-		<logger name="de.rallye" level="debug" additivity="false">
+		<logger name="de.rallye" level="trace" additivity="false">
 			<appender-ref ref="DebugLogFile" />
 		</logger>
         
