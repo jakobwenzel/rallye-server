@@ -23,9 +23,7 @@ import de.rallye.admin.ServerConsole;
 import de.rallye.config.ConfigTools;
 import de.rallye.config.GitRepositoryState;
 import de.rallye.config.RallyeConfig;
-import de.rallye.db.DataAdapter;
 import de.rallye.injection.RallyeBinder;
-import de.rallye.model.structures.RallyeGameState;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -49,8 +47,6 @@ public class StadtRallye {
 		//If there are config errors, we exit.
 		if (config!=null) {
 			RallyeBinder.config = config;
-			RallyeBinder.data = DataAdapter.getInstance(config);
-			RallyeBinder.gameState = RallyeGameState.getInstance(RallyeBinder.data);
 			
 			//start server
 			String host = (args.length > 0 ? args[0] : config.getHostName());

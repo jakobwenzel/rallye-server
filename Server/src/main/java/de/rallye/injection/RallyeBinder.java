@@ -21,6 +21,7 @@ package de.rallye.injection;
 
 import de.rallye.config.GitRepositoryState;
 import de.rallye.config.RallyeConfig;
+import de.rallye.db.DataAdapter;
 import de.rallye.db.IDataAdapter;
 import de.rallye.images.ImageRepository;
 import de.rallye.model.structures.ChatPictureLink;
@@ -41,7 +42,6 @@ import java.util.Map;
 /**
  * HK2 Binder, declaring all dependencies of injectable Objects
  *
- * WARNING: RallyeConfigFactory has to be initialized separately
  */
 public class RallyeBinder extends AbstractBinder {
 
@@ -64,6 +64,16 @@ public class RallyeBinder extends AbstractBinder {
 
 	@Override
 	protected void configure() {
+		if (config == null) {
+			System.err.println("Instantiating RallyeBinder without RallyeConfig");
+		}
+		if (data == null) {
+			data = DataAdapter.getInstance(config);
+		}
+		if (gameState == null) {
+			gameState = RallyeGameState.getInstance(data);
+		}
+
 
 		bind(GitRepositoryState.class).to(GitRepositoryState.class);
 		bind(config).to(RallyeConfig.class);

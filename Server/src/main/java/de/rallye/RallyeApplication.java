@@ -42,8 +42,9 @@ public class RallyeApplication extends ResourceConfig {
 		register(JacksonXMLProvider.class);
 		register(JacksonFeature.class);
 		//register(EnsureMimeType.class);
-		register(new RallyeBinder());
 		register(MultiPartFeature.class);
+
+		register(new RallyeBinder());
 
         property(MvcFeature.TEMPLATE_BASE_PATH, "templates");
 		property(MustacheMvcFeature.CACHE_TEMPLATES, false); //TODO enable caching once templates are no longer being modified

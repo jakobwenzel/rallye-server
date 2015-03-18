@@ -36,7 +36,6 @@ import java.io.IOException;
 import java.io.InputStream;
 
 @Service
-//@JsonIgnoreProperties(ignoreUnknown = true)
 public class RallyeConfig {
 	
 	private static final Logger logger = LogManager.getLogger(RallyeConfig.class);
@@ -121,7 +120,6 @@ public class RallyeConfig {
 			
 			if (config.isDataRelativeToConfig()) {
 				logger.warn("Data relative to config is not supported for Stream Config. Falling back to default config");
-				return new RallyeConfig();
 			}
 				
 			logger.debug(config.toString());
@@ -194,14 +192,12 @@ public class RallyeConfig {
 
 	@JsonCreator
 	public RallyeConfig(@JsonProperty("hostName") String hostname,
-
 		@JsonProperty("restPort") Integer restPort,
 		@JsonProperty("consolePort") Integer consolePort,
 		@JsonProperty("gcmApiKey") String gcmApiKey,
 		@JsonProperty("serverName")String serverName,
 		@JsonProperty("description") String description,
 		@JsonProperty("imageCacheConfig") ImageCacheConfig imageCacheConfig,
-
 		@JsonProperty("dbConnectionConfig") DbConnectionConfig dbConnectionConfig,
 		@JsonProperty("dataDirectory") String dataDirectory,
 		@JsonProperty("dataRelativeToConfig") Boolean dataRelativeToConfig

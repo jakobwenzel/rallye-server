@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2014 Jakob Wenzel, Ramon Wirsch.
+  ~
+  ~ This file is part of RallyeSoft.
+  ~
+  ~ RallyeSoft is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ RallyeSoft is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with RallyeSoft. If not, see <http://www.gnu.org/licenses/>.
+  -->
+
+<configuration status="info" strict="true">
+    <properties>
+        <property name="log" >log/rallye.log</property>
+        <property name="debugLog" >log/debug.log</property>
+    </properties>
+    <filter type="ThresholdFilter" level="trace"/>
+
+    <appenders>
+        <appender type="Console" name="STDOUT">
+            <layout type="PatternLayout" pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36}.%method -  %msg%n%throwable{full}" />
+        </appender>
+        
+        <appender type="RollingRandomAccessFile" name="LogFile" fileName="${log}" filePattern="log/rallye %d{dd-MMM-yy, HH-mm-ss}.log">
+            <layout type="PatternLayout" pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36}.%method - %msg%n%throwable{10}" />
+			<policies>
+				<OnStartupTriggeringPolicy />
+			</policies>
+			<strategy type="DefaultRolloverStrategy" max="5" />
+        </appender>
+        
+        <appender type="RollingRandomAccessFile" name="DebugLogFile" fileName="${debugLog}" filePattern="log/debug %d{dd-MMM-yy, HH-mm-ss}.log">
+            <layout type="PatternLayout" pattern="%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36}.%method - %msg%n%throwable{10}" />
+			<policies>
+				<OnStartupTriggeringPolicy />
+			</policies>
+			<strategy type="DefaultRolloverStrategy" max="5" />
+        </appender>
+        
+    </appenders>
+
+    <loggers>
+
+		<logger name="de.rallye.api" level="trace" additivity="false">
+			<appender-ref ref="DebugLogFile" />
+		</logger>
+
+		<logger name="de.rallye" level="debug" additivity="false">
+			<appender-ref ref="DebugLogFile" />
+		</logger>
+        
+        <root level="info">
+			<appender-ref ref="STDOUT" />
+			<appender-ref ref="LogFile" level="warn" />
+			<appender-ref ref="DebugLogFile" />
+        </root>
+    </loggers>
+
+</configuration>
