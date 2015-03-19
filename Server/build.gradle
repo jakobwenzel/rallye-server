@@ -22,8 +22,9 @@ import java.text.SimpleDateFormat
 plugins {
 	id 'org.hidetake.ssh' version '1.1.1'
 	id 'java'
-	id 'application'
+	//id 'application'
 	id 'war'
+	id 'org.akhikhl.gretty' version '1.1.9'
 }
 
 repositories {
@@ -32,16 +33,16 @@ repositories {
 
 //Our files are Unicode. Always.
 compileJava.options.encoding = 'UTF-8'
-applicationDefaultJvmArgs = ["-Dfile.encoding=UTF-8"]
+//applicationDefaultJvmArgs = ["-Dfile.encoding=UTF-8"]
 
-mainClassName = "de.rallye.StadtRallye"
+//mainClassName = "de.rallye.StadtRallye"
 
 task buildInfo {
 	group "Build"
 	description "Add Build info (git infos) to buildDir"
 	ext.destinationDir = file("$buildDir/resources/main/META-INF")
 	doLast {
-		
+
 		def cmd = "git rev-parse --short HEAD"
 		def proc = cmd.execute()
 		def revision = proc.text.trim()
@@ -104,7 +105,7 @@ jar {
 	archiveName 'rallye-server.jar'
 
 	doFirst {
-	 
+
 		manifest {
 			attributes 'Main-Class' : mainClassName
 			attributes 'Class-Path': configurations.runtime.collect { 'lib/'+it.getName() }.join(' ')
@@ -116,6 +117,11 @@ war.dependsOn processResources
 
 war {
 
+}
+
+
+gretty {
+	contextPath ''
 }
 
 sourceCompatibility = 1.7
@@ -141,7 +147,7 @@ dependencies {
 	providedCompile "org.glassfish.jersey.ext:jersey-mvc-mustache:$jerseyVersion"
 
 	providedCompile 'org.glassfish.grizzly:grizzly-http-server:2.3.+' // For standalone
-	
+
 	providedCompile 'org.glassfish.grizzly:grizzly-websockets:2.3.+' // For standalone
 
 	//compile 'org.glassfish.grizzly:grizzly-http-servlet:2.3.+' //Needed for websockets (standalone)
@@ -186,9 +192,10 @@ dependencies {
 	//Testing
 	testCompile 'junit:junit:4.12'
 	testCompile 'org.apache.httpcomponents:httpclient:4.4'
-	
+
 	compile project(':common:RallyeStructures')
 }
+
 
 if (file("$rootProject.projectDir/local/remotes.gradle").exists()) {
 	apply from: "$rootProject.projectDir/local/remotes.gradle"
