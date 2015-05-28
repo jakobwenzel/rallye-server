@@ -170,7 +170,7 @@ public class ImageRepository implements IPictureRepository {
 
 
 	public static LatLngAlt readGps(Metadata meta) {
-		GpsDirectory gps = meta.getDirectory(GpsDirectory.class);
+		GpsDirectory gps = meta.getFirstDirectoryOfType(GpsDirectory.class);
 		if (gps == null)
 			return null;
 
@@ -195,7 +195,7 @@ public class ImageRepository implements IPictureRepository {
 	public static String readMakeModel(Metadata meta) {
 		StringBuilder sb = new StringBuilder();
 
-		ExifIFD0Directory exif = meta.getDirectory(ExifIFD0Directory.class);
+		ExifIFD0Directory exif = meta.getFirstDirectoryOfType(ExifIFD0Directory.class);
 
 		if (exif == null) {
 			return null;
