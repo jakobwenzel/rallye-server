@@ -183,15 +183,15 @@ dependencies {
 	providedCompile 'commons-io:commons-io:2.4'
 	//compile 'com.google.inject:guice:3.0'
 
-	providedCompile 'org.apache.xmlgraphics:batik-codec:1.7'
-	providedCompile ('org.apache.xmlgraphics:batik-rasterizer:1.7') {
+	providedCompile 'org.apache.xmlgraphics:batik-codec:1.8'
+	providedCompile ('org.apache.xmlgraphics:batik-rasterizer:1.8') {
 		exclude group: 'fop', module: 'fop'
 	}
 	providedCompile 'org.jdom:jdom:2.0.2'
 
 	//Testing
 	testCompile 'junit:junit:4.12'
-	testCompile 'org.apache.httpcomponents:httpclient:4.4'
+	testCompile 'org.apache.httpcomponents:httpclient:4.4.1'
 
 	compile project(':common:RallyeStructures')
 }
