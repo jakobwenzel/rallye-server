@@ -91,7 +91,7 @@ public class Webclient {
 			if (projectDir != null) {
 				logger.debug("serving from project dir");
 				try {
-					stream = new FileInputStream(new File(new URL(projectDir + "Server/src/main/resources/de/rallye/" + RESOURCE_PATH + path).toURI()));
+					stream = new FileInputStream(new File(new URL(projectDir + "Server/src/main/webapp/" + RESOURCE_PATH + path).toURI()));
 				} catch (Exception e) {
 					throw new WebApplicationException(e);
 				}
