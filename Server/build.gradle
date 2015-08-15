@@ -128,7 +128,7 @@ sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
 ext {
-	jerseyVersion = '2.19'
+	jerseyVersion = '2.21'
 	jacksonVersion = '2.6.+'
 }
 
