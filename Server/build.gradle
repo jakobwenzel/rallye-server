@@ -39,21 +39,24 @@ compileJava.options.encoding = 'UTF-8'
 
 task buildInfo {
 	group "Build"
-	description "Add Build info (git infos) to buildDir"
-	ext.destinationDir = file("$buildDir/resources/main/META-INF")
+	description "Add Build info (git infos) to META-INF"
+	ext.destinationDir = new File(file(sourceSets.main.output.resourcesDir), 'META-INF')
+	destinationDir.mkdirs()
+	ext.infoFile = new File(destinationDir, 'buildInfo.properties')
+	
+	FileCollection srcs = files()
+	sourceSets.all { set -> srcs += set.allSource } // collect all relevant src files that make up this app
+	
+	inputs.files srcs.files
+	inputs.dir file('../.git') // depend on .git as well, as it mirrors dirty state //Is it faster to collect the results of git-calls?
+	outputs.file infoFile
+	
 	doLast {
+		def revision = 'git rev-parse --short HEAD'.execute().text.trim()
 
-		def cmd = "git rev-parse --short HEAD"
-		def proc = cmd.execute()
-		def revision = proc.text.trim()
+		def branch = 'git rev-parse --abbrev-ref HEAD'.execute().text.trim()
 
-		cmd = "git rev-parse --abbrev-ref HEAD"
-		proc = cmd.execute()
-		def branch = proc.text.trim()
-
-		cmd = 'git status --porcelain'
-		proc = cmd.execute()
-		def output = proc.text.trim()
+		def output = 'git status --porcelain'.execute().text.trim()
 		def dirty = false
 
 		output.eachLine {
@@ -70,12 +73,6 @@ task buildInfo {
 		sdf.applyPattern("dd.MM.yyyy '-' HH\\:mm\\:ss z")
 		def time = sdf.format(new Date())
 
-
-
-		destinationDir.mkdirs()
-
-
-		ext.infoFile = file(destinationDir.getAbsolutePath() + '/buildInfo.properties')
 		def content = "git.commit.branch="+ branch +"\ngit.commit.id.revision=" + revision + "\ngit.build.time=" + time + "\n"
 		infoFile.write(content)
 	}
